@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metatype:MetaData xmlns:metatype="http://www.osgi.org/xmlns/metatype/v1.0.0">
+	<OCD description="MAT Zip Output Plugin" name="MAT Zip Output Plugin" id="edu.mayo.cts2.framework.plugin.service.mat">
+		<AD name="UTS Service Name" id="utsServiceName" required="true" type="String" default="http://umlsks.nlm.nih.gov"/>
+		<AD name="UTS Username" id="utsUsername" required="true" type="String" />
+		<AD name="UTS Password" id="utsPassword" required="true" type="String" />
+		<AD name="UTS Auth Service Url" id="utsAuthServiceUrl" required="true" type="String" default="https://uts-ws.nlm.nih.gov/restful/IsValidUMLSUser"/>
+		<AD name="UTS License Code" id="utsLicenseCode" required="true" type="String" />
+		<AD name="UTS UMLS Release" id="utsUmlsRelease" required="true" type="String" default="2012AA"/>
+		<AD name="NamespaceService URL" id="namespaceServiceUrl" required="true" type="String" default="http://informatics.mayo.edu/cts2/services/bioportal-rdf/"  />
+	</OCD>
+	<Designate pid="edu.mayo.cts2.framework.plugin.service.mat">
+        <Object ocdref="edu.mayo.cts2.framework.plugin.service.mat"/>
+    </Designate>
+	
+</metatype:MetaData>

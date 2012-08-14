@@ -1,0 +1,58 @@
+package edu.mayo.cts2.framework.plugin.service.mat.profile.valuesetdefinition
+
+import java.lang.Override
+
+import scala.collection.JavaConversions._
+
+import org.springframework.stereotype.Component
+
+import edu.mayo.cts2.framework.model.command.ResolvedReadContext
+import edu.mayo.cts2.framework.model.core.VersionTagReference
+import edu.mayo.cts2.framework.model.extension.LocalIdValueSetDefinition
+import edu.mayo.cts2.framework.model.service.core.NameOrURI
+import edu.mayo.cts2.framework.plugin.service.mat.profile.AbstractService
+import edu.mayo.cts2.framework.service.profile.valuesetdefinition.ValueSetDefinitionReadService
+import edu.mayo.cts2.framework.service.profile.valuesetdefinition.name.ValueSetDefinitionReadId
+
+@Component
+class MatValueSetDefinitionReadService extends AbstractService with ValueSetDefinitionReadService {
+
+  /**
+   * This is incomplete... this is only here to map the 'CURRENT' tag to a CodeSystemVersionName.
+   */
+  @Override
+  def readByTag(
+    valueSet: NameOrURI,
+    tag: VersionTagReference, readContext: ResolvedReadContext): LocalIdValueSetDefinition = {
+
+    if (tag.getContent() == null || !tag.getContent().equals("CURRENT")) {
+      throw new RuntimeException("Only 'CURRENT' tag is supported")
+    }
+
+    val valueSetName = valueSet.getName()
+
+    //TODO
+    null
+  }
+
+  @Override
+  def existsByTag(valueSet: NameOrURI,
+    tag: VersionTagReference, readContext: ResolvedReadContext): Boolean = {
+    throw new UnsupportedOperationException()
+  }
+
+  @Override
+  def read(identifier: ValueSetDefinitionReadId,
+    readContext: ResolvedReadContext): LocalIdValueSetDefinition = {
+    throw new UnsupportedOperationException()
+  }
+
+  @Override
+  def exists(identifier: ValueSetDefinitionReadId, readContext: ResolvedReadContext): Boolean = {
+    throw new UnsupportedOperationException()
+  }
+
+  def getSupportedTags: java.util.List[VersionTagReference] =
+    List[VersionTagReference](CURRENT_TAG)
+
+}
