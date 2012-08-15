@@ -22,8 +22,6 @@ import edu.mayo.cts2.framework.service.profile.valuesetdefinition.ResolvedValueS
 import edu.mayo.cts2.framework.service.profile.valuesetdefinition.ValueSetDefinitionResolutionService
 import edu.mayo.cts2.framework.service.profile.valuesetdefinition.name.ValueSetDefinitionReadId
 import javax.annotation.Resource
-import net.liftweb.json.Extraction._
-import net.liftweb.json.Printer._
 import edu.mayo.cts2.framework.plugin.service.mat.namespace.NamespaceResolutionService
 import edu.mayo.cts2.framework.plugin.service.mat.profile.AbstractService
 
