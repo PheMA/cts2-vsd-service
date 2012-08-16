@@ -7,18 +7,42 @@ import javax.persistence.OneToMany
 import javax.persistence.ElementCollection
 import javax.persistence.FetchType
 import javax.persistence.Id
+import scala.collection.JavaConversions._
 
 @Entity
-class ValueSet {
-  
+class ValueSet extends Equals {
+
   @BeanProperty
   @Id
-  var oid:String = _
-  
-  @BeanProperty
-  var name:String = _
-  
-  @ElementCollection
-  var entries:java.util.List[ValueSetEntry] = new ArrayList[ValueSetEntry]()
+  var oid: String = _
 
+  @BeanProperty
+  var name: String = _
+
+  @BeanProperty
+  var valueSetDeveloper: String = _
+
+  @BeanProperty
+  var qdmCategory: String = _
+
+  @ElementCollection
+  var entries: java.util.List[ValueSetEntry] = new ArrayList[ValueSetEntry]()
+  
+  def canEqual(other: Any) = {
+    other.isInstanceOf[edu.mayo.cts2.framework.plugin.service.mat.model.ValueSet]
+  }
+  
+  override def equals(other: Any) = {
+    other match {
+      case that: edu.mayo.cts2.framework.plugin.service.mat.model.ValueSet => that.canEqual(ValueSet.this) && oid == that.oid
+      case _ => false
+    }
+  }
+  
+  override def hashCode() = {
+    val prime = 41
+    prime + oid.hashCode
+  }
+
+  
 }

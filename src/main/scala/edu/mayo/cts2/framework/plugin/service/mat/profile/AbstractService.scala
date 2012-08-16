@@ -12,6 +12,8 @@ import javax.annotation.Resource
 import edu.mayo.cts2.framework.model.core.NameAndMeaningReference
 import edu.mayo.cts2.framework.model.core.CodeSystemReference
 import edu.mayo.cts2.framework.core.url.UrlConstructor
+import org.springframework.data.domain.PageRequest
+import edu.mayo.cts2.framework.model.command.Page
 
 abstract class AbstractService extends BaseService {
 
@@ -25,6 +27,11 @@ abstract class AbstractService extends BaseService {
   @Resource
   var urlConstructor: UrlConstructor = _
 
+  def toPageable(page:Option[Page]) = {
+	val aPage = page.getOrElse(new Page())
+    new PageRequest(aPage.getPage, aPage.getMaxToReturn)
+  }
+  
   override def getServiceVersion(): String = {
     DEFAULT_VERSION
   }
