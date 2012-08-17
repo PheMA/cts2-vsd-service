@@ -24,7 +24,6 @@ import org.springframework.context.annotation.ScopedProxyMode
 import scala.collection.JavaConversions._
 
 @Component
-@Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)
 class MatValueSetQueryService
   extends AbstractService
   with ValueSetQueryService {
@@ -53,6 +52,7 @@ class MatValueSetQueryService
     val summary = new ValueSetCatalogEntrySummary()
     summary.setValueSetName(valueSet.name)
     summary.setAbout(valueSet.oid)
+    summary.setFormalName(valueSet.formalName)
     
     seq ++ Seq(summary)
   }:Seq[ValueSetCatalogEntrySummary]

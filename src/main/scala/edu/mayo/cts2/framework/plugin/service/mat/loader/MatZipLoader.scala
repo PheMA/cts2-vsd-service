@@ -19,6 +19,18 @@ import javax.annotation.Resource
 class MatZipLoader {
 
   def GROUPING_CODE_SYSTEM = "GROUPING"
+  
+  /* This seems to be the new version of the excel
+  def DEVELOPER_CELL = 0
+  def OID_CELL = 1
+  def LAST_MODIFIED = 2
+  def NAME_CELL = 3
+  def QDM_CATEGORY_CELL = 4
+  def CODE_SYSTEM_CELL = 5
+  def CODE_SYSTEM_VERSION_CELL = 6
+  def CODE_CELL = 7
+  def DESCRIPTOR_CELL = 8
+  */
 
   def DEVELOPER_CELL = 0
   def OID_CELL = 1
@@ -30,7 +42,7 @@ class MatZipLoader {
   def DESCRIPTOR_CELL = 7
   
   @Resource
-  var valueSetRepository:ValueSetRepository = _
+  var valueSetRepository: ValueSetRepository = _
 
   def loadMatZip(zip: ZipFile): Unit = {
     MatZipLoaderUtils.doWithMatZip(zip, processSpreadSheet)
@@ -51,16 +63,23 @@ class MatZipLoader {
 
       set + valueSet
     })
-    
+
     valueSetRepository.save(valueSets)
-  }:Unit
+  }: Unit
 
   private def loadSheets(zip: MatZip) = {
 
     val fs = new POIFSFileSystem(zip.spreadSheet)
     val wb = new HSSFWorkbook(fs);
 
-    val sheetIterator = wb.getSheetAt(1).rowIterator ++ wb.getSheetAt(2).rowIterator
+    val itr1 = wb.getSheetAt(1).rowIterator
+    val itr2 = wb.getSheetAt(2).rowIterator
+
+    //skip headers
+    itr1.next
+    itr2.next
+
+    val sheetIterator = itr1 ++ itr2
 
     val spreadSheetResult = sheetIterator.foldLeft(new SpreadSheetResult())(
       (result, row) => {
@@ -72,7 +91,7 @@ class MatZipLoader {
           result.valueSets += (oid -> valueSet)
         }
 
-        if (!valueSetEntry.codeSystem.equals(GROUPING_CODE_SYSTEM)) {
+        if (!valueSetEntry.codeSystem.equalsIgnoreCase(GROUPING_CODE_SYSTEM)) {
           if (!result.valueSetEntries.contains(oid)) {
             result.valueSetEntries += (oid -> Seq(valueSetEntry))
           } else {
@@ -117,7 +136,8 @@ class MatZipLoader {
   def rowToValueSet(row: Row): ValueSet = {
     val valueSet = new ValueSet()
     valueSet.oid = row.getCell(OID_CELL).getStringCellValue
-    valueSet.name = row.getCell(NAME_CELL).getStringCellValue
+    valueSet.name = row.getCell(OID_CELL).getStringCellValue
+    valueSet.formalName = row.getCell(NAME_CELL).getStringCellValue
     valueSet.valueSetDeveloper = row.getCell(DEVELOPER_CELL).getStringCellValue
     valueSet.qdmCategory = row.getCell(QDM_CATEGORY_CELL).getStringCellValue
 
@@ -126,10 +146,10 @@ class MatZipLoader {
 
   def rowToValueSetEntry(row: Row): ValueSetEntry = {
     val valueSetEntry = new ValueSetEntry()
-    valueSetEntry.code = row.getCell(CODE_CELL).getStringCellValue
+    valueSetEntry.code = row.getCell(CODE_CELL).toString
     valueSetEntry.description = row.getCell(DESCRIPTOR_CELL).getStringCellValue
     valueSetEntry.codeSystem = row.getCell(CODE_SYSTEM_CELL).getStringCellValue
-    valueSetEntry.codeSystemVersion = row.getCell(CODE_SYSTEM_VERSION_CELL).getStringCellValue
+    valueSetEntry.codeSystemVersion = row.getCell(CODE_SYSTEM_VERSION_CELL).toString
 
     valueSetEntry
   }

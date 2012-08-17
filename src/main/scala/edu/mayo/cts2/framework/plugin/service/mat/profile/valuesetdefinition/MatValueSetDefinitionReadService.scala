@@ -1,11 +1,8 @@
 package edu.mayo.cts2.framework.plugin.service.mat.profile.valuesetdefinition
 
 import java.lang.Override
-
 import scala.collection.JavaConversions._
-
 import org.springframework.stereotype.Component
-
 import edu.mayo.cts2.framework.model.command.ResolvedReadContext
 import edu.mayo.cts2.framework.model.core.VersionTagReference
 import edu.mayo.cts2.framework.model.extension.LocalIdValueSetDefinition
@@ -13,10 +10,18 @@ import edu.mayo.cts2.framework.model.service.core.NameOrURI
 import edu.mayo.cts2.framework.plugin.service.mat.profile.AbstractService
 import edu.mayo.cts2.framework.service.profile.valuesetdefinition.ValueSetDefinitionReadService
 import edu.mayo.cts2.framework.service.profile.valuesetdefinition.name.ValueSetDefinitionReadId
+import edu.mayo.cts2.framework.plugin.service.mat.repository.ValueSetRepository
+import javax.annotation.Resource
+import edu.mayo.cts2.framework.model.valuesetdefinition.ValueSetDefinition
+import edu.mayo.cts2.framework.plugin.service.mat.model.ValueSet
+import org.springframework.transaction.annotation.Transactional
 
 @Component
 class MatValueSetDefinitionReadService extends AbstractService with ValueSetDefinitionReadService {
 
+  @Resource
+  var valueSetRepository: ValueSetRepository = _
+  
   /**
    * This is incomplete... this is only here to map the 'CURRENT' tag to a CodeSystemVersionName.
    */
@@ -31,8 +36,7 @@ class MatValueSetDefinitionReadService extends AbstractService with ValueSetDefi
 
     val valueSetName = valueSet.getName()
 
-    //TODO
-    null
+    new LocalIdValueSetDefinition(valueSetName, null)
   }
 
   @Override
@@ -42,9 +46,24 @@ class MatValueSetDefinitionReadService extends AbstractService with ValueSetDefi
   }
 
   @Override
-  def read(identifier: ValueSetDefinitionReadId,
-    readContext: ResolvedReadContext): LocalIdValueSetDefinition = {
-    throw new UnsupportedOperationException()
+  @Transactional
+  def read(
+      identifier: ValueSetDefinitionReadId,
+      readContext: ResolvedReadContext): LocalIdValueSetDefinition = {
+    val valueSetName = identifier.getValueSet.getName
+    
+    val valueSet = valueSetRepository.findOneByName(valueSetName)
+    
+    val valueSetDef = valueSetToDefinition(valueSet)
+    
+    new LocalIdValueSetDefinition("1", valueSetDef)
+  }
+  
+  def valueSetToDefinition(valueSet:ValueSet):ValueSetDefinition = {
+    val valueSetDef = new ValueSetDefinition()
+    valueSetDef.setAbout("TODO")
+
+    valueSetDef
   }
 
   @Override

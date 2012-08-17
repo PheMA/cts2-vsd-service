@@ -30,6 +30,22 @@ class ValueSetRepositoryTestIT extends AbstractTestBase {
 	}
 	
 	@Test
+	void TestInsertAndRetrieveByName() {
+		def valueSet = new ValueSet(oid:"1.23.45", name:"testName")
+		repos.save(valueSet)
+		
+		assertNotNull repos.findOneByName("testName")
+	}
+	
+	@Test
+	void TestInsertAndRetrieveByWrongName() {
+		def valueSet = new ValueSet(oid:"1.23.45", name:"testName")
+		repos.save(valueSet)
+		
+		assertNull repos.findOneByName("__INVALID__")
+	}
+	
+	@Test
 	void TestInsertAndRetrieveWrongId() {
 		def valueSet = new ValueSet(oid:"1.23.45", name:"testName")
 		repos.save(valueSet)

@@ -7,6 +7,10 @@
 		<AD name="UTS Auth Service Url" id="utsAuthServiceUrl" required="true" type="String" default="https://uts-ws.nlm.nih.gov/restful/IsValidUMLSUser"/>
 		<AD name="UTS License Code" id="utsLicenseCode" required="true" type="String" />
 		<AD name="UTS UMLS Release" id="utsUmlsRelease" required="true" type="String" default="2012AA"/>
+		<AD name="JDBC URL" id="jdbcUrl" required="true" type="String" default="jdbc:hsqldb:file:${user.home}/.cts2/mat-load-database"/>
+		<AD name="JDBC Driver Class" id="jdbcDriverClass" required="true" type="String" default="org.hsqldb.jdbcDriver"/>
+		<AD name="JDBC Username" id="jdbcUsername" required="true" type="String" default="sa" />
+		<AD name="JDBC Password" id="jdbcPassword" required="true" type="String" default="" />
 		<AD name="NamespaceService URL" id="namespaceServiceUrl" required="true" type="String" default="http://informatics.mayo.edu/cts2/services/bioportal-rdf/"  />
 	</OCD>
 	<Designate pid="edu.mayo.cts2.framework.plugin.service.mat">

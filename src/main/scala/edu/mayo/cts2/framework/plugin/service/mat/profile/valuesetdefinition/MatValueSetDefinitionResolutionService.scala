@@ -24,9 +24,16 @@ import edu.mayo.cts2.framework.service.profile.valuesetdefinition.name.ValueSetD
 import javax.annotation.Resource
 import edu.mayo.cts2.framework.plugin.service.mat.namespace.NamespaceResolutionService
 import edu.mayo.cts2.framework.plugin.service.mat.profile.AbstractService
+import edu.mayo.cts2.framework.plugin.service.mat.repository.ValueSetRepository
+import edu.mayo.cts2.framework.plugin.service.mat.model.ValueSet
+import edu.mayo.cts2.framework.plugin.service.mat.model.ValueSetEntry
+import org.springframework.transaction.annotation.Transactional
 
 @Component
 class MatValueSetDefinitionResolutionService extends AbstractService with ValueSetDefinitionResolutionService {
+
+  @Resource
+  var valueSetRepository: ValueSetRepository = _
 
   @Resource
   var namespaceResolutionService: NamespaceResolutionService = _
@@ -39,6 +46,7 @@ class MatValueSetDefinitionResolutionService extends AbstractService with ValueS
 
   def getKnownProperties: Set[PredicateReference] = null
 
+  @Transactional
   def resolveDefinition(
     id: ValueSetDefinitionReadId,
     codeSystemVersions: Set[NameOrURI],
@@ -50,11 +58,28 @@ class MatValueSetDefinitionResolutionService extends AbstractService with ValueS
 
     val valueSetName = id.getName()
 
-    //TODO
-    return null;
+    val valueSet = valueSetRepository.findOneByName(valueSetName)
+
+    if (valueSet == null) {
+      return null
+    }
+
+    val entries = valueSet.entries.slice(page.getStart, page.getEnd).
+      foldLeft(Seq[EntitySynopsis]())(valueSetToEntitySynopsis)
+
+    new ResolvedValueSetResult(buildHeader(valueSetName), entries, true);
   }
-  
-  private def buildHeader(valueSetName:String): ResolvedValueSetHeader = {
+
+  private def valueSetToEntitySynopsis = (seq: Seq[EntitySynopsis], entry: ValueSetEntry) => {
+    val synopsis = new EntitySynopsis()
+    synopsis.setName(entry.code)
+    synopsis.setNamespace("TODO")
+    synopsis.setUri("TODO")
+    
+    seq ++ Seq(synopsis)
+  }: Seq[EntitySynopsis]
+
+  private def buildHeader(valueSetName: String): ResolvedValueSetHeader = {
     val header = new ResolvedValueSetHeader()
 
     val valueDefSetRef = new ValueSetDefinitionReference()
@@ -64,7 +89,7 @@ class MatValueSetDefinitionResolutionService extends AbstractService with ValueS
 
     header
   }
-  
+
   def resolveDefinitionAsEntityDirectory(p1: ValueSetDefinitionReadId, p2: Set[NameOrURI], p3: NameOrURI, p4: ResolvedValueSetResolutionEntityQuery, p5: SortCriteria, p6: ResolvedReadContext, p7: Page): ResolvedValueSetResult[EntityDirectoryEntry] = null
 
   def resolveDefinitionAsCompleteSet(p1: ValueSetDefinitionReadId, p2: Set[NameOrURI], p3: NameOrURI, p4: ResolvedReadContext): ResolvedValueSet = null

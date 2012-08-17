@@ -18,4 +18,6 @@ trait ValueSetRepository extends CrudRepository[ValueSet, String] {
   @Query("select vs from ValueSet vs where vs.name = :query or vs.oid = :query")
   def findByAny(@Param("query") query:String, pageable: Pageable): Page[ValueSet]
   
+  def findOneByName(query:String): ValueSet
+  
 }

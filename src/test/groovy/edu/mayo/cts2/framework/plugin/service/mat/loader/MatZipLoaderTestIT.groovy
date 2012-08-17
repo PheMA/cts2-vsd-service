@@ -26,7 +26,7 @@ class MatZipLoaderTestIT extends AbstractTestBase {
 	
 	@Test
 	void TestLoad() {
-		def zip = new ZipFile(new File("src/test/resources/exampleMatZips/Pharyngitis_Artifacts.zip"))
+		def zip = new ZipFile(new File("src/test/resources/exampleMatZips/test.zip"))
 		
 		loader.loadMatZip(zip)
 		

@@ -8,16 +8,21 @@ import javax.persistence.ElementCollection
 import javax.persistence.FetchType
 import javax.persistence.Id
 import scala.collection.JavaConversions._
+import javax.persistence.GeneratedValue
+import javax.persistence.GenerationType
 
 @Entity
 class ValueSet extends Equals {
-
-  @BeanProperty
+  
   @Id
+  @BeanProperty
   var oid: String = _
-
+  
   @BeanProperty
   var name: String = _
+
+  @BeanProperty
+  var formalName: String = _
 
   @BeanProperty
   var valueSetDeveloper: String = _

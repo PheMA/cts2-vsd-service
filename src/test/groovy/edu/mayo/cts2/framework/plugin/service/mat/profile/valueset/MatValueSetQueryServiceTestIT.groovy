@@ -2,35 +2,27 @@ package edu.mayo.cts2.framework.plugin.service.mat.profile.valueset
 
 import static org.junit.Assert.*
 
-import java.util.zip.ZipFile
-
 import javax.annotation.Resource
+import javax.xml.transform.stream.StreamResult
 
-import org.junit.Before
 import org.junit.Test
 
 import edu.mayo.cts2.framework.core.xml.DelegatingMarshaller
 import edu.mayo.cts2.framework.plugin.service.mat.loader.MatZipLoader
-import edu.mayo.cts2.framework.plugin.service.mat.test.AbstractTestBase
+import edu.mayo.cts2.framework.plugin.service.mat.test.AbstractZipLoadingTestBase
 import edu.mayo.cts2.framework.service.profile.valueset.ValueSetQuery
+import edu.mayo.cts2.framework.service.profile.valueset.ValueSetQueryService
 
-class MatValueSetQueryServiceTestIT extends AbstractTestBase {
+class MatValueSetQueryServiceTestIT extends AbstractZipLoadingTestBase {
 
 	@Resource
-	def MatValueSetQueryService service
+	def ValueSetQueryService service
 	
 	@Resource
 	def MatZipLoader loader
 
 	def marshaller = new DelegatingMarshaller()
 	
-	@Before
-	void LoadContent() {
-		def zip = new ZipFile(new File("src/test/resources/exampleMatZips/Pharyngitis_Artifacts.zip"))
-		
-		loader.loadMatZip(zip)
-	}
-
 	@Test
 	void TestSetUp() {
 		assertNotNull service
@@ -39,6 +31,17 @@ class MatValueSetQueryServiceTestIT extends AbstractTestBase {
 	@Test
 	void TestQuerySize() {
 		assertTrue service.getResourceSummaries(null as ValueSetQuery,null,null).entries.size() > 10
+	}
+	
+	@Test
+	void TestValidXml() {
+		def entries = service.getResourceSummaries(null as ValueSetQuery,null,null).entries
+		
+		assertTrue entries.size() > 0
+		
+		entries.each {
+			marshaller.marshal(it, new StreamResult(new StringWriter()))
+		}
 	}
 
 }

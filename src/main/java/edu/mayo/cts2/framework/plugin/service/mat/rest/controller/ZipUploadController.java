@@ -7,30 +7,53 @@ import java.util.zip.ZipFile;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
+import org.osgi.service.http.HttpService;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
+import org.springframework.web.multipart.MultipartResolver;
+import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 
 import edu.mayo.cts2.framework.plugin.service.mat.loader.MatZipLoader;
+import edu.mayo.cts2.framework.webapp.rest.extensions.controller.ControllerProvider;
 
-@Controller
-public class ZipUploadController {
+@Controller("zipUploadControllerProvider")
+public class ZipUploadController implements ControllerProvider, InitializingBean {
 	
 	@Resource
 	private MatZipLoader matZipLoader;
+	
+	@Autowired(required=false)
+	private HttpService httpService;
 
-	@RequestMapping(value = "/executions", method = RequestMethod.POST)
-	public String createExceuction(HttpServletRequest request)
+	@Override
+	public void afterPropertiesSet() throws Exception {
+	
+		if(this.httpService != null){
+			httpService.registerResources(
+					"/zipupload",
+					"/WEB-INF", 
+					null);
+		}
+	}
+
+	@RequestMapping(value = "/mat/zips", method = RequestMethod.POST)
+	public void loadZip(HttpServletRequest request)
 			throws Exception {
 
-		if (!(request instanceof MultipartHttpServletRequest)) {
+		MultipartResolver multipartResolver = 
+			new CommonsMultipartResolver(request.getSession().getServletContext());
+		
+		if (! multipartResolver.isMultipart(request)) {
 			throw new IllegalStateException(
 					"ServletRequest expected to be of type MultipartHttpServletRequest");
 		}
 
-		MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
+		MultipartHttpServletRequest multipartRequest = multipartResolver.resolveMultipart(request);
 
 		MultipartFile multipartFile = multipartRequest.getFile("file");
 
@@ -42,7 +65,10 @@ public class ZipUploadController {
 		ZipFile zipFile = new ZipFile(zip);
 
 		matZipLoader.loadMatZip(zipFile);
-		
-		return "loaded";
+	}
+
+	@Override
+	public Object getController() {
+		return this;
 	}
 }

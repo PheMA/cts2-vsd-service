@@ -47,7 +47,7 @@ class UtsDao {
     securityService.getProxyTicket(ticketGrantingTicket, serviceName);
   }
 
-  private def callSecurely[R](fn: (String, String) => R): R = {
+  def callSecurely[R](fn: (String, String) => R): R = {
     fn(getSecurityTicket, umlsRelease)
   }
 }
