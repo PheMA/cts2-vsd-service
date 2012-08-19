@@ -14,6 +14,7 @@ import scala.collection.Seq
 import java.io.BufferedInputStream
 import edu.mayo.cts2.framework.plugin.service.mat.repository.ValueSetRepository
 import javax.annotation.Resource
+import org.apache.commons.lang.WordUtils
 
 @Component
 class MatZipLoader {
@@ -136,12 +137,16 @@ class MatZipLoader {
   def rowToValueSet(row: Row): ValueSet = {
     val valueSet = new ValueSet()
     valueSet.oid = row.getCell(OID_CELL).getStringCellValue
-    valueSet.name = row.getCell(OID_CELL).getStringCellValue
+    valueSet.name = valueSetFormalNameToName(row.getCell(NAME_CELL).getStringCellValue)
     valueSet.formalName = row.getCell(NAME_CELL).getStringCellValue
     valueSet.valueSetDeveloper = row.getCell(DEVELOPER_CELL).getStringCellValue
     valueSet.qdmCategory = row.getCell(QDM_CATEGORY_CELL).getStringCellValue
 
     valueSet
+  }
+  
+  def valueSetFormalNameToName(formalName:String):String = {
+    WordUtils.initials(formalName,null).toUpperCase
   }
 
   def rowToValueSetEntry(row: Row): ValueSetEntry = {
