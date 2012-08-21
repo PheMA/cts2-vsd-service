@@ -9,7 +9,7 @@ trait UriResolver {
   def idToUri(id: String, idType: IdType.Value):String
 
   /*
-   * Given a `canonical` URI of a resource, retur the VersionID information.
+   * Given a `canonical` URI of a resource, return the VersionID information.
    */
   def uriToVersionId(id: String, idType: IdType.Value):VersionId
 
