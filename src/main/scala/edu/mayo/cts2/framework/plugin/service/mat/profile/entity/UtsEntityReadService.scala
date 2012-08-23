@@ -34,6 +34,8 @@ import edu.mayo.cts2.framework.plugin.service.mat.umls.dao.UtsDao
 import gov.nih.nlm.umls.uts.webservice.Psf
 import gov.nih.nlm.umls.uts.webservice.AtomDTO
 import edu.mayo.cts2.framework.model.core.ScopedEntityName
+import  edu.mayo.cts2.framework.model.core.TsAnyType
+import java.util.ArrayList
 
 @Component
 class UtsEntityReadService extends AbstractService
@@ -74,22 +76,72 @@ class UtsEntityReadService extends AbstractService
     
     val ed = new EntityDescription()
     ed.setNamedEntity(namedEntity)
-    
+
     ed
   }
   
   private def atomToNamedEntityDescription(atom:AtomDTO):NamedEntityDescription = {
     val ed = new NamedEntityDescription()
     ed.setAbout("TODO")
-    
     val name = new ScopedEntityName()
-    name.setName(atom.getSourceUi)
+    name.setName(atom.getSourceConcept().getSourceUi())
     name.setNamespace(atom.getRootSource)
     ed.setEntityID(name)
-    
+    setDesignation(ed, atom)
     ed
   }
+  
+  def setDesignation(ed:NamedEntityDescription, atom:AtomDTO) = {
+    val designation = new Designation()
+    val anyType = new TsAnyType()
+    anyType.setContent(atom.getTermString().getDefaultPreferredName())
+    designation.setValue(anyType)
+    val designList = new ArrayList[Designation]()
+    designList.add(designation)
+    ed.setDesignation(designList)
+  }
+  
+  def getConceptSemanticTypes(atom: AtomDTO):List[java.lang.String] = {
+    atom.getConcept().getSemanticTypes().toList
+  }
+  
+  def getConceptStatus(atom: AtomDTO):String = {
+    atom.getConcept().getStatus()
+  }
+  
+  def getConceptCUI(atom: AtomDTO):String = {
+    atom.getConcept().getUi()
+  }
 
+  def isConceptObsolete(atom: AtomDTO):Boolean = {
+   false
+  }
+  
+  def getSourceConceptDefaultPreferredName(atom: AtomDTO):String = {
+    atom.getSourceConcept().getDefaultPreferredName()
+  }
+  
+  def getTermStringTermLanguage(atom: AtomDTO):String = {
+    atom.getTermString().getTerm().getLanguage()
+  }
+  
+  def getTermStringTermLuiNormName(atom: AtomDTO):String = {
+    atom.getTermString().getTerm().getLuinormForm()
+  }
+  
+  def getTermStringTermLUI(atom: AtomDTO):String = {
+    atom.getTermString().getTerm().getUi()
+  }
+  
+  def getTermStringTermTyep(atom: AtomDTO):String = {
+    null
+  }
+  
+  def getAtomUi(atom: AtomDTO):String = {
+    atom.getUi()
+  }
+  
+  
   def exists(p1: EntityDescriptionReadId, p2: ResolvedReadContext): Boolean = throw new RuntimeException()
 
   def getSupportedVersionTags: java.util.List[VersionTagReference] =
