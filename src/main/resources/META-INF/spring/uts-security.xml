@@ -13,12 +13,22 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
 
 	<context:annotation-config />
 
+	<security:http pattern="/" security="none"/>
 	<security:http pattern="/system/**" security="none"/>
+	<security:http pattern="/mat/utslogin.html" security="none"/>
 	
 	<security:http>
 		<security:intercept-url pattern="/**" access="ROLE_USER" />
-		<security:http-basic />
+		<security:form-login 
+			authentication-success-handler-ref="originalUrlSuccessHandler" 
+			login-page="/mat/utslogin.html"/>
 	</security:http>
+
+	<beans:bean id="originalUrlSuccessHandler" class="org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler">
+	    <beans:property name="useReferer" value="true"/>
+	    <beans:property name="defaultTargetUrl" value="/"/>
+	    <beans:property name="targetUrlParameter" value="spring-security-redirect"/>
+	</beans:bean>
 
 	<security:authentication-manager alias="authenticationManager">
 		<security:authentication-provider ref="utsSecurityProvider"/>	

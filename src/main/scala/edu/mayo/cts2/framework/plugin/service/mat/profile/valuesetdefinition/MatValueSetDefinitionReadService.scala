@@ -15,6 +15,10 @@ import javax.annotation.Resource
 import edu.mayo.cts2.framework.model.valuesetdefinition.ValueSetDefinition
 import edu.mayo.cts2.framework.plugin.service.mat.model.ValueSet
 import org.springframework.transaction.annotation.Transactional
+import edu.mayo.cts2.framework.model.valuesetdefinition.ValueSetDefinitionEntry
+import edu.mayo.cts2.framework.model.valuesetdefinition.SpecificEntityList
+import edu.mayo.cts2.framework.model.core.URIAndEntityName
+import edu.mayo.cts2.framework.model.core.types.SetOperator
 
 @Component
 class MatValueSetDefinitionReadService extends AbstractService with ValueSetDefinitionReadService {
@@ -62,8 +66,29 @@ class MatValueSetDefinitionReadService extends AbstractService with ValueSetDefi
   def valueSetToDefinition(valueSet:ValueSet):ValueSetDefinition = {
     val valueSetDef = new ValueSetDefinition()
     valueSetDef.setAbout("TODO")
+    
+    val list = valueSet.entries.foldLeft(new SpecificEntityList())( (list, entry) => {
+      val entity = new URIAndEntityName()
+      entity.setName(entry.code)
+      entity.setNamespace(entry.codeSystem)
+      entity.setUri("TODO")
+      list.addReferencedEntity(entity)
+      
+      list
+    })
+    
+    val vsdEntry = new ValueSetDefinitionEntry()
+    vsdEntry.setEntryOrder(1)
+    vsdEntry.setOperator(SetOperator.UNION)
+    vsdEntry.setEntityList(list)
 
+    valueSetDef.addEntry(vsdEntry)
+    
     valueSetDef
+  }
+  
+  private def buildSourceAndNotation(){
+    
   }
 
   @Override

@@ -14,6 +14,7 @@ import edu.mayo.cts2.framework.model.core.CodeSystemReference
 import edu.mayo.cts2.framework.core.url.UrlConstructor
 import org.springframework.data.domain.PageRequest
 import edu.mayo.cts2.framework.model.command.Page
+import edu.mayo.cts2.framework.plugin.service.mat.uri.UriResolver
 
 abstract class AbstractService extends BaseService {
 
@@ -26,6 +27,9 @@ abstract class AbstractService extends BaseService {
   
   @Resource
   var urlConstructor: UrlConstructor = _
+  
+  @Resource
+  var uriResolver: UriResolver = _
 
   def toPageable(page:Option[Page]) = {
 	val aPage = page.getOrElse(new Page())

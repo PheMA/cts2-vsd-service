@@ -74,6 +74,8 @@ class MatZipLoader {
     val wb = new HSSFWorkbook(fs);
 
     val itr1 = wb.getSheetAt(1).rowIterator
+    
+    //Skip supplemental for now
     val itr2 = wb.getSheetAt(2).rowIterator
 
     //skip headers
@@ -137,16 +139,12 @@ class MatZipLoader {
   def rowToValueSet(row: Row): ValueSet = {
     val valueSet = new ValueSet()
     valueSet.oid = row.getCell(OID_CELL).getStringCellValue
-    valueSet.name = valueSetFormalNameToName(row.getCell(NAME_CELL).getStringCellValue)
+    valueSet.name = valueSet.oid
     valueSet.formalName = row.getCell(NAME_CELL).getStringCellValue
     valueSet.valueSetDeveloper = row.getCell(DEVELOPER_CELL).getStringCellValue
     valueSet.qdmCategory = row.getCell(QDM_CATEGORY_CELL).getStringCellValue
 
     valueSet
-  }
-  
-  def valueSetFormalNameToName(formalName:String):String = {
-    WordUtils.initials(formalName,null).toUpperCase
   }
 
   def rowToValueSetEntry(row: Row): ValueSetEntry = {

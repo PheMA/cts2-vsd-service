@@ -217,6 +217,7 @@
 							edu.mayo.cts2.framework.core.xml,
 							edu.mayo.cts2.framework.core.plugin,
 							org.springframework.context.config,
+							org.springframework.security.web.authentication,
 							edu.mayo.cts2.framework.model,
 							edu.mayo.cts2.framework.model.service.association,
 							edu.mayo.cts2.framework.model.service.codesystem,
@@ -266,6 +267,7 @@
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-core</artifactId>
 			<version>${spring-security.version}</version>
+			<scope>provided</scope>
 			<exclusions>
 				<exclusion>
 					<groupId>org.springframework</groupId>
@@ -286,6 +288,7 @@
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-config</artifactId>
 			<version>${spring-security.version}</version>
+			<scope>provided</scope>
 			<exclusions>
 				<exclusion>
 					<groupId>org.springframework</groupId>
@@ -306,6 +309,7 @@
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-acl</artifactId>
 			<version>${spring-security.version}</version>
+			<scope>provided</scope>
 			<exclusions>
 				<exclusion>
 					<groupId>org.springframework</groupId>
@@ -326,6 +330,7 @@
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-web</artifactId>
 			<version>${spring-security.version}</version>
+			<scope>provided</scope>
 			<exclusions>
 				<exclusion>
 					<groupId>org.springframework</groupId>

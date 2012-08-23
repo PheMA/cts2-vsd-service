@@ -25,22 +25,21 @@ class MatValueSetReadServiceTestIT extends AbstractZipLoadingTestBase {
 	
 	@Test
 	void TestRead() {
-		assertNotNull service.read(ModelUtils.nameOrUriFromName("AMA-PCFPI"), null)
+		assertNotNull service.read(ModelUtils.nameOrUriFromName("2.16.840.1.113883.3.526.02.696"), null)
 	}
 	
 	@Test
 	void TestReadCorrectName() {
-		def vs = service.read(ModelUtils.nameOrUriFromName("AMA-PCFPI"), null)
+		def vs = service.read(ModelUtils.nameOrUriFromName("2.16.840.1.113883.3.526.02.696"), null)
 		
-		assertEquals "AMA-PCFPI", vs.getValueSetName()
+		assertEquals "2.16.840.1.113883.3.526.02.696", vs.getValueSetName()
 	}
 	
 	@Test
 	void TestReadCorrectAbout() {
-		def vs = service.read(ModelUtils.nameOrUriFromName("AMA-PCFPI"), null)
+		def vs = service.read(ModelUtils.nameOrUriFromName("2.16.840.1.113883.3.526.02.696"), null)
 		
-		fail("not sure what the about should be")
-		assertEquals "???", vs.getAbout()
+		assertEquals "urn:oid:2.16.840.1.113883.3.526.02.696", vs.getAbout()
 	}
 	
 }

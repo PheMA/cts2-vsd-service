@@ -28,6 +28,8 @@ import edu.mayo.cts2.framework.plugin.service.mat.repository.ValueSetRepository
 import edu.mayo.cts2.framework.plugin.service.mat.model.ValueSet
 import edu.mayo.cts2.framework.plugin.service.mat.model.ValueSetEntry
 import org.springframework.transaction.annotation.Transactional
+import edu.mayo.cts2.framework.plugin.service.mat.uri.UriResolver
+import edu.mayo.cts2.framework.plugin.service.mat.uri.IdType
 
 @Component
 class MatValueSetDefinitionResolutionService extends AbstractService with ValueSetDefinitionResolutionService {
@@ -74,7 +76,9 @@ class MatValueSetDefinitionResolutionService extends AbstractService with ValueS
     val synopsis = new EntitySynopsis()
     synopsis.setName(entry.code)
     synopsis.setNamespace(entry.codeSystem)
-    synopsis.setUri("TODO")
+    
+    var codeSystemUri = uriResolver.idToUri(entry.codeSystem, IdType.CODESYSTEM)
+    synopsis.setUri(codeSystemUri + "/" + codeSystemUri)
     synopsis.setDesignation(entry.description);
     
     seq ++ Seq(synopsis)

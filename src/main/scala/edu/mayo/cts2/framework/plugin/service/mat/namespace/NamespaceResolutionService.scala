@@ -17,15 +17,14 @@ class NamespaceResolutionService {
   @Value("${namespaceServiceUrl}")
   var namespaceServiceUrl: String = _
 
-  def prefixToUri(prefix: String): String = {
+  def prefixToUri(prefix: String): Option[String] = {
 
     var uri = getNsUriFn.invoke(namespaceServiceUrl, prefix)
 
-    if (uri != null) {
-      println("GOT: " + uri + " from: " + namespaceServiceUrl  + "AND" + prefix);
-      uri.toString()
+    if(uri != null){
+      Option(uri.toString)
     } else {
-      throw new UnsupportedOperationException()
+      None
     }
   }
 

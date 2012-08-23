@@ -1,4 +1,4 @@
-package edu.mayo.cts2.framework.plugin.service.mat.profile.valuesetdefinition
+package edu.mayo.cts2.framework.plugin.service.mat.profile.valueset
 
 import java.lang.Override
 import scala.collection.JavaConversions._
@@ -17,6 +17,8 @@ import edu.mayo.cts2.framework.plugin.service.mat.model.ValueSet
 import org.springframework.transaction.annotation.Transactional
 import edu.mayo.cts2.framework.service.profile.valueset.ValueSetReadService
 import edu.mayo.cts2.framework.model.valueset.ValueSetCatalogEntry
+import edu.mayo.cts2.framework.plugin.service.mat.uri.UriResolver
+import edu.mayo.cts2.framework.plugin.service.mat.uri.IdType
 
 @Component
 class MatValueSetReadService extends AbstractService with ValueSetReadService {
@@ -37,10 +39,12 @@ class MatValueSetReadService extends AbstractService with ValueSetReadService {
   }
   
   def valueSetToValueSetCatalogEntry(valueSet:ValueSet):ValueSetCatalogEntry = {
-    val valueSetDef = new ValueSetCatalogEntry()
-    valueSetDef.setAbout("TODO")
+    val valueSetCatalogEntry = new ValueSetCatalogEntry()
+    valueSetCatalogEntry.setAbout(uriResolver.idToUri(valueSet.oid, IdType.VALUESET))
+    valueSetCatalogEntry.setValueSetName(valueSet.getName)
+    valueSetCatalogEntry.setFormalName(valueSet.formalName)
 
-    valueSetDef
+    valueSetCatalogEntry
   }
 
   @Override

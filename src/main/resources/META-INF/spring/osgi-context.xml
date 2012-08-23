@@ -17,6 +17,8 @@
 	
 	<osgi:service ref="matServiceProvider" interface="edu.mayo.cts2.framework.service.provider.ServiceProvider"/>
 	
+<!-- 	<osgi:service ref="viewResolver" interface="org.springframework.web.servlet.ViewResolver"/> -->
+	
 	<osgi:service ref="zipUploadControllerProvider" interface="edu.mayo.cts2.framework.webapp.rest.extensions.controller.ControllerProvider"/>
 	
 	<osgi:service ref="springSecurityFilterChain" interface="javax.servlet.Filter"/>

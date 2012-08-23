@@ -35,7 +35,7 @@ public class ZipUploadController implements ControllerProvider, InitializingBean
 	
 		if(this.httpService != null){
 			httpService.registerResources(
-					"/zipupload",
+					"/mat",
 					"/WEB-INF", 
 					null);
 		}
