@@ -12,6 +12,7 @@
 		<AD name="JDBC Username" id="jdbcUsername" required="true" type="String" default="sa" />
 		<AD name="JDBC Password" id="jdbcPassword" required="true" type="String" default="" />
 		<AD name="NamespaceService URL" id="namespaceServiceUrl" required="true" type="String" default="http://informatics.mayo.edu/cts2/services/bioportal-rdf/"  />
+		<AD name="UriResolutionService URL" id="uriResolutionServiceUrl" required="true" type="String" default="http://bmidev4:8000/"  />
 	</OCD>
 	<Designate pid="edu.mayo.cts2.framework.plugin.service.mat">
         <Object ocdref="edu.mayo.cts2.framework.plugin.service.mat"/>

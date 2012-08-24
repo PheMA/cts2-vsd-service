@@ -37,6 +37,20 @@ class MatValueSetDefinitionResolutionServiceTestIT extends AbstractZipLoadingTes
 	}
 	
 	@Test
+	void TestEntriesHaveUri() {
+		def id = new ValueSetDefinitionReadId("2.16.840.1.113883.1.11.1", ModelUtils.nameOrUriFromName("2.16.840.1.113883.1.11.1"))
+		
+		def result = service.resolveDefinition(id, null, null, null, null, null, new Page())
+		
+		assertNotNull result
+		assertTrue result.entries.size() > 0
+		
+		result.entries.each {
+			assertTrue ! it.uri.startsWith("null")
+		}
+	}
+	
+	@Test
 	void TestValidXml() {
 		def id = new ValueSetDefinitionReadId("2.16.840.1.113883.1.11.1", ModelUtils.nameOrUriFromName("2.16.840.1.113883.1.11.1"))
 		

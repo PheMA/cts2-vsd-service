@@ -1,5 +1,6 @@
 (ns cts2.uri
-  (:require [clj-http.client :as client]))
+  (:require [clj-http.client :as client])
+  (:import [java.net URLEncoder]))
 
 (def call
   (memoize
@@ -10,11 +11,15 @@
 
 (defn- doGetId 
  [baseuri type id resource]
-    (call (str baseuri "/id/" type "?id=" id) resource))
+    (call (str baseuri "/id/" type "?id=" (URLEncoder/encode id "UTF-8")) resource))
 
 (defn getUri 
  [baseuri type id]
     (doGetId baseuri type id "resourceURI"))
+
+(defn getBaseEntityUri 
+ [baseuri id]
+    (doGetId baseuri "CODE_SYSTEM" id "baseEntityURI"))
 
 (defn getName 
  [baseuri type id]

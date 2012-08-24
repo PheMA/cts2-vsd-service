@@ -51,7 +51,7 @@ class MatValueSetQueryService
   def transformValueSet = (seq:Seq[ValueSetCatalogEntrySummary], valueSet:ValueSet) => {
     val summary = new ValueSetCatalogEntrySummary()
     summary.setValueSetName(valueSet.name)
-    summary.setAbout(valueSet.oid)
+    summary.setAbout("urn:oid:" + valueSet.oid)
     summary.setFormalName(valueSet.formalName)
     summary.setHref(urlConstructor.createValueSetUrl((valueSet.name)))
     
