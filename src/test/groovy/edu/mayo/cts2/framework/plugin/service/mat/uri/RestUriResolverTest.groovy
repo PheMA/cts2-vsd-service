@@ -12,7 +12,7 @@ class RestUriResolverTest {
 	@Before
 	void SetUp(){
 		resolver = new RestUriResolver()
-		resolver.setUriResolutionServiceUrl("http://bmidev4:8000/")
+		resolver.setUriResolutionServiceUrl("https://informatics.mayo.edu/cts2/services/uriresolver")
 	}
 
 	@Test

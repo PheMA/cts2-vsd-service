@@ -75,9 +75,11 @@ class MatValueSetDefinitionResolutionService extends AbstractService with ValueS
   private def valueSetToEntitySynopsis = (seq: Seq[EntitySynopsis], entry: ValueSetEntry) => {
     val synopsis = new EntitySynopsis()
     synopsis.setName(entry.code)
-    synopsis.setNamespace(entry.codeSystem)
+    
+    val prefix = uriResolver.idToName(entry.codeSystem, IdType.CODE_SYSTEM)
+    synopsis.setNamespace(prefix)
 
-    var baseUri = uriResolver.idToBaseUri(entry.codeSystem)
+    val baseUri = uriResolver.idToBaseUri(entry.codeSystem)
     
     synopsis.setUri(baseUri + entry.code)
     synopsis.setDesignation(entry.description);

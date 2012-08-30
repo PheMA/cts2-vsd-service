@@ -14,7 +14,7 @@ public class NamespaceResolutionServiceTest {
 		def svc = new NamespaceResolutionService()
 		svc.namespaceServiceUrl = "http://informatics.mayo.edu/cts2/services/bioportal-rdf"
 		
-		assertEquals "http://schema.omg.org/spec/CTS2/1.0/", svc.prefixToUri("cts2")
+		assertEquals "http://schema.omg.org/spec/CTS2/1.0/", svc.prefixToUri("cts2").get()
 	}
 	
 	@Test

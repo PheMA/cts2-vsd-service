@@ -7,7 +7,7 @@
    (fn [url response]
      (get
        (:body 
-         (client/get url {:throw-exceptions false :accept :json :as :json})) (keyword response) ))))
+         (client/get url {:throw-exceptions false :accept :json :as :json :insecure? true})) (keyword response) ))))
 
 (defn- doGetId 
  [baseuri type id resource]

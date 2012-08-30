@@ -42,7 +42,7 @@ public class ZipUploadController implements ControllerProvider, InitializingBean
 	}
 
 	@RequestMapping(value = "/mat/zips", method = RequestMethod.POST)
-	public void loadZip(HttpServletRequest request)
+	public String loadZip(HttpServletRequest request)
 			throws Exception {
 
 		MultipartResolver multipartResolver = 
@@ -65,6 +65,8 @@ public class ZipUploadController implements ControllerProvider, InitializingBean
 		ZipFile zipFile = new ZipFile(zip);
 
 		matZipLoader.loadMatZip(zipFile);
+		
+		return "uploadComplete";
 	}
 
 	@Override

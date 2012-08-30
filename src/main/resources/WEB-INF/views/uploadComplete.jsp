@@ -1,5 +1,0 @@
-<html>
-<body>
-	<h1>Nice!</h1>
-</body>
-</html>

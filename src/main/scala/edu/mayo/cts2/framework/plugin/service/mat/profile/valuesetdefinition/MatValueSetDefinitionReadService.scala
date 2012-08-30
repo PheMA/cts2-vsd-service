@@ -19,13 +19,16 @@ import edu.mayo.cts2.framework.model.valuesetdefinition.ValueSetDefinitionEntry
 import edu.mayo.cts2.framework.model.valuesetdefinition.SpecificEntityList
 import edu.mayo.cts2.framework.model.core.URIAndEntityName
 import edu.mayo.cts2.framework.model.core.types.SetOperator
+import edu.mayo.cts2.framework.plugin.service.mat.uri.IdType
+import edu.mayo.cts2.framework.model.core.SourceAndNotation
+import edu.mayo.cts2.framework.model.core.ValueSetReference
 
 @Component
 class MatValueSetDefinitionReadService extends AbstractService with ValueSetDefinitionReadService {
 
   @Resource
   var valueSetRepository: ValueSetRepository = _
-  
+
   /**
    * This is incomplete... this is only here to map the 'CURRENT' tag to a CodeSystemVersionName.
    */
@@ -52,43 +55,62 @@ class MatValueSetDefinitionReadService extends AbstractService with ValueSetDefi
   @Override
   @Transactional
   def read(
-      identifier: ValueSetDefinitionReadId,
-      readContext: ResolvedReadContext): LocalIdValueSetDefinition = {
+    identifier: ValueSetDefinitionReadId,
+    readContext: ResolvedReadContext): LocalIdValueSetDefinition = {
     val valueSetName = identifier.getValueSet.getName
-    
+
     val valueSet = valueSetRepository.findOneByName(valueSetName)
-    
+
     val valueSetDef = valueSetToDefinition(valueSet)
-    
+
     new LocalIdValueSetDefinition("1", valueSetDef)
   }
-  
-  def valueSetToDefinition(valueSet:ValueSet):ValueSetDefinition = {
+
+  def valueSetToDefinition(valueSet: ValueSet): ValueSetDefinition = {
     val valueSetDef = new ValueSetDefinition()
-    valueSetDef.setAbout("TODO")
-    
-    val list = valueSet.entries.foldLeft(new SpecificEntityList())( (list, entry) => {
+    valueSetDef.setAbout("urn:oid:" + valueSet.oid)
+    valueSetDef.setDocumentURI("TODO")
+    valueSetDef.setSourceAndNotation(buildSourceAndNotation())
+    valueSetDef.setDefinedValueSet(buildValueSetReference(valueSet))
+
+    val list = valueSet.entries.foldLeft(new SpecificEntityList())((list, entry) => {
       val entity = new URIAndEntityName()
-      entity.setName(entry.code)
-      entity.setNamespace(entry.codeSystem)
-      entity.setUri("TODO")
+      val prefix = uriResolver.idToName(entry.codeSystem, IdType.CODE_SYSTEM)
+      entity.setNamespace(prefix)
+
+      val baseUri = uriResolver.idToBaseUri(entry.codeSystem)
+
+      entity.setUri(baseUri + entry.code)
+
       list.addReferencedEntity(entity)
-      
+
       list
     })
-    
+
     val vsdEntry = new ValueSetDefinitionEntry()
     vsdEntry.setEntryOrder(1)
     vsdEntry.setOperator(SetOperator.UNION)
     vsdEntry.setEntityList(list)
 
     valueSetDef.addEntry(vsdEntry)
-    
+
     valueSetDef
   }
-  
-  private def buildSourceAndNotation(){
-    
+
+  private def buildValueSetReference(valueSet: ValueSet): ValueSetReference = {
+	val ref = new ValueSetReference()
+	ref.setContent(valueSet.name)
+	ref.setUri("urn:oid:" + valueSet.oid)
+	ref.setHref(urlConstructor.createValueSetUrl(valueSet.name))
+	
+	ref
+  }
+
+  private def buildSourceAndNotation(): SourceAndNotation = {
+    val sourceAndNotation = new SourceAndNotation()
+    sourceAndNotation.setSourceAndNotationDescription("MAT Authoring Tool Output Zip.")
+
+    sourceAndNotation
   }
 
   @Override

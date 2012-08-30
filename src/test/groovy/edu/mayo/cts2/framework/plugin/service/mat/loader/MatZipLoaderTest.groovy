@@ -8,11 +8,7 @@ class MatZipLoaderTest {
 
 	@Test
 	void TestValueSetFormalNameToName() {
-		def loader = new MatZipLoader()
 		
-		def name = loader.valueSetFormalNameToName("American Medical Association - Physician Consortium for Performance Improvement")
-	
-		assertEquals "AMA-PCFPI", name	
 	}
 	
 }

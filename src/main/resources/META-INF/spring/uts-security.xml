@@ -14,14 +14,17 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
 	<context:annotation-config />
 
 	<security:http pattern="/" security="none"/>
+	<security:http pattern="/resources/**" security="none"/>
 	<security:http pattern="/system/**" security="none"/>
 	<security:http pattern="/mat/utslogin.html" security="none"/>
 	
 	<security:http>
 		<security:intercept-url pattern="/**" access="ROLE_USER" />
-		<security:form-login 
-			authentication-success-handler-ref="originalUrlSuccessHandler" 
-			login-page="/mat/utslogin.html"/>
+<!-- 		<security:form-login  -->
+<!-- 			login-processing-url="${securityCheckUrl}" -->
+<!-- 			authentication-success-handler-ref="originalUrlSuccessHandler"  -->
+<!-- 			login-page="/mat/utslogin.html"/> -->
+		<security:http-basic/>
 	</security:http>
 
 	<beans:bean id="originalUrlSuccessHandler" class="org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler">

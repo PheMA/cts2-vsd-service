@@ -1,30 +1,27 @@
 package edu.mayo.cts2.framework.plugin.service.mat.profile.entity
 
 import static org.junit.Assert.*
-
-import java.util.concurrent.atomic.AtomicBoolean;
+import edu.mayo.cts2.framework.model.util.ModelUtils
+import edu.mayo.cts2.framework.core.xml.DelegatingMarshaller
+import edu.mayo.cts2.framework.model.entity.NamedEntityDescription
+import edu.mayo.cts2.framework.plugin.service.mat.test.AbstractTestBase
+import edu.mayo.cts2.framework.service.profile.entitydescription.name.EntityDescriptionReadId
+import gov.nih.nlm.umls.uts.webservice.AtomDTO
+import gov.nih.nlm.umls.uts.webservice.ConceptDTO
+import gov.nih.nlm.umls.uts.webservice.SourceAtomClusterDTO
+import gov.nih.nlm.umls.uts.webservice.TermDTO
+import gov.nih.nlm.umls.uts.webservice.TermStringDTO
 
 import javax.annotation.Resource
 
+import org.junit.Ignore
 import org.junit.Test
-
-import edu.mayo.cts2.framework.core.xml.DelegatingMarshaller
-import edu.mayo.cts2.framework.model.util.ModelUtils
-import edu.mayo.cts2.framework.plugin.service.mat.test.AbstractTestBase
-import edu.mayo.cts2.framework.service.profile.entitydescription.name.EntityDescriptionReadId
-import edu.mayo.cts2.framework.model.entity.NamedEntityDescription
-import  gov.nih.nlm.umls.uts.webservice.AtomDTO
-import  gov.nih.nlm.umls.uts.webservice.TermDTO
-import  gov.nih.nlm.umls.uts.webservice.TermStringDTO
-import  gov.nih.nlm.umls.uts.webservice.ConceptDTO
-import  gov.nih.nlm.umls.uts.webservice.SourceAtomClusterDTO
 
 class UtsEntityReadServiceTestIT extends AbstractTestBase {
 
 	@Resource
 	def UtsEntityReadService service
-	
-//	AtomDTO atom = new AtomDTO()
+
 	def marshaller = new DelegatingMarshaller()
 	
 	
@@ -160,7 +157,8 @@ class UtsEntityReadServiceTestIT extends AbstractTestBase {
 	}
 
 	@Test
-	void TestSetTermStringTermTyep(){
+	@Ignore
+	void TestSetTermStringTermType(){
 		def atom = new AtomDTO()
 		def termString = new TermStringDTO()
 		def term = new TermDTO()
