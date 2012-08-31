@@ -15,6 +15,7 @@ import java.io.BufferedInputStream
 import edu.mayo.cts2.framework.plugin.service.mat.repository.ValueSetRepository
 import javax.annotation.Resource
 import org.apache.commons.lang.WordUtils
+import org.apache.commons.lang.StringUtils
 
 @Component
 class MatZipLoader {
@@ -152,7 +153,14 @@ class MatZipLoader {
     valueSetEntry.code = row.getCell(CODE_CELL).toString
     valueSetEntry.description = row.getCell(DESCRIPTOR_CELL).getStringCellValue
     valueSetEntry.codeSystem = row.getCell(CODE_SYSTEM_CELL).getStringCellValue
-    valueSetEntry.codeSystemVersion = row.getCell(CODE_SYSTEM_VERSION_CELL).toString
+    try{
+    	valueSetEntry.codeSystemVersion = row.getCell(CODE_SYSTEM_VERSION_CELL).getStringCellValue
+    } catch {
+      case e: Exception => {   
+    	  valueSetEntry.codeSystemVersion = 
+    			StringUtils.substringBeforeLast(row.getCell(CODE_SYSTEM_VERSION_CELL).toString, ".")
+      }
+    }
 
     valueSetEntry
   }

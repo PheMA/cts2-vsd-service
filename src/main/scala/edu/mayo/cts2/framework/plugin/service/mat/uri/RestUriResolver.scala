@@ -57,7 +57,7 @@ class RestUriResolver extends UriResolver {
     if (versionName != null) {
       versionName.toString
     } else {
-      throw new IllegalStateException("No VersionName Found for: " + id)
+      throw new IllegalStateException("No VersionName Found for: " + id + ", " + versionId)
     }
   }
 

@@ -15,5 +15,5 @@ trait UriResolver {
 
 object IdType extends Enumeration {
   type IdType = Value
-  val CODE_SYSTEM, VALUE_SET = Value
+  val CODE_SYSTEM, VALUE_SET, CODE_SYSTEM_VERSION = Value
 }

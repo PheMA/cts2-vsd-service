@@ -76,4 +76,43 @@ class ValueSetRepositoryTestIT extends AbstractTestBase {
 		
 		assertEquals 2, repos.findOne("1.23.45").entries.size()
 	}
+	
+	@Test
+	@Transactional
+	void TestGetDistinctCodeSystemVersionsWithNumberVersion() {
+		def valueSet = new ValueSet(oid:"1.23.45", name:"testName")
+		def entry = new ValueSetEntry(code:"123")
+		entry.setCodeSystem("testcs")
+		entry.setCodeSystemVersion("2011")
+		valueSet.entries.add(entry)
+
+		repos.save(valueSet)
+		
+		def val = repos.findCodeSystemVersionsByOid("1.23.45")
+		
+		assertEquals 1, val.size()
+		assertEquals "testcs", val[0][0]
+		assertEquals "2011", val[0][1]
+	}
+	
+	@Test
+	@Transactional
+	void TestGetDistinctCodeSystemVersions() {
+		def valueSet = new ValueSet(oid:"1.23.45", name:"testName")
+		def entry = new ValueSetEntry(code:"123")
+		entry.setCodeSystem("testcs")
+		entry.setCodeSystemVersion("1.0")
+		valueSet.entries.add(entry)
+		
+		entry = new ValueSetEntry(code:"456")
+		entry.setCodeSystem("something")
+		entry.setCodeSystemVersion("2.0")
+		valueSet.entries.add(entry)
+		
+		repos.save(valueSet)
+		
+		def val = repos.findCodeSystemVersionsByOid("1.23.45")
+		
+		assertEquals 2, val.size()
+	}
 }

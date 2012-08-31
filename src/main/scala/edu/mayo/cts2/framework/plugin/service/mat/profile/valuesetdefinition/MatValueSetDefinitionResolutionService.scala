@@ -2,6 +2,7 @@ package edu.mayo.cts2.framework.plugin.service.mat.profile.valuesetdefinition
 
 import java.util.Set
 import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import org.springframework.stereotype.Component
 import edu.mayo.cts2.framework.model.command.Page
 import edu.mayo.cts2.framework.model.command.ResolvedReadContext
@@ -30,6 +31,8 @@ import edu.mayo.cts2.framework.plugin.service.mat.model.ValueSetEntry
 import org.springframework.transaction.annotation.Transactional
 import edu.mayo.cts2.framework.plugin.service.mat.uri.UriResolver
 import edu.mayo.cts2.framework.plugin.service.mat.uri.IdType
+import edu.mayo.cts2.framework.model.core.CodeSystemVersionReference
+import edu.mayo.cts2.framework.model.core.CodeSystemReference
 
 @Component
 class MatValueSetDefinitionResolutionService extends AbstractService with ValueSetDefinitionResolutionService {
@@ -76,10 +79,10 @@ class MatValueSetDefinitionResolutionService extends AbstractService with ValueS
     val synopsis = new EntitySynopsis()
     synopsis.setName(entry.code)
     
-    val prefix = uriResolver.idToName(entry.codeSystem, IdType.CODE_SYSTEM)
-    synopsis.setNamespace(prefix)
+    val csName = uriResolver.idToName(entry.codeSystem, IdType.CODE_SYSTEM)
+    synopsis.setNamespace(csName)
 
-    val baseUri = uriResolver.idToBaseUri(entry.codeSystem)
+    val baseUri = uriResolver.idToBaseUri(csName)
     
     synopsis.setUri(baseUri + entry.code)
     synopsis.setDesignation(entry.description);
@@ -95,6 +98,44 @@ class MatValueSetDefinitionResolutionService extends AbstractService with ValueS
     valueDefSetRef.setValueSetDefinition(new NameAndMeaningReference(valueSetName))
     header.setResolutionOf(valueDefSetRef)
 
+    val codeSystemVersions = valueSetRepository.findCodeSystemVersionsByName(valueSetName).asInstanceOf[java.util.List[Array[Object]]]
+    
+    val itr = codeSystemVersions.asScala
+    
+    val versionRefs = itr.foldLeft(Seq[CodeSystemVersionReference]())(
+    		(seq, entry) => {
+    		  val ref = new CodeSystemVersionReference()
+
+    		  val csName = entry(0).toString
+    		  val versionId = entry(1).toString
+    		  
+    		  val codeSystemName = uriResolver.idToName(csName, IdType.CODE_SYSTEM)
+    		  val codeSystemUri = uriResolver.idToUri(csName, IdType.CODE_SYSTEM)
+    		  val codeSystemVersionName = uriResolver.idAndVersionToVersionName(
+    		        codeSystemName,
+    		        versionId, 
+    		        IdType.CODE_SYSTEM_VERSION)  
+    		  val codeSystemVersionUri = uriResolver.idAndVersionToVersionUri(
+    		        codeSystemName,
+    		        versionId, 
+    		        IdType.CODE_SYSTEM_VERSION) 
+    		        
+    		  val cs = new CodeSystemReference()
+    		  cs.setContent(codeSystemName)
+    		  cs.setUri(codeSystemName)
+    		  
+    		  val csv = new NameAndMeaningReference()
+    		  csv.setContent(codeSystemVersionName)
+    		  csv.setUri(codeSystemVersionUri)
+    		  
+    		  ref.setCodeSystem(cs)
+    		  ref.setVersion(csv)
+    		        
+    		  seq :+ ref
+    		}
+   )
+    header.setResolvedUsingCodeSystem(versionRefs)
+    
     header
   }
 
