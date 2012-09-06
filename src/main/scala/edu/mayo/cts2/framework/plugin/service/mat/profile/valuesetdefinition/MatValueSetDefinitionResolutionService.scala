@@ -61,7 +61,10 @@ class MatValueSetDefinitionResolutionService extends AbstractService with ValueS
     readContext: ResolvedReadContext,
     page: Page): ResolvedValueSetResult[EntitySynopsis] = {
 
-    val valueSetName = id.getName()
+    //NOTE: Currently not using this variable...
+    val valueSetDefinitionName = id.getName
+    
+    val valueSetName = id.getValueSet.getName
 
     val valueSet = valueSetRepository.findOneByName(valueSetName)
 

@@ -3,22 +3,19 @@ package edu.mayo.cts2.framework.plugin.service.mat.profile.valueset
 import java.lang.Override
 import scala.collection.JavaConversions._
 import org.springframework.stereotype.Component
-import edu.mayo.cts2.framework.model.command.ResolvedReadContext
-import edu.mayo.cts2.framework.model.core.VersionTagReference
-import edu.mayo.cts2.framework.model.extension.LocalIdValueSetDefinition
-import edu.mayo.cts2.framework.model.service.core.NameOrURI
-import edu.mayo.cts2.framework.plugin.service.mat.profile.AbstractService
-import edu.mayo.cts2.framework.service.profile.valuesetdefinition.ValueSetDefinitionReadService
-import edu.mayo.cts2.framework.service.profile.valuesetdefinition.name.ValueSetDefinitionReadId
-import edu.mayo.cts2.framework.plugin.service.mat.repository.ValueSetRepository
-import javax.annotation.Resource
-import edu.mayo.cts2.framework.model.valuesetdefinition.ValueSetDefinition
-import edu.mayo.cts2.framework.plugin.service.mat.model.ValueSet
 import org.springframework.transaction.annotation.Transactional
-import edu.mayo.cts2.framework.service.profile.valueset.ValueSetReadService
+import edu.mayo.cts2.framework.model.command.ResolvedReadContext
+import edu.mayo.cts2.framework.model.core.SourceAndRoleReference
+import edu.mayo.cts2.framework.model.core.ValueSetDefinitionReference
+import edu.mayo.cts2.framework.model.service.core.NameOrURI
 import edu.mayo.cts2.framework.model.valueset.ValueSetCatalogEntry
-import edu.mayo.cts2.framework.plugin.service.mat.uri.UriResolver
-import edu.mayo.cts2.framework.plugin.service.mat.uri.IdType
+import edu.mayo.cts2.framework.plugin.service.mat.model.ValueSet
+import edu.mayo.cts2.framework.plugin.service.mat.profile.AbstractService
+import edu.mayo.cts2.framework.plugin.service.mat.repository.ValueSetRepository
+import edu.mayo.cts2.framework.plugin.service.mat.uri.UriUtils
+import edu.mayo.cts2.framework.service.profile.valueset.ValueSetReadService
+import javax.annotation.Resource
+import org.apache.commons.lang.StringUtils
 
 @Component
 class MatValueSetReadService extends AbstractService with ValueSetReadService {
@@ -29,20 +26,37 @@ class MatValueSetReadService extends AbstractService with ValueSetReadService {
   @Override
   @Transactional
   def read(
-      identifier: NameOrURI,
-      readContext: ResolvedReadContext): ValueSetCatalogEntry = {
-    val valueSetName = identifier.getName
-    
-    val valueSet = valueSetRepository.findOneByName(valueSetName)
-    
-    valueSetToValueSetCatalogEntry(valueSet)
+    identifier: NameOrURI,
+    readContext: ResolvedReadContext): ValueSetCatalogEntry = {
+    val valueSet =
+      if (identifier.getName != null) {
+        valueSetRepository.findOneByName(identifier.getName)
+      } else {
+        val uri = identifier.getUri
+
+        val lookupKey =
+          if (StringUtils.startsWith(uri, UriUtils.oidUriPrefix)) {
+            StringUtils.substringAfter(identifier.getUri, UriUtils.oidUriPrefix)
+          } else {
+            uri
+          }
+        
+        valueSetRepository.findOne(lookupKey)
+      }
+
+    if (valueSet == null) null else valueSetToValueSetCatalogEntry(valueSet)
   }
-  
-  def valueSetToValueSetCatalogEntry(valueSet:ValueSet):ValueSetCatalogEntry = {
+
+  def valueSetToValueSetCatalogEntry(valueSet: ValueSet): ValueSetCatalogEntry = {
     val valueSetCatalogEntry = new ValueSetCatalogEntry()
-    valueSetCatalogEntry.setAbout("urn:oid:" + valueSet.oid)
+    valueSetCatalogEntry.setAbout(UriUtils.oidToUri(valueSet.oid))
+    valueSetCatalogEntry.addAlternateID(valueSet.oid)
     valueSetCatalogEntry.setValueSetName(valueSet.getName)
     valueSetCatalogEntry.setFormalName(valueSet.formalName)
+    valueSetCatalogEntry.addSourceAndRole(MatValueSetUtils.sourceAndRole)
+
+    valueSetCatalogEntry.setDefinitions(urlConstructor.createDefinitionsOfValueSetUrl(valueSet.getName))
+    valueSetCatalogEntry.setCurrentDefinition(MatValueSetUtils.currentDefintion(valueSetCatalogEntry, urlConstructor))
 
     valueSetCatalogEntry
   }

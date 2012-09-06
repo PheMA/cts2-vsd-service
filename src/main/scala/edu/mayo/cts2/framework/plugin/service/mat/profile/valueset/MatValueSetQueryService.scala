@@ -113,6 +113,8 @@ class MatValueSetQueryService
     summary.setFormalName(valueSet.formalName)
     summary.setHref(urlConstructor.createValueSetUrl((valueSet.name)))
     
+    summary.setCurrentDefinition(MatValueSetUtils.currentDefintion(summary, urlConstructor))
+    
     seq ++ Seq(summary)
   }:Seq[ValueSetCatalogEntrySummary]
 

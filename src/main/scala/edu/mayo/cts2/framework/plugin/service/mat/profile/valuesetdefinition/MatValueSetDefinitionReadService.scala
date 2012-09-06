@@ -22,6 +22,8 @@ import edu.mayo.cts2.framework.model.core.types.SetOperator
 import edu.mayo.cts2.framework.plugin.service.mat.uri.IdType
 import edu.mayo.cts2.framework.model.core.SourceAndNotation
 import edu.mayo.cts2.framework.model.core.ValueSetReference
+import edu.mayo.cts2.framework.plugin.service.mat.profile.valueset.MatValueSetUtils
+import edu.mayo.cts2.framework.plugin.service.mat.uri.UriUtils
 
 @Component
 class MatValueSetDefinitionReadService extends AbstractService with ValueSetDefinitionReadService {
@@ -68,8 +70,8 @@ class MatValueSetDefinitionReadService extends AbstractService with ValueSetDefi
 
   def valueSetToDefinition(valueSet: ValueSet): ValueSetDefinition = {
     val valueSetDef = new ValueSetDefinition()
-    valueSetDef.setAbout("urn:oid:" + valueSet.oid)
-    valueSetDef.setDocumentURI("urn:oid:" + valueSet.oid + ":1")
+    valueSetDef.setAbout(UriUtils.oidToUri(valueSet.oid))
+    valueSetDef.setDocumentURI(UriUtils.oidToUri(valueSet.oid) + ":1")
     valueSetDef.setSourceAndNotation(buildSourceAndNotation())
     valueSetDef.setDefinedValueSet(buildValueSetReference(valueSet))
 
@@ -94,6 +96,8 @@ class MatValueSetDefinitionReadService extends AbstractService with ValueSetDefi
     vsdEntry.setEntityList(list)
 
     valueSetDef.addEntry(vsdEntry)
+    
+    valueSetDef.addSourceAndRole(MatValueSetUtils.sourceAndRole)
 
     valueSetDef
   }
@@ -101,7 +105,7 @@ class MatValueSetDefinitionReadService extends AbstractService with ValueSetDefi
   private def buildValueSetReference(valueSet: ValueSet): ValueSetReference = {
 	val ref = new ValueSetReference()
 	ref.setContent(valueSet.name)
-	ref.setUri("urn:oid:" + valueSet.oid)
+	ref.setUri(UriUtils.oidToUri(valueSet.oid))
 	ref.setHref(urlConstructor.createValueSetUrl(valueSet.name))
 	
 	ref
