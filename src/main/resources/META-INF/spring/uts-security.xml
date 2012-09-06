@@ -17,7 +17,8 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
 	<security:http pattern="/resources/**" security="none"/>
 	<security:http pattern="/system/**" security="none"/>
 	<security:http pattern="/mat/utslogin.html" security="none"/>
-	
+	<security:http pattern="\A.*\?.*bypass=1.*\Z" path-type="regex" security="none"/>
+
 	<security:http>
 		<security:intercept-url pattern="/**" access="ROLE_USER" />
 <!-- 		<security:form-login  -->

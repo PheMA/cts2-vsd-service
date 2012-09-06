@@ -69,7 +69,7 @@ class MatValueSetDefinitionReadService extends AbstractService with ValueSetDefi
   def valueSetToDefinition(valueSet: ValueSet): ValueSetDefinition = {
     val valueSetDef = new ValueSetDefinition()
     valueSetDef.setAbout("urn:oid:" + valueSet.oid)
-    valueSetDef.setDocumentURI("TODO")
+    valueSetDef.setDocumentURI("urn:oid:" + valueSet.oid + ":1")
     valueSetDef.setSourceAndNotation(buildSourceAndNotation())
     valueSetDef.setDefinedValueSet(buildValueSetReference(valueSet))
 
@@ -77,7 +77,8 @@ class MatValueSetDefinitionReadService extends AbstractService with ValueSetDefi
       val entity = new URIAndEntityName()
       val prefix = uriResolver.idToName(entry.codeSystem, IdType.CODE_SYSTEM)
       entity.setNamespace(prefix)
-
+      entity.setName(entry.code)
+      
       val baseUri = uriResolver.idToBaseUri(entry.codeSystem)
 
       entity.setUri(baseUri + entry.code)

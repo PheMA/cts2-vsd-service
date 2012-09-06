@@ -5,6 +5,7 @@ import static org.junit.Assert.*
 import javax.annotation.Resource
 
 import org.junit.Test
+import org.springframework.data.domain.PageRequest
 import org.springframework.transaction.annotation.Transactional
 
 import edu.mayo.cts2.framework.plugin.service.mat.model.ValueSet
@@ -27,6 +28,24 @@ class ValueSetRepositoryTestIT extends AbstractTestBase {
 		repos.save(valueSet)
 		
 		assertNotNull repos.findOne("1.23.45")
+	}
+	
+	@Test
+	void TestFindByNameLike() {
+		def valueSet = new ValueSet(oid:"1.23.45", name:"testName")
+		repos.save(valueSet)
+		
+		def page = repos.findByNameLikeIgnoreCase("%est%", new PageRequest(0,100))
+		assertNotNull page
+		assertEquals 1, page.getContent().size()
+	}
+	
+	@Test
+	void TestFindByNameLikeCaseInsensitive() {
+		def valueSet = new ValueSet(oid:"1.23.45", name:"testName")
+		repos.save(valueSet)
+		
+		assertNotNull repos.findByNameLikeIgnoreCase("%estna%",new PageRequest(0,100))
 	}
 	
 	@Test

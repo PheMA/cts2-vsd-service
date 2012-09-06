@@ -1,9 +1,16 @@
 package edu.mayo.cts2.framework.plugin.service.mat.profile.entity
 
 import static org.junit.Assert.*
-import edu.mayo.cts2.framework.model.util.ModelUtils
+
+import javax.annotation.Resource
+import javax.xml.transform.stream.StreamResult
+
+import org.junit.Ignore
+import org.junit.Test
+
 import edu.mayo.cts2.framework.core.xml.DelegatingMarshaller
 import edu.mayo.cts2.framework.model.entity.NamedEntityDescription
+import edu.mayo.cts2.framework.model.util.ModelUtils
 import edu.mayo.cts2.framework.plugin.service.mat.test.AbstractTestBase
 import edu.mayo.cts2.framework.service.profile.entitydescription.name.EntityDescriptionReadId
 import gov.nih.nlm.umls.uts.webservice.AtomDTO
@@ -11,11 +18,6 @@ import gov.nih.nlm.umls.uts.webservice.ConceptDTO
 import gov.nih.nlm.umls.uts.webservice.SourceAtomClusterDTO
 import gov.nih.nlm.umls.uts.webservice.TermDTO
 import gov.nih.nlm.umls.uts.webservice.TermStringDTO
-
-import javax.annotation.Resource
-
-import org.junit.Ignore
-import org.junit.Test
 
 class UtsEntityReadServiceTestIT extends AbstractTestBase {
 
@@ -60,6 +62,17 @@ class UtsEntityReadServiceTestIT extends AbstractTestBase {
 	}
 	
 	@Test
+	void TestReadValidXml() {
+		def id = new EntityDescriptionReadId("99201", "CPT", ModelUtils.nameOrUriFromName("CPT"))
+		
+		def result = service.read(id, null)
+		
+		assertNotNull result
+		
+		marshaller.marshal(result, new StreamResult(new StringWriter()))
+	}
+	
+	@Test
 	void TestReadHasDescriptions() {
 		def id = new EntityDescriptionReadId("185465003", "SNOMEDCT", ModelUtils.nameOrUriFromName("SNOMEDCT"))
 		
@@ -85,7 +98,7 @@ class UtsEntityReadServiceTestIT extends AbstractTestBase {
 		def term = new TermStringDTO()
 		term.setDefaultPreferredName("Test Designation")
 		atom.setTermString(term)
-		service.setDesignation(ed, atom)
+		service.setDesignation(ed, atom, true)
 		assertEquals(ed.getDesignation(0).getValue().getContent(), "Test Designation")
 	}
 	

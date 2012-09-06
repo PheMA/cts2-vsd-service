@@ -87,6 +87,10 @@ class MatValueSetDefinitionResolutionService extends AbstractService with ValueS
     synopsis.setUri(baseUri + entry.code)
     synopsis.setDesignation(entry.description);
     
+    if(csName.equals("CPT")){
+    	synopsis.setHref(urlConstructor.createEntityUrl(csName, csName, entry.code))
+    }
+    
     seq ++ Seq(synopsis)
   }: Seq[EntitySynopsis]
 
@@ -111,22 +115,26 @@ class MatValueSetDefinitionResolutionService extends AbstractService with ValueS
     		  
     		  val codeSystemName = uriResolver.idToName(csName, IdType.CODE_SYSTEM)
     		  val codeSystemUri = uriResolver.idToUri(csName, IdType.CODE_SYSTEM)
+    		  /*
     		  val codeSystemVersionName = uriResolver.idAndVersionToVersionName(
     		        codeSystemName,
     		        versionId, 
-    		        IdType.CODE_SYSTEM_VERSION)  
+    		        IdType.CODE_SYSTEM_VERSION) 
+    		  */ 
+    		  /*     
     		  val codeSystemVersionUri = uriResolver.idAndVersionToVersionUri(
     		        codeSystemName,
     		        versionId, 
     		        IdType.CODE_SYSTEM_VERSION) 
-    		        
+    		  */  
+		  
     		  val cs = new CodeSystemReference()
     		  cs.setContent(codeSystemName)
-    		  cs.setUri(codeSystemName)
+    		  cs.setUri(codeSystemUri)
     		  
     		  val csv = new NameAndMeaningReference()
-    		  csv.setContent(codeSystemVersionName)
-    		  csv.setUri(codeSystemVersionUri)
+    		  csv.setContent(csName + "-" + versionId)
+    		  //csv.setUri(codeSystemUri)
     		  
     		  ref.setCodeSystem(cs)
     		  ref.setVersion(csv)

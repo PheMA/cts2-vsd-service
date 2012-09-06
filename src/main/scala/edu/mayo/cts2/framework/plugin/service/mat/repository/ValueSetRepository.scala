@@ -18,8 +18,12 @@ trait ValueSetRepository extends CrudRepository[ValueSet, String] {
 
   def findAll(pageable: Pageable): Page[ValueSet]
   
-  @Query("select vs from ValueSet vs where vs.name = :query or vs.oid = :query")
-  def findByAny(@Param("query") query:String, pageable: Pageable): Page[ValueSet]
+  @Query("select vs from ValueSet vs where upper(vs.name) = upper(:query) or upper(vs.oid) = upper(:query)")
+  def findByAnyLikeIgnoreCase(@Param("query") query:String, pageable: Pageable): Page[ValueSet]
+
+  def findByNameLikeIgnoreCase(query:String, pageable: Pageable): Page[ValueSet]
+  
+  def findByFormalNameLikeIgnoreCase(query:String, pageable: Pageable): Page[ValueSet]
   
   def findOneByName(query:String): ValueSet
   
