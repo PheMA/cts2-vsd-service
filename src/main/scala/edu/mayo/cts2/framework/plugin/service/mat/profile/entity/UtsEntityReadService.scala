@@ -32,6 +32,7 @@ import gov.nih.nlm.umls.uts.webservice.AtomDTO
 import gov.nih.nlm.umls.uts.webservice.Psf
 import javax.annotation.Resource
 import edu.mayo.cts2.framework.model.entity.types.DesignationRole
+import org.apache.commons.lang.StringUtils
 
 @Component
 class UtsEntityReadService extends AbstractService
@@ -39,7 +40,7 @@ class UtsEntityReadService extends AbstractService
 
   @Resource
   var namespaceResolutionService: NamespaceResolutionService = _
-  
+
   @Resource
   var utsDao: UtsDao = _
 
@@ -57,59 +58,62 @@ class UtsEntityReadService extends AbstractService
 
     val csv = id.getCodeSystemVersion.getName
     val fn = utsDao.utsContentService.getCodeAtoms _
-  
-    val atoms = utsDao.callSecurely(fn(_, _, id.getEntityName.getName, csv, new Psf()))
-    
-    if(atoms.size == 0){
+
+    val atoms = utsDao.callSecurely(fn(_, _, id.getEntityName.getName, csvNameToSab(csv), new Psf()))
+
+    if (atoms.size == 0) {
       return null;
     }
-    
-    val namedEntity = atoms.foldLeft(atomToNamedEntityDescription(atoms.get(0)))(
-    		(entity, atom) => {
-    		  entity
-    		}
-    )
-    
+
+    val namedEntity = atoms.foldLeft(atomToNamedEntityDescription(atoms.get(0), csv))(
+      (entity, atom) => {
+        entity
+      })
+
     val ed = new EntityDescription()
     ed.setNamedEntity(namedEntity)
 
     ed
   }
-  
-  private def atomToNamedEntityDescription(atom:AtomDTO):NamedEntityDescription = {
+
+  private def csvNameToSab(csvName: String) = {
+    StringUtils.substringBefore(csvName, "-")
+  }
+
+  private def atomToNamedEntityDescription(atom: AtomDTO, csv: String): NamedEntityDescription = {
     val ed = new NamedEntityDescription()
     val csName = atom.getRootSource
 
     val name = new ScopedEntityName()
-    val code = atom.getSourceConcept().getSourceUi()
+    val code = atom.getCode().getSourceUi()
     name.setName(code)
     name.setNamespace(atom.getRootSource)
     ed.setEntityID(name)
-        
+
     val baseUri = uriResolver.idToBaseUri(csName)
     ed.setAbout(baseUri + code)
     setDesignation(ed, atom, true)
-    
+
     val csvRef = new CodeSystemVersionReference();
     val csRef = new CodeSystemReference(csName);
-    val nameMeaningRef = new NameAndMeaningReference(csName + "-1");
-    
+    val nameMeaningRef = new NameAndMeaningReference(csv);
+
     csvRef.setCodeSystem(csRef)
     csvRef.setVersion(nameMeaningRef)
-    
+
     ed.setDescribingCodeSystemVersion(csvRef)
-    
+
     val entityType = new URIAndEntityName()
     entityType.setName("Class")
     entityType.setNamespace("owl")
     entityType.setUri("http://www.w3.org/2002/07/owl#Class")
 
     ed.addEntityType(entityType)
-    
+
     ed
   }
-  
-  def setDesignation(ed:NamedEntityDescription, atom:AtomDTO, preferred:Boolean = false) = {
+
+  def setDesignation(ed: NamedEntityDescription, atom: AtomDTO, preferred: Boolean = false) = {
     val designation = new Designation()
     designation.setDesignationRole(if (preferred) DesignationRole.PREFERRED else DesignationRole.ALTERNATIVE)
     val anyType = new TsAnyType()
@@ -119,48 +123,47 @@ class UtsEntityReadService extends AbstractService
     designList.add(designation)
     ed.setDesignation(designList)
   }
-  
-  def getConceptSemanticTypes(atom: AtomDTO):List[java.lang.String] = {
+
+  def getConceptSemanticTypes(atom: AtomDTO): List[java.lang.String] = {
     atom.getConcept().getSemanticTypes().toList
   }
-  
-  def getConceptStatus(atom: AtomDTO):String = {
+
+  def getConceptStatus(atom: AtomDTO): String = {
     atom.getConcept().getStatus()
   }
-  
-  def getConceptCUI(atom: AtomDTO):String = {
+
+  def getConceptCUI(atom: AtomDTO): String = {
     atom.getConcept().getUi()
   }
 
-  def isConceptObsolete(atom: AtomDTO):Boolean = {
-   false
+  def isConceptObsolete(atom: AtomDTO): Boolean = {
+    false
   }
-  
-  def getSourceConceptDefaultPreferredName(atom: AtomDTO):String = {
+
+  def getSourceConceptDefaultPreferredName(atom: AtomDTO): String = {
     atom.getSourceConcept().getDefaultPreferredName()
   }
-  
-  def getTermStringTermLanguage(atom: AtomDTO):String = {
+
+  def getTermStringTermLanguage(atom: AtomDTO): String = {
     atom.getTermString().getTerm().getLanguage()
   }
-  
-  def getTermStringTermLuiNormName(atom: AtomDTO):String = {
+
+  def getTermStringTermLuiNormName(atom: AtomDTO): String = {
     atom.getTermString().getTerm().getLuinormForm()
   }
-  
-  def getTermStringTermLUI(atom: AtomDTO):String = {
+
+  def getTermStringTermLUI(atom: AtomDTO): String = {
     atom.getTermString().getTerm().getUi()
   }
-  
-  def getTermStringTermTyep(atom: AtomDTO):String = {
+
+  def getTermStringTermTyep(atom: AtomDTO): String = {
     null
   }
-  
-  def getAtomUi(atom: AtomDTO):String = {
+
+  def getAtomUi(atom: AtomDTO): String = {
     atom.getUi()
   }
-  
-  
+
   def exists(p1: EntityDescriptionReadId, p2: ResolvedReadContext): Boolean = throw new RuntimeException()
 
   def getSupportedVersionTags: java.util.List[VersionTagReference] =

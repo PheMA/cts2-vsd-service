@@ -64,6 +64,23 @@ class MatValueSetQueryServiceTestIT extends AbstractZipLoadingTestBase {
 	}
 	
 	@Test
+	void TestQueryContainsFilterSynopsis() {
+		def summaries = service.getResourceSummaries(
+			{
+				getFilterComponents : {
+					def filter = new ResolvedFilter(
+						matchValue:"office",
+						propertyReference: StandardModelAttributeReference.RESOURCE_SYNOPSIS.propertyReference,
+						matchAlgorithmReference: StandardMatchAlgorithmReference.CONTAINS.matchAlgorithmReference
+					)
+					[filter] as Set
+				}
+			} as ValueSetQuery,null,null)
+		
+		assertEquals 1, summaries.entries.size()
+	}
+	
+	@Test
 	void TestIsPartialTrue() {
 		def summaries = service.getResourceSummaries(null as ValueSetQuery,null,new Page(maxToReturn:50,page:0))
 		

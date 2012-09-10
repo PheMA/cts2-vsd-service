@@ -22,40 +22,39 @@ import edu.mayo.cts2.framework.plugin.service.mat.loader.MatZipLoader;
 import edu.mayo.cts2.framework.webapp.rest.extensions.controller.ControllerProvider;
 
 @Controller("zipUploadControllerProvider")
-public class ZipUploadController implements ControllerProvider, InitializingBean {
-	
+public class ZipUploadController implements ControllerProvider,
+		InitializingBean {
+
 	@Resource
 	private MatZipLoader matZipLoader;
-	
-	@Autowired(required=false)
+
+	@Autowired(required = false)
 	private HttpService httpService;
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
-	
-		if(this.httpService != null){
-			httpService.registerResources(
-					"/mat",
-					"/WEB-INF", 
-					null);
+
+		if (this.httpService != null) {
+			httpService.registerResources("/mat", "/WEB-INF", null);
 		}
 	}
 
 	@RequestMapping(value = "/mat/zips", method = RequestMethod.POST)
-	public String loadZip(HttpServletRequest request)
-			throws Exception {
+	public String loadZip(HttpServletRequest request) throws Exception {
 
-		MultipartResolver multipartResolver = 
-			new CommonsMultipartResolver(request.getSession().getServletContext());
-		
-		if (! multipartResolver.isMultipart(request)) {
+		MultipartResolver multipartResolver = new CommonsMultipartResolver(
+				request.getSession().getServletContext());
+
+		if (!multipartResolver.isMultipart(request)) {
 			throw new IllegalStateException(
 					"ServletRequest expected to be of type MultipartHttpServletRequest");
 		}
 
-		MultipartHttpServletRequest multipartRequest = multipartResolver.resolveMultipart(request);
+		MultipartHttpServletRequest multipartRequest = multipartResolver
+				.resolveMultipart(request);
 
 		MultipartFile multipartFile = multipartRequest.getFile("file");
+		String zipType = multipartRequest.getParameter("zipType");
 
 		final File zip = File.createTempFile(UUID.randomUUID().toString(),
 				".zip");
@@ -64,9 +63,21 @@ public class ZipUploadController implements ControllerProvider, InitializingBean
 
 		ZipFile zipFile = new ZipFile(zip);
 
-		matZipLoader.loadMatZip(zipFile);
-		
-		return "uploadComplete";
+		try {
+			if (zipType.equals("single")) {
+				matZipLoader.loadMatZip(zipFile);
+			} else if (zipType.equals("combined")) {
+				matZipLoader.loadCombinedMatZip(zipFile);
+			} else {
+				throw new IllegalStateException("Cannot determine Zip type.");
+			}
+
+			return "uploadComplete";
+		} finally {
+			if (zipFile != null) {
+				zipFile.close();
+			}
+		}
 	}
 
 	@Override

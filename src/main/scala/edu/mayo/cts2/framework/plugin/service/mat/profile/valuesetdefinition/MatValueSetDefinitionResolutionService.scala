@@ -33,12 +33,17 @@ import edu.mayo.cts2.framework.plugin.service.mat.uri.UriResolver
 import edu.mayo.cts2.framework.plugin.service.mat.uri.IdType
 import edu.mayo.cts2.framework.model.core.CodeSystemVersionReference
 import edu.mayo.cts2.framework.model.core.CodeSystemReference
+import org.apache.commons.lang.StringUtils
+import edu.mayo.cts2.framework.plugin.service.mat.uri.UriUtils
 
 @Component
 class MatValueSetDefinitionResolutionService extends AbstractService with ValueSetDefinitionResolutionService {
 
   @Resource
   var valueSetRepository: ValueSetRepository = _
+  
+  @Resource
+  var hrefBuilder: HrefBuilder = _
 
   @Resource
   var namespaceResolutionService: NamespaceResolutionService = _
@@ -75,7 +80,7 @@ class MatValueSetDefinitionResolutionService extends AbstractService with ValueS
     val entries = valueSet.entries.slice(page.getStart, page.getEnd).
       foldLeft(Seq[EntitySynopsis]())(valueSetToEntitySynopsis)
 
-    new ResolvedValueSetResult(buildHeader(valueSetName), entries, true);
+    new ResolvedValueSetResult(buildHeader(valueSet), entries, entries.size == valueSet.entries.size);
   }
 
   private def valueSetToEntitySynopsis = (seq: Seq[EntitySynopsis], entry: ValueSetEntry) => {
@@ -89,23 +94,30 @@ class MatValueSetDefinitionResolutionService extends AbstractService with ValueS
     
     synopsis.setUri(baseUri + entry.code)
     synopsis.setDesignation(entry.description);
-    
-    if(csName.equals("CPT")){
-    	synopsis.setHref(urlConstructor.createEntityUrl(csName, csName, entry.code))
-    }
-    
+
+    synopsis.setHref(hrefBuilder.createEntityHref(entry))
+        
     seq ++ Seq(synopsis)
   }: Seq[EntitySynopsis]
-
-  private def buildHeader(valueSetName: String): ResolvedValueSetHeader = {
+   
+  private def buildHeader(valueSet: ValueSet): ResolvedValueSetHeader = {
     val header = new ResolvedValueSetHeader()
 
     val valueDefSetRef = new ValueSetDefinitionReference()
-    valueDefSetRef.setValueSet(new ValueSetReference(valueSetName))
-    valueDefSetRef.setValueSetDefinition(new NameAndMeaningReference(valueSetName))
+    val valueSetRef = new ValueSetReference(valueSet.getName)
+    valueSetRef.setUri(UriUtils.oidToUri(valueSet.oid))
+    valueSetRef.setHref(urlConstructor.createValueSetUrl(valueSet.getName))
+    valueDefSetRef.setValueSet(valueSetRef)
+   
+    
+    val nameAndMeaning = new NameAndMeaningReference("1")
+    nameAndMeaning.setUri(UriUtils.oidToUri(valueSet.oid) + ":1")
+    nameAndMeaning.setHref(urlConstructor.createValueSetDefinitionUrl(valueSet.getName, "1"))
+    valueDefSetRef.setValueSetDefinition(nameAndMeaning)
+    
     header.setResolutionOf(valueDefSetRef)
 
-    val codeSystemVersions = valueSetRepository.findCodeSystemVersionsByName(valueSetName).asInstanceOf[java.util.List[Array[Object]]]
+    val codeSystemVersions = valueSetRepository.findCodeSystemVersionsByName(valueSet.name).asInstanceOf[java.util.List[Array[Object]]]
     
     val itr = codeSystemVersions.asScala
     
@@ -114,7 +126,10 @@ class MatValueSetDefinitionResolutionService extends AbstractService with ValueS
     		  val ref = new CodeSystemVersionReference()
 
     		  val csName = entry(0).toString
-    		  val versionId = entry(1).toString
+    		  var versionId = entry(1).toString
+    		  if(StringUtils.isBlank(versionId)){
+    		    versionId = "unknown"
+    		  }
     		  
     		  val codeSystemName = uriResolver.idToName(csName, IdType.CODE_SYSTEM)
     		  val codeSystemUri = uriResolver.idToUri(csName, IdType.CODE_SYSTEM)

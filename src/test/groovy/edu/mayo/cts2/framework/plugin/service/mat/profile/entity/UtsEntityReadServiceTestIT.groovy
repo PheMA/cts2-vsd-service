@@ -62,6 +62,24 @@ class UtsEntityReadServiceTestIT extends AbstractTestBase {
 	}
 	
 	@Test
+	void TestReadRxNorm() {
+		def id = new EntityDescriptionReadId("205166", "RXNORM", ModelUtils.nameOrUriFromName("RXNORM"))
+		
+		def result = service.read(id, null)
+		
+		assertNotNull result
+	}
+	
+	@Test
+	void TestReadICD9CM() {
+		def id = new EntityDescriptionReadId("M15.0", "ICD10CM", ModelUtils.nameOrUriFromName("ICD10CM-2010"))
+		
+		def result = service.read(id, null)
+		
+		assertNotNull result
+	}
+	
+	@Test
 	void TestReadValidXml() {
 		def id = new EntityDescriptionReadId("99201", "CPT", ModelUtils.nameOrUriFromName("CPT"))
 		

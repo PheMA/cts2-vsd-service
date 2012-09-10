@@ -10,6 +10,7 @@ import javax.persistence.Id
 import scala.collection.JavaConversions._
 import javax.persistence.GeneratedValue
 import javax.persistence.GenerationType
+import javax.persistence.Column
 
 @Entity
 class ValueSet extends Equals {
@@ -19,6 +20,7 @@ class ValueSet extends Equals {
   var oid: String = _
   
   @BeanProperty
+  @Column(unique=true, nullable=false)
   var name: String = _
 
   @BeanProperty

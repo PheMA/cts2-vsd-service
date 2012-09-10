@@ -33,4 +33,12 @@ class MatZipLoaderTestIT extends AbstractTestBase {
 		assertTrue repo.count() > 10
 	}
 	
+	@Test
+	void TestLoadCombined() {
+		def zip = new ZipFile(new File("src/test/resources/exampleMatZips/combined.zip"))
+		
+		loader.loadCombinedMatZip(zip)
+		
+		assertTrue repo.count() > 10
+	}
 }

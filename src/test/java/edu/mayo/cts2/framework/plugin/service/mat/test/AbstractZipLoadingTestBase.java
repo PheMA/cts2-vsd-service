@@ -25,5 +25,4 @@ public abstract class AbstractZipLoadingTestBase extends AbstractTestBase {
 		
 		loader.loadMatZip(zip);
 	}
-
 }
