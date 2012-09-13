@@ -92,12 +92,14 @@ class MatValueSetDefinitionReadService extends AbstractService with ValueSetDefi
       list
     })
 
-    val vsdEntry = new ValueSetDefinitionEntry()
-    vsdEntry.setEntryOrder(1)
-    vsdEntry.setOperator(SetOperator.UNION)
-    vsdEntry.setEntityList(list)
-
-    valueSetDef.addEntry(vsdEntry)
+    if(list.getReferencedEntityCount > 0){
+	    val vsdEntry = new ValueSetDefinitionEntry()
+	    vsdEntry.setEntryOrder(1)
+	    vsdEntry.setOperator(SetOperator.UNION)
+	    vsdEntry.setEntityList(list)
+	
+	    valueSetDef.addEntry(vsdEntry)
+    }
 
     val includesValueSets = valueSet.includesValueSets.foldLeft(Seq[ValueSetDefinitionEntry]())(
       (seq, oid) => {
@@ -116,7 +118,6 @@ class MatValueSetDefinitionReadService extends AbstractService with ValueSetDefi
       })
 
     includesValueSets.foreach(valueSetDef.addEntry(_))
-    valueSetDef
 
     valueSetDef.addSourceAndRole(MatValueSetUtils.sourceAndRole)
 
