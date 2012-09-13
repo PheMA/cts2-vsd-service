@@ -1,12 +1,12 @@
 package edu.mayo.cts2.framework.plugin.service.mat.umls.dao;
 
-import scala.collection.JavaConversions._
-import org.springframework.stereotype.Component
-import gov.nih.nlm.umls.uts.webservice.UtsWsSecurityControllerImplService
-import gov.nih.nlm.umls.uts.webservice.UtsWsContentControllerImplService
-import gov.nih.nlm.umls.uts.webservice.Psf
 import java.util.Date
+import scala.collection.JavaConversions._
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.stereotype.Component
+import gov.nih.nlm.umls.uts.webservice.UtsWsContentControllerImplService
+import gov.nih.nlm.umls.uts.webservice.UtsWsSecurityControllerImplService
+import gov.nih.nlm.umls.uts.webservice.UtsFault
 
 @Component
 class UtsDao {
@@ -15,19 +15,19 @@ class UtsDao {
 
   @scala.reflect.BeanProperty
   @Value("${utsUsername}")
-  var username:String = _
+  var username: String = _
 
   @scala.reflect.BeanProperty
   @Value("${utsPassword}")
-  var password:String = _
+  var password: String = _
 
   @scala.reflect.BeanProperty
   @Value("${utsUmlsRelease}")
-  var umlsRelease:String = _
+  var umlsRelease: String = _
 
   @scala.reflect.BeanProperty
   @Value("${utsServiceName}")
-  var serviceName:String = _
+  var serviceName: String = _
 
   private val securityService = (new UtsWsSecurityControllerImplService()).getUtsWsSecurityControllerImplPort();
   val utsContentService = (new UtsWsContentControllerImplService()).getUtsWsContentControllerImplPort();
@@ -35,19 +35,23 @@ class UtsDao {
   private var ticketGrantingTicket: String = _
   private var ticketCreationDate: Date = _
 
-  def getSecurityTicket(): String = {
+  private def getSecurityTicket(retry: Boolean = false): String = {
 
     val eightHoursAgo = new Date(new Date().getTime() - EIGHT_HOURS);
 
-    if (ticketCreationDate == null || ticketCreationDate.before(eightHoursAgo)) {
+    if (retry || ticketCreationDate == null || ticketCreationDate.before(eightHoursAgo)) {
       ticketCreationDate = new Date()
       ticketGrantingTicket = securityService.getProxyGrantTicket(username, password);
     }
 
-    securityService.getProxyTicket(ticketGrantingTicket, serviceName);
+    try {
+      securityService.getProxyTicket(ticketGrantingTicket, serviceName);
+    } catch {
+      case e: UtsFault => if (retry) getSecurityTicket() else throw e
+    }
   }
 
   def callSecurely[R](fn: (String, String) => R): R = {
-    fn(getSecurityTicket, umlsRelease)
+    fn(getSecurityTicket(), umlsRelease)
   }
 }
