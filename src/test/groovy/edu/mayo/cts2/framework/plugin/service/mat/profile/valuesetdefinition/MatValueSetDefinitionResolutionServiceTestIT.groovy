@@ -61,6 +61,17 @@ class MatValueSetDefinitionResolutionServiceTestIT extends AbstractZipLoadingTes
 	}
 	
 	@Test
+	void TestQueryGrouping() {
+		def id = new ValueSetDefinitionReadId("2.16.840.1.113883.3.526.03.695", ModelUtils.nameOrUriFromName("2.16.840.1.113883.3.526.03.695"))
+		
+		def result = service.resolveDefinition(id, null, null, null, null, null, new Page())
+		
+		assertNotNull result
+		println result.entries.size()
+		assertTrue result.entries.size() > 0
+	}
+	
+	@Test
 	void TestValidXml() {
 		def id = new ValueSetDefinitionReadId("2.16.840.1.113883.1.11.1", ModelUtils.nameOrUriFromName("2.16.840.1.113883.1.11.1"))
 		

@@ -24,6 +24,7 @@ import edu.mayo.cts2.framework.model.core.SourceAndNotation
 import edu.mayo.cts2.framework.model.core.ValueSetReference
 import edu.mayo.cts2.framework.plugin.service.mat.profile.valueset.MatValueSetUtils
 import edu.mayo.cts2.framework.plugin.service.mat.uri.UriUtils
+import edu.mayo.cts2.framework.model.valuesetdefinition.CompleteValueSetReference
 
 @Component
 class MatValueSetDefinitionReadService extends AbstractService with ValueSetDefinitionReadService {
@@ -73,14 +74,15 @@ class MatValueSetDefinitionReadService extends AbstractService with ValueSetDefi
     valueSetDef.setAbout(UriUtils.oidToUri(valueSet.oid))
     valueSetDef.setDocumentURI(UriUtils.oidToUri(valueSet.oid) + ":1")
     valueSetDef.setSourceAndNotation(buildSourceAndNotation())
-    valueSetDef.setDefinedValueSet(buildValueSetReference(valueSet))
+    valueSetDef.setDefinedValueSet(
+    		MatValueSetUtils.buildValueSetReference(valueSet,urlConstructor))
 
     val list = valueSet.entries.foldLeft(new SpecificEntityList())((list, entry) => {
       val entity = new URIAndEntityName()
       val prefix = uriResolver.idToName(entry.codeSystem, IdType.CODE_SYSTEM)
       entity.setNamespace(prefix)
       entity.setName(entry.code)
-      
+
       val baseUri = uriResolver.idToBaseUri(entry.codeSystem)
 
       entity.setUri(baseUri + entry.code)
@@ -96,19 +98,29 @@ class MatValueSetDefinitionReadService extends AbstractService with ValueSetDefi
     vsdEntry.setEntityList(list)
 
     valueSetDef.addEntry(vsdEntry)
-    
+
+    val includesValueSets = valueSet.includesValueSets.foldLeft(Seq[ValueSetDefinitionEntry]())(
+      (seq, oid) => {
+        val vsdEntry = new ValueSetDefinitionEntry()
+        vsdEntry.setEntryOrder(1)
+        vsdEntry.setOperator(SetOperator.UNION)
+        
+        val valueSet = valueSetRepository.findOne(oid)
+        
+        val vsRef = new CompleteValueSetReference()
+        vsRef.setValueSet(MatValueSetUtils.buildValueSetReference(valueSet, urlConstructor))
+        
+        vsdEntry.setCompleteValueSet(vsRef)
+        
+        seq :+ vsdEntry
+      })
+
+    includesValueSets.foreach(valueSetDef.addEntry(_))
+    valueSetDef
+
     valueSetDef.addSourceAndRole(MatValueSetUtils.sourceAndRole)
 
     valueSetDef
-  }
-
-  private def buildValueSetReference(valueSet: ValueSet): ValueSetReference = {
-	val ref = new ValueSetReference()
-	ref.setContent(valueSet.name)
-	ref.setUri(UriUtils.oidToUri(valueSet.oid))
-	ref.setHref(urlConstructor.createValueSetUrl(valueSet.name))
-	
-	ref
   }
 
   private def buildSourceAndNotation(): SourceAndNotation = {

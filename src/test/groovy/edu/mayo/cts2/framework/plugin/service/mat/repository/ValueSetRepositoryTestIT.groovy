@@ -30,6 +30,30 @@ class ValueSetRepositoryTestIT extends AbstractTestBase {
 		assertNotNull repos.findOne("1.23.45")
 	}
 	
+	/*
+	@Test
+	@Transactional
+	void TestFindEntriesByOids() {
+		def valueSet1 = new ValueSet(oid:"1.23.45", name:"testName1")
+		def entry1 = new ValueSetEntry(code:"123")
+		entry1.setCodeSystem("testcs")
+		entry1.setCodeSystemVersion("2011")
+		valueSet1.entries.add(entry1)
+		
+		def valueSet2 = new ValueSet(oid:"2.23.45", name:"testName2")
+		def entry2 = new ValueSetEntry(code:"456")
+		entry2.setCodeSystem("testcs")
+		entry2.setCodeSystemVersion("2011")
+		valueSet2.entries.add(entry2)
+
+		repos.save(valueSet1)
+		repos.save(valueSet2)
+		
+		def results = repos.findValueSetEntriesByOids(["1.23.45","2.23.45"], new PageRequest(0,100)).content
+		println results
+		assertEquals 2, results.size()
+	}
+	*/
 	@Test
 	void TestFindByNameLike() {
 		def valueSet = new ValueSet(oid:"1.23.45", name:"testName")

@@ -50,7 +50,7 @@
 		<property name="poolPreparedStatements" value="true" />
 		<property name="maxOpenPreparedStatements" value="10" />
 	</bean>
-
+    
 	<bean
 		class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
 		<property name="staticMethod">

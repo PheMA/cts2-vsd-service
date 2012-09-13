@@ -1,21 +1,23 @@
 package edu.mayo.cts2.framework.plugin.service.mat.loader
 
-import org.springframework.stereotype.Component
-import java.io.InputStream
-import org.apache.poi.poifs.filesystem.POIFSFileSystem
-import org.apache.poi.hssf.usermodel.HSSFWorkbook
-import org.apache.poi.hssf.usermodel.HSSFSheet
-import scala.collection.JavaConversions._
-import java.util.zip.ZipFile
-import edu.mayo.cts2.framework.plugin.service.mat.model.ValueSet
-import org.apache.poi.ss.usermodel.Row
-import edu.mayo.cts2.framework.plugin.service.mat.model.ValueSetEntry
-import scala.collection.Seq
 import java.io.BufferedInputStream
+import java.util.zip.ZipFile
+
+import scala.collection.JavaConversions._
+import scala.collection.Seq
+
+import org.apache.commons.lang.StringUtils
+import org.apache.poi.hssf.usermodel.HSSFSheet
+import org.apache.poi.hssf.usermodel.HSSFWorkbook
+import org.apache.poi.poifs.filesystem.POIFSFileSystem
+import org.apache.poi.ss.usermodel.Row
+import org.apache.poi.ss.usermodel.Cell
+import org.springframework.stereotype.Component
+
+import edu.mayo.cts2.framework.plugin.service.mat.model.ValueSet
+import edu.mayo.cts2.framework.plugin.service.mat.model.ValueSetEntry
 import edu.mayo.cts2.framework.plugin.service.mat.repository.ValueSetRepository
 import javax.annotation.Resource
-import org.apache.commons.lang.WordUtils
-import org.apache.commons.lang.StringUtils
 
 @Component
 class MatZipLoader {
@@ -57,7 +59,6 @@ class MatZipLoader {
   class SpreadSheetResult {
     var valueSets: Map[String, ValueSet] = Map[String, ValueSet]()
     var valueSetEntries: Map[String, Seq[ValueSetEntry]] = Map[String, Seq[ValueSetEntry]]()
-    var groupEntries: Map[String, Seq[String]] = Map[String, Seq[String]]()
   }
 
   private def processSpreadSheet = (zip: MatZip) => {
@@ -65,8 +66,20 @@ class MatZipLoader {
 
     val valueSets = result.valueSets.foldLeft(Set[ValueSet]())((set, mapEntry) => {
       val valueSet = mapEntry._2
-      valueSet.entries = (result.valueSetEntries.get(mapEntry._1).get)
+      val foundEntries = result.valueSetEntries.get(mapEntry._1)
+      if(foundEntries.isDefined){
+        valueSet.entries = foundEntries.get
+      }
 
+      /*
+      if(valueSet.includesValueSets.size > 0){
+        valueSet.includesValueSets.foreach( oid => {
+            val entries = result.valueSetEntries.get(oid).getOrElse(throw new RuntimeException(valueSet.oid + " "  + oid))
+            valueSet.entries.addAll(entries)
+        	}
+        )
+      }
+      */
       set + valueSet
     })
 
@@ -104,87 +117,61 @@ class MatZipLoader {
             result.valueSets += (oid -> valueSet)
           }
 
-          if (!valueSetEntry.codeSystem.equalsIgnoreCase(GROUPING_CODE_SYSTEM)) {
+
+         if (!valueSetEntry.codeSystem.equalsIgnoreCase(GROUPING_CODE_SYSTEM)) {
             if (!result.valueSetEntries.contains(oid)) {
               result.valueSetEntries += (oid -> Seq(valueSetEntry))
             } else {
               result.valueSetEntries = result.valueSetEntries updated (oid, (result.valueSetEntries.get(oid).get ++ Seq(valueSetEntry)))
             }
           } else {
-            if (!result.groupEntries.contains(oid)) {
-              result.groupEntries += (oid -> Seq(valueSetEntry.code))
-            } else {
-              result.groupEntries = result.groupEntries updated (oid, (result.groupEntries.get(oid).get ++ Seq(valueSetEntry.code)))
-            }
+            result.valueSets.get(oid).get.includesValueSets += valueSetEntry.code
           }
+
         }
         
         result
       })
 
-    spreadSheetResult.groupEntries.foreach((entry) => {
-      val entries = entry._2.foldLeft(Seq[ValueSetEntry]())((seq, groupOid) => {
-        seq ++ getGroupCodes(groupOid, spreadSheetResult)
-      })
-
-      if (!spreadSheetResult.valueSetEntries.contains(entry._1)) {
-        spreadSheetResult.valueSetEntries += (entry._1 -> entries)
-      } else {
-        spreadSheetResult.valueSetEntries = spreadSheetResult.valueSetEntries updated
-          (entry._1, (spreadSheetResult.valueSetEntries.get(entry._1).get ++ entries))
-      }
-
-    })
-
     spreadSheetResult
   }: SpreadSheetResult
-
-  def getGroupCodes(oid: String, spreadSheet: SpreadSheetResult): Seq[ValueSetEntry] = {
-    val groupOids = spreadSheet.groupEntries.getOrElse(oid, return Seq[ValueSetEntry]())
-
-    groupOids.foldLeft(Seq[ValueSetEntry]())((entries, groupOid) => {
-      entries ++ getGroupCodes(groupOid, spreadSheet) ++ spreadSheet.valueSetEntries.getOrElse(groupOid, Seq())
-    })
-  }
 
   def rowToValueSet(row: Row): ValueSet = {
     val valueSet = new ValueSet()
     if (!validateCell(row,OID_CELL) || !validateCell(row,NAME_CELL)) {
       return null
     }
-    valueSet.oid = StringUtils.trim(row.getCell(OID_CELL).getStringCellValue)
+    valueSet.oid = getCellValue(row.getCell(OID_CELL))
     valueSet.name = valueSet.oid
-    valueSet.formalName = StringUtils.trim(row.getCell(NAME_CELL).getStringCellValue)
-    valueSet.valueSetDeveloper = StringUtils.trim(row.getCell(DEVELOPER_CELL).getStringCellValue)
-    valueSet.qdmCategory = StringUtils.trim(row.getCell(QDM_CATEGORY_CELL).getStringCellValue)
+    valueSet.formalName = getCellValue(row.getCell(NAME_CELL))
+    valueSet.valueSetDeveloper = getCellValue(row.getCell(DEVELOPER_CELL))
+    valueSet.qdmCategory = getCellValue(row.getCell(QDM_CATEGORY_CELL))
 
     valueSet
   }
   
   private def validateCell(row:Row, cell:Int) = {
-    row.getCell(OID_CELL) != null && StringUtils.isNotBlank(row.getCell(OID_CELL).getStringCellValue)
+    row.getCell(OID_CELL) != null && StringUtils.isNotBlank(getCellValue(row.getCell(OID_CELL)))
   } :Boolean
 
+  private def getCellValue(cell:Cell) = {
+    val cellType = cell.getCellType
+    
+    cellType match {
+      case Cell.CELL_TYPE_STRING => cell.getStringCellValue
+      case Cell.CELL_TYPE_NUMERIC => cell.getNumericCellValue.asInstanceOf[Int].toString
+      case Cell.CELL_TYPE_BLANK => null
+      case _ => throw new IllegalStateException("Found a Cell of type: " + cellType)
+    }
+  }
+  
   def rowToValueSetEntry(row: Row): ValueSetEntry = {
     val valueSetEntry = new ValueSetEntry()
-    try {
-    	valueSetEntry.code = StringUtils.trim(row.getCell(CODE_CELL).getStringCellValue)
-    } catch {
-      case e: Exception => {
-        valueSetEntry.code =
-          StringUtils.substringBeforeLast(StringUtils.trim(row.getCell(CODE_CELL).toString), ".")
-      }
-    }
-    valueSetEntry.description = StringUtils.trim(row.getCell(DESCRIPTOR_CELL).getStringCellValue)
-    valueSetEntry.codeSystem = StringUtils.trim(row.getCell(CODE_SYSTEM_CELL).getStringCellValue)
-    try {
-      valueSetEntry.codeSystemVersion = StringUtils.trim(row.getCell(CODE_SYSTEM_VERSION_CELL).getStringCellValue)
-    } catch {
-      case e: Exception => {
-        valueSetEntry.codeSystemVersion =
-          StringUtils.substringBeforeLast(StringUtils.trim(row.getCell(CODE_SYSTEM_VERSION_CELL).toString), ".")
-      }
-    }
+
+    valueSetEntry.code = getCellValue(row.getCell(CODE_CELL))
+    valueSetEntry.description = getCellValue(row.getCell(DESCRIPTOR_CELL))
+    valueSetEntry.codeSystem = getCellValue(row.getCell(CODE_SYSTEM_CELL))
+    valueSetEntry.codeSystemVersion = getCellValue(row.getCell(CODE_SYSTEM_VERSION_CELL))
 
     valueSetEntry
   }

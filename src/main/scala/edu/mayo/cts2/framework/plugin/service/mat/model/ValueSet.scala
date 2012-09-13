@@ -35,6 +35,9 @@ class ValueSet extends Equals {
   @ElementCollection
   var entries: java.util.List[ValueSetEntry] = new ArrayList[ValueSetEntry]()
   
+  @ElementCollection
+  var includesValueSets: java.util.List[String] = new ArrayList[String]()
+  
   def canEqual(other: Any) = {
     other.isInstanceOf[edu.mayo.cts2.framework.plugin.service.mat.model.ValueSet]
   }

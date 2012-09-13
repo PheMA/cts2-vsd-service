@@ -7,6 +7,7 @@ import java.util.zip.ZipFile
 import javax.annotation.Resource
 
 import org.junit.Test
+import org.springframework.transaction.annotation.Transactional
 
 import edu.mayo.cts2.framework.plugin.service.mat.repository.ValueSetRepository
 import edu.mayo.cts2.framework.plugin.service.mat.test.AbstractTestBase
@@ -40,5 +41,22 @@ class MatZipLoaderTestIT extends AbstractTestBase {
 		loader.loadCombinedMatZip(zip)
 		
 		assertTrue repo.count() > 10
+	}
+	
+	@Test
+	@Transactional
+	void TestLoadNQF_0002() {
+		def zip = new ZipFile(new File("src/test/resources/exampleMatZips/NQF_0002_HHS_Updated_Dec_2011.zip"))
+		
+		loader.loadMatZip(zip)
+		
+		def valueSet = repo.findOne("2.16.840.1.113883.3.464.0001.372")
+		
+		assertNotNull valueSet
+		
+		valueSet.entries.each {
+			println it.code
+			assertTrue it.codeSystem + " - " + it.code, it.code.length() > 1
+		}
 	}
 }

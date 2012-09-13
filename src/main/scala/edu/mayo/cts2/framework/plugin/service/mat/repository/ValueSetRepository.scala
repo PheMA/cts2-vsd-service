@@ -11,6 +11,7 @@ import edu.mayo.cts2.framework.plugin.service.mat.model.ValueSet
 import scala.reflect.BeanProperty
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
+import edu.mayo.cts2.framework.plugin.service.mat.model.ValueSetEntry
 
 @Repository
 @Transactional
@@ -27,12 +28,12 @@ trait ValueSetRepository extends CrudRepository[ValueSet, String] {
   def findByFormalNameLikeIgnoreCase(query:String, pageable: Pageable): Page[ValueSet]
   
   def findOneByName(query:String): ValueSet
-  
+
   @Query("select distinct entries.codeSystem, entries.codeSystemVersion from ValueSet valueSet " +
   		"inner join valueSet.entries entries where valueSet.oid = :oid")
   def findCodeSystemVersionsByOid(@Param("oid") oid:String): java.util.Collection[Array[String]]
   
-    @Query("select distinct entries.codeSystem, entries.codeSystemVersion from ValueSet valueSet " +
+  @Query("select distinct entries.codeSystem, entries.codeSystemVersion from ValueSet valueSet " +
   		"inner join valueSet.entries entries where valueSet.name = :name")
   def findCodeSystemVersionsByName(@Param("name") name:String): java.util.Collection[Array[Any]]
   

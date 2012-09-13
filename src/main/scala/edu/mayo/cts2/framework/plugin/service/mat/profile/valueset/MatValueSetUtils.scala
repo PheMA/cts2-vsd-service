@@ -34,6 +34,7 @@ import edu.mayo.cts2.framework.core.url.UrlConstructor
 import edu.mayo.cts2.framework.model.core.SourceReference
 import edu.mayo.cts2.framework.model.core.SourceAndRoleReference
 import edu.mayo.cts2.framework.model.core.RoleReference
+import edu.mayo.cts2.framework.plugin.service.mat.uri.UriUtils
 
 object MatValueSetUtils {
 
@@ -44,6 +45,15 @@ object MatValueSetUtils {
   def currentDefintion(valueSet: ValueSetCatalogEntrySummary, urlConstructor: UrlConstructor) = {
     doGetCurrentDefintion(valueSet.getValueSetName, valueSet.getAbout, urlConstructor)
   }: ValueSetDefinitionReference
+
+  def buildValueSetReference(valueSet: ValueSet, urlConstructor: UrlConstructor): ValueSetReference = {
+    val ref = new ValueSetReference()
+    ref.setContent(valueSet.name)
+    ref.setUri(UriUtils.oidToUri(valueSet.oid))
+    ref.setHref(urlConstructor.createValueSetUrl(valueSet.name))
+
+    ref
+  }
 
   private def doGetCurrentDefintion(name: String, about: String, urlConstructor: UrlConstructor) = {
     val currentDefinition = new ValueSetDefinitionReference()
