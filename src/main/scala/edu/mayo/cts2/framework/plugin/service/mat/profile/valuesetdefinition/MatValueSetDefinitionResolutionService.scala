@@ -37,6 +37,7 @@ import edu.mayo.cts2.framework.service.profile.valuesetdefinition.ValueSetDefini
 import edu.mayo.cts2.framework.service.profile.valuesetdefinition.name.ValueSetDefinitionReadId
 import javax.annotation.Resource
 import com.google.common.collect.Lists
+import org.apache.commons.lang.ObjectUtils
 
 @Component
 class MatValueSetDefinitionResolutionService extends AbstractService with ValueSetDefinitionResolutionService {
@@ -153,7 +154,7 @@ class MatValueSetDefinitionResolutionService extends AbstractService with ValueS
         val ref = new CodeSystemVersionReference()
 
         val csName = entry(0).toString
-        var versionId = entry(1).toString
+        var versionId = ObjectUtils.toString(entry(1))
         if (StringUtils.isBlank(versionId)) {
           versionId = "unknown"
         }

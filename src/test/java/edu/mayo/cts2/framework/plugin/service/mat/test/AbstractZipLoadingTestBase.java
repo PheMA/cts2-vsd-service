@@ -11,17 +11,19 @@ import edu.mayo.cts2.framework.plugin.service.mat.loader.MatZipLoader;
 import edu.mayo.cts2.framework.plugin.service.mat.repository.ValueSetRepository;
 
 public abstract class AbstractZipLoadingTestBase extends AbstractTestBase {
+	
+	protected String zipFilePath = "src/test/resources/exampleMatZips/test.zip";
 
 	@Resource
-	private MatZipLoader loader;
+	public MatZipLoader loader;
 	
 	@Resource
-	private ValueSetRepository repo;
+	public ValueSetRepository repo;
 
 	@Before
 	public void Load() throws Exception {
 		ZipFile zip = 
-			new ZipFile(new File("src/test/resources/exampleMatZips/test.zip"));
+			new ZipFile(new File(zipFilePath));
 		
 		loader.loadMatZip(zip);
 	}
