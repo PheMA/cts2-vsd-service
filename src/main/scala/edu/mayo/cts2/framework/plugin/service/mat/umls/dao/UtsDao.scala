@@ -47,7 +47,7 @@ class UtsDao {
     try {
       securityService.getProxyTicket(ticketGrantingTicket, serviceName);
     } catch {
-      case e: UtsFault => if (retry) getSecurityTicket() else throw e
+      case e: UtsFault => if (!retry) getSecurityTicket(true) else throw e
     }
   }
 
