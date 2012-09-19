@@ -58,5 +58,21 @@ class MatZipLoaderTestIT extends AbstractTestBase {
 			println it.code
 			assertTrue it.codeSystem + " - " + it.code, it.code.length() > 1
 		}
+
 	}
+
+    @Test
+    @Transactional
+    void TestRowToValueSetEntry(){
+        def zip = new ZipFile(new File("src/test/resources/exampleMatZips/NQF_0002_HHS_Updated_Dec_2011.zip"))
+        loader.loadMatZip(zip)
+
+        def valueSet = repo.findOne("2.16.840.1.113883.3.464.0001.45")
+        assertNotNull valueSet
+
+        for (it in valueSet.entries()) {
+            println it.description
+            assertTrue it.codeSystem + " - " + it.description, it.description.length() > 1
+        }
+    }
 }
