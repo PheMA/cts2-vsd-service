@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RetrieveMultipleValueSetsResponse
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="urn:ihe:iti:svs:2008 ../../../../src/main/schema/SVS/IHE/SVS.xsd"
+	xmlns="urn:ihe:iti:svs:2008">
+	<DescribedValueSet ID="2.16.840.1.114222.4.11.836"
+		displayName="Race" version="20120917">
+		<ConceptList>
+			<Concept code="2028-9" codeSystemName="CDCREC"
+				codeSystemVersion="1.0" displayName="ASIAN" />
+			<Concept code="2054-5" codeSystemName="CDCREC"
+				codeSystemVersion="1.0" displayName="BLACK OR AFRICAN AMERICAN" />
+			<Concept code="2076-8" codeSystemName="CDCREC"
+				codeSystemVersion="1.0" displayName="NATIVE HAWAIIAN OR OTHER PACIFIC ISLANDER" />
+			<Concept code="2106-3" codeSystemName="CDCREC"
+				codeSystemVersion="1.0" displayName="WHITE" />
+			<Concept code="2131-1" codeSystemName="CDCREC"
+				codeSystemVersion="1.0" displayName="OTHER RACE" />
+			<Concept code="1002-5" codeSystemName="CDCREC"
+				codeSystemVersion="1.0" displayName="AMERICAN INDIAN OR ALASKA NATIVE" />
+		</ConceptList>
+		
+		<!-- into value set definition -->
+		<Source>CDC NCHS</Source>
+		<Type>Extensional</Type>
+		<Binding>Dynamic</Binding>
+		<Status>Active</Status>
+		<RevisionDate>2007-03-30</RevisionDate>
+		<!-- end into value set definition -->
+		
+		<!-- ignore for now -->
+		<Group ID="1" sourceOrganization="National Quality Forum"
+			displayName="Measure Type">
+			<Keyword>PROCESS</Keyword>
+		</Group>
+		<Group ID="1" sourceOrganization="National Quality Forum"
+			displayName="eMeasure Identifier">
+			<Keyword>131</Keyword>
+		</Group>
+		<Group ID="1" sourceOrganization="National Quality Forum"
+			displayName="GUID">
+			<Keyword>d90bdab4-b9d2-4329-9993-5c34e2c0dc66</Keyword>
+		</Group>
+		<Group ID="1" sourceOrganization="National Quality Forum"
+			displayName="Endorsed By">
+			<Keyword>National Quality Forum</Keyword>
+		</Group>
+		<Group ID="1" sourceOrganization="National Quality Forum"
+			displayName="eMeasure Title">
+			<Keyword>Diabetes: Eye Exam</Keyword>
+		</Group>
+		<Group ID="1" sourceOrganization="National Quality Forum"
+			displayName="Measure Developer">
+			<Keyword>National Committee for Quality Assurance</Keyword>
+		</Group>
+		<Group ID="1" sourceOrganization="National Quality Forum"
+			displayName="eMeasure Status">
+			<Keyword>Complete</Keyword>
+		</Group>
+		<Group ID="1" sourceOrganization="National Quality Forum"
+			displayName="SHEETNAME">
+			<Keyword>Supplemental Value Sets</Keyword>
+		</Group>
+		<Group ID="1" sourceOrganization="National Quality Forum"
+			displayName="eMeasure Version number">
+			<Keyword>1</Keyword>
+		</Group>
+		<Group ID="1" sourceOrganization="National Quality Forum"
+			displayName="eMeasure Copyright">
+			<Keyword>Physician Performance Measure (Measures) and related data
+				specifications were developed by the National Committee for Quality
+				Assurance (NCQA). </Keyword>
+		</Group>
+		<Group ID="1" sourceOrganization="National Quality Forum"
+			displayName="Finalized Time">
+			<Keyword>201208291244-0500</Keyword>
+		</Group>
+		<Group ID="1" sourceOrganization="National Quality Forum"
+			displayName="CATEGORY">
+			<Keyword>Individual Characteristic</Keyword>
+		</Group>
+		<Group ID="1" sourceOrganization="National Quality Forum"
+			displayName="Meaningful Use">
+			<Keyword>Phase 2</Keyword>
+		</Group>
+		<Group ID="1" sourceOrganization="National Quality Forum"
+			displayName="Measure Steward">
+			<Keyword>National Committee for Quality Assurance</Keyword>
+		</Group>
+		<Group ID="1" sourceOrganization="National Quality Forum"
+			displayName="NQF Number">
+			<Keyword>0055</Keyword>
+		</Group>
+		<Group ID="1" sourceOrganization="National Quality Forum"
+			displayName="eMeasure Description">
+			<Keyword>Percentage of patients 18-75 years of age with diabetes who
+				had a retinal or dilated eye exam by an eye care professional during
+				the measurement period or a negative retinal exam by an eye care
+				professional (no evidence of retinopathy) in the 12 months prior to
+				the measurement period</Keyword>
+		</Group>
+	</DescribedValueSet>
+</RetrieveMultipleValueSetsResponse>
