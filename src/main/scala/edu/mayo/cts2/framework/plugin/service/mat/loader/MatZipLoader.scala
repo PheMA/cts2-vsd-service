@@ -2,10 +2,8 @@ package edu.mayo.cts2.framework.plugin.service.mat.loader
 
 import java.io.BufferedInputStream
 import java.util.zip.ZipFile
-
 import scala.collection.JavaConversions._
 import scala.collection.Seq
-
 import org.apache.commons.lang.StringUtils
 import org.apache.poi.hssf.usermodel.HSSFSheet
 import org.apache.poi.hssf.usermodel.HSSFWorkbook
@@ -13,7 +11,6 @@ import org.apache.poi.poifs.filesystem.POIFSFileSystem
 import org.apache.poi.ss.usermodel.Row
 import org.apache.poi.ss.usermodel.Cell
 import org.springframework.stereotype.Component
-
 import edu.mayo.cts2.framework.plugin.service.mat.model.ValueSet
 import edu.mayo.cts2.framework.plugin.service.mat.model.ValueSetEntry
 import edu.mayo.cts2.framework.plugin.service.mat.repository.ValueSetRepository
@@ -23,6 +20,9 @@ import javax.annotation.Resource
 class MatZipLoader {
 
   def GROUPING_CODE_SYSTEM = "GROUPING"
+    
+  @Resource  
+  var loaderUts: MatZipLoaderUTS = _  
 
   /* This seems to be the new version of the excel
   def DEVELOPER_CELL = 0
@@ -47,6 +47,7 @@ class MatZipLoader {
 
   @Resource
   var valueSetRepository: ValueSetRepository = _
+  
 
   def loadCombinedMatZip(zip: ZipFile): Unit = {
     MatZipLoaderUtils.doWithCombinedMatZip(zip, processSpreadSheet)
@@ -169,9 +170,15 @@ class MatZipLoader {
     val valueSetEntry = new ValueSetEntry()
 
     valueSetEntry.code = getCellValue(row.getCell(CODE_CELL))
-    valueSetEntry.description = getCellValue(row.getCell(DESCRIPTOR_CELL))
+
     valueSetEntry.codeSystem = getCellValue(row.getCell(CODE_SYSTEM_CELL))
     valueSetEntry.codeSystemVersion = getCellValue(row.getCell(CODE_SYSTEM_VERSION_CELL))
+    if(valueSetEntry.codeSystem == "CPT"){
+    	valueSetEntry.description = loaderUts.getDescriptionFromUTS(valueSetEntry.codeSystem, valueSetEntry.code)
+    }
+    else{
+          valueSetEntry.description = getCellValue(row.getCell(DESCRIPTOR_CELL))
+    }
 
     valueSetEntry
   }
