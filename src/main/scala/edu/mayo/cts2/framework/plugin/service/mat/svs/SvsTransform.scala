@@ -12,6 +12,8 @@ import ihe.iti.svs._2008.CE
 import edu.mayo.cts2.framework.plugin.service.mat.model.ValueSetVersion
 import edu.mayo.cts2.framework.plugin.service.mat.model.ValueSetProperty
 import ihe.iti.svs._2008.GroupType
+import org.apache.commons.collections.CollectionUtils
+import edu.mayo.cts2.framework.plugin.service.mat.model.PropertyQualifier
 
 @Component
 class SvsTransform {
@@ -24,19 +26,19 @@ class SvsTransform {
   def transformMultipleValueSetsResponse(svs: RetrieveMultipleValueSetsResponseType) = {
     svs.getDescribedValueSet.foldLeft(Seq[ValueSet]())(
       (seq, describedVs) => seq :+ describedValueSetToValueSet(describedVs))
-
   }
 
   def describedValueSetToValueSet(svsValueSet: DescribedValueSet) = {
     val valueSet = new ValueSet(svsValueSet.getID)
     valueSet.name = svsValueSet.getID
-    
+
     val valueSetVersion = new ValueSetVersion() 
     valueSetVersion.valueSetType = svsValueSet.getType
     valueSetVersion.source = svsValueSet.getSource
     valueSetVersion.binding = svsValueSet.getBinding
     valueSetVersion.revisionDate = svsValueSet.getRevisionDate.toGregorianCalendar
     valueSetVersion.versionId = svsValueSet.getVersion
+    valueSetVersion.status = svsValueSet.getStatus
     
     val properties = 
       svsValueSet.getGroup.foldLeft(Seq[ValueSetProperty]())(_ :+ groupToValueSetProperty(_))
@@ -56,7 +58,13 @@ class SvsTransform {
   def groupToValueSetProperty(group: GroupType) = {
     val prop = new ValueSetProperty()
     prop.name = group.getDisplayName
-    prop.value = group.getKeyword.get(0)
+    
+    if(CollectionUtils.isNotEmpty(group.getKeyword)){
+    	prop.value = group.getKeyword.get(0)
+    }
+    
+    prop.qualifiers.add(new PropertyQualifier("GroupID", group.getID))
+    prop.qualifiers.add(new PropertyQualifier("SourceOrganization", group.getSourceOrganization))
     
     prop
   }

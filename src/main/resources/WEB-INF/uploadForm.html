@@ -1,11 +1,20 @@
 <html>
 <body>
+	<h1>Load MAT Zip files</h1>
 	<form method="post" action="../mat/zips" name="submit" enctype="multipart/form-data">
 		<input type="file" name="file">
+		<br />
 		<input type="radio" name="zipType" value="single" /> Single <br />
 		<input type="radio" name="zipType" value="combined" /> Combined <br />
 		<br />
-		<br /> 
+		<input type="submit" name="submit" value="Submit">
+	</form>
+	<br />
+	<br />
+	<h1>Load SVS XML files</h1>
+	<form method="post" action="../mat/svs" name="submit" enctype="multipart/form-data">
+		<input type="file" name="file">
+		<br />
 		<input type="submit" name="submit" value="Submit">
 	</form>
 </body>

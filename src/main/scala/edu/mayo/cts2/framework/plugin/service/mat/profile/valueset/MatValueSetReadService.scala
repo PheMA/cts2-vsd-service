@@ -2,23 +2,31 @@ package edu.mayo.cts2.framework.plugin.service.mat.profile.valueset
 
 import java.lang.Override
 import scala.collection.JavaConversions._
+import org.apache.commons.lang.StringUtils
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import edu.mayo.cts2.framework.model.command.ResolvedReadContext
+import edu.mayo.cts2.framework.model.core.Property
 import edu.mayo.cts2.framework.model.core.SourceAndRoleReference
 import edu.mayo.cts2.framework.model.core.ValueSetDefinitionReference
 import edu.mayo.cts2.framework.model.service.core.NameOrURI
 import edu.mayo.cts2.framework.model.valueset.ValueSetCatalogEntry
 import edu.mayo.cts2.framework.plugin.service.mat.model.ValueSet
+import edu.mayo.cts2.framework.plugin.service.mat.model.ValueSetProperty
 import edu.mayo.cts2.framework.plugin.service.mat.profile.AbstractService
 import edu.mayo.cts2.framework.plugin.service.mat.repository.ValueSetRepository
 import edu.mayo.cts2.framework.plugin.service.mat.uri.UriUtils
 import edu.mayo.cts2.framework.service.profile.valueset.ValueSetReadService
 import javax.annotation.Resource
-import org.apache.commons.lang.StringUtils
+import edu.mayo.cts2.framework.model.core.PredicateReference
+import edu.mayo.cts2.framework.model.core.StatementTarget
+import edu.mayo.cts2.framework.model.util.ModelUtils
 
 @Component
 class MatValueSetReadService extends AbstractService with ValueSetReadService {
+  
+  val SVS_NS = "SVS"
+  val SVS_URI = "urn:ihe:iti:svs:2008"
 
   @Resource
   var valueSetRepository: ValueSetRepository = _
@@ -56,9 +64,41 @@ class MatValueSetReadService extends AbstractService with ValueSetReadService {
     valueSetCatalogEntry.addSourceAndRole(MatValueSetUtils.sourceAndRole)
 
     valueSetCatalogEntry.setDefinitions(urlConstructor.createDefinitionsOfValueSetUrl(valueSet.getName))
-    valueSetCatalogEntry.setCurrentDefinition(MatValueSetUtils.currentDefintion(valueSetCatalogEntry, urlConstructor))
+    
+    valueSetCatalogEntry.setCurrentDefinition(
+        MatValueSetUtils.buildValueSetDefinitionReference(
+            valueSetCatalogEntry.getValueSetName, valueSetCatalogEntry.getAbout,
+            valueSet.currentVersion,
+            urlConstructor))
 
+    valueSet.properties.foreach( (prop) => valueSetCatalogEntry.addProperty( toProperty(prop) ) )
+    
     valueSetCatalogEntry
+  }
+  
+  def toProperty(valueSetProp: ValueSetProperty) = {
+     val prop = createProperty(valueSetProp.getName, valueSetProp.getValue)
+     
+     valueSetProp.qualifiers.foreach( (qual) => {
+       prop.addPropertyQualifier( createProperty(qual.getName, qual.getValue) )
+     })  
+     
+     prop
+  } : Property
+  
+  def createProperty(name:String,value:String) = {
+    val prop = new Property()
+    
+     val predicate = new PredicateReference()
+     predicate.setName(name)
+     predicate.setNamespace(SVS_NS)
+     predicate.setUri(SVS_URI + "/" + name)
+     prop.setPredicate(predicate)
+     
+     val target = new StatementTarget()
+     target.setLiteral( ModelUtils.createOpaqueData(value) )   
+     
+     prop
   }
 
   @Override

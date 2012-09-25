@@ -27,6 +27,8 @@ import edu.mayo.cts2.framework.service.meta.StandardModelAttributeReference
 import org.springframework.data.domain.Pageable
 import org.apache.commons.collections.CollectionUtils
 import edu.mayo.cts2.framework.model.command.ResolvedFilter
+import edu.mayo.cts2.framework.plugin.service.mat.uri.UriUtils
+import org.apache.commons.lang.StringUtils
 
 @Component
 class MatValueSetQueryService
@@ -109,11 +111,15 @@ class MatValueSetQueryService
   def transformValueSet = (seq:Seq[ValueSetCatalogEntrySummary], valueSet:ValueSet) => {
     val summary = new ValueSetCatalogEntrySummary()
     summary.setValueSetName(valueSet.name)
-    summary.setAbout("urn:oid:" + valueSet.oid)
+    summary.setAbout(UriUtils.oidToUri(valueSet.oid))
     summary.setFormalName(valueSet.formalName)
     summary.setHref(urlConstructor.createValueSetUrl((valueSet.name)))
-    
-    summary.setCurrentDefinition(MatValueSetUtils.currentDefintion(summary, urlConstructor))
+
+    summary.setCurrentDefinition(
+        MatValueSetUtils.buildValueSetDefinitionReference(
+            summary.getValueSetName, summary.getAbout,
+            valueSet.currentVersion,
+            urlConstructor))
     
     seq ++ Seq(summary)
   }:Seq[ValueSetCatalogEntrySummary]

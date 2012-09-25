@@ -40,7 +40,7 @@ class ValueSet(valueSetOid: String) extends Equals {
   @OneToMany(cascade=Array{CascadeType.ALL})
   var versions: java.util.List[ValueSetVersion] = new java.util.ArrayList[ValueSetVersion]
 
-  @ElementCollection
+  @OneToMany(cascade=Array{CascadeType.ALL})
   var properties: java.util.List[ValueSetProperty] = new ArrayList[ValueSetProperty]()
   
   def canEqual(other: Any) = {

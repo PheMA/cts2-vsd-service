@@ -35,16 +35,10 @@ import edu.mayo.cts2.framework.model.core.SourceReference
 import edu.mayo.cts2.framework.model.core.SourceAndRoleReference
 import edu.mayo.cts2.framework.model.core.RoleReference
 import edu.mayo.cts2.framework.plugin.service.mat.uri.UriUtils
+import edu.mayo.cts2.framework.plugin.service.mat.model.ValueSetVersion
+import org.apache.commons.lang.StringUtils
 
 object MatValueSetUtils {
-
-  def currentDefintion(valueSet: ValueSetCatalogEntry, urlConstructor: UrlConstructor) = {
-    doGetCurrentDefintion(valueSet.getValueSetName, valueSet.getAbout, urlConstructor)
-  }: ValueSetDefinitionReference
-
-  def currentDefintion(valueSet: ValueSetCatalogEntrySummary, urlConstructor: UrlConstructor) = {
-    doGetCurrentDefintion(valueSet.getValueSetName, valueSet.getAbout, urlConstructor)
-  }: ValueSetDefinitionReference
 
   def buildValueSetReference(valueSet: ValueSet, urlConstructor: UrlConstructor): ValueSetReference = {
     val ref = new ValueSetReference()
@@ -55,7 +49,28 @@ object MatValueSetUtils {
     ref
   }
 
-  private def doGetCurrentDefintion(name: String, about: String, urlConstructor: UrlConstructor) = {
+  def buildValueSetDefinitionReference(
+    name: String, about: String,
+    valueSetVersion: ValueSetVersion,
+    urlConstructor: UrlConstructor): ValueSetDefinitionReference = {
+
+    val valueSetDefName =
+      if (StringUtils.isNotBlank(valueSetVersion.versionId)) {
+        valueSetVersion.versionId
+      } else {
+        valueSetVersion.id
+      }
+
+    buildValueSetDefinitionReference(
+      name, about,
+      valueSetDefName, UriUtils.uuidToUri(valueSetVersion.id),
+      urlConstructor)
+  }
+
+  def buildValueSetDefinitionReference(
+    name: String, about: String,
+    defName: String, defDocUri: String,
+    urlConstructor: UrlConstructor) = {
     val currentDefinition = new ValueSetDefinitionReference()
 
     val valueSetRef = new ValueSetReference(name)
@@ -63,9 +78,9 @@ object MatValueSetUtils {
     valueSetRef.setHref(urlConstructor.createValueSetUrl(name))
     currentDefinition.setValueSet(valueSetRef)
 
-    val valueSetDefRef = new NameAndMeaningReference("1")
-    valueSetDefRef.setUri(about + ":1")
-    valueSetDefRef.setHref(urlConstructor.createValueSetDefinitionUrl(name, "1"))
+    val valueSetDefRef = new NameAndMeaningReference(defName)
+    valueSetDefRef.setUri(defDocUri)
+    valueSetDefRef.setHref(urlConstructor.createValueSetDefinitionUrl(name, defName))
     currentDefinition.setValueSetDefinition(valueSetDefRef)
 
     currentDefinition

@@ -11,6 +11,7 @@ import edu.mayo.cts2.framework.plugin.service.mat.svs.SvsTransform
 import java.util.zip.ZipFile
 import javax.xml.bind.JAXBContext
 import java.io.InputStream
+import javax.xml.bind.JAXBElement
 
 @Component
 class SvsLoader {
@@ -40,7 +41,9 @@ class SvsLoader {
     try {
       val jc = JAXBContext.newInstance(classOf[RetrieveMultipleValueSetsResponseType])
       val u = jc.createUnmarshaller()
-      u.unmarshal(stream).asInstanceOf[RetrieveMultipleValueSetsResponseType]
+      val obj = u.unmarshal(stream)
+      
+      obj.asInstanceOf[JAXBElement[RetrieveMultipleValueSetsResponseType]].getValue
     } finally {
       stream.close()
     }
@@ -49,5 +52,5 @@ class SvsLoader {
   def loadRetrieveMultipleValueSetsResponse(svs: RetrieveMultipleValueSetsResponseType): Unit = {
     svsTransform.transformMultipleValueSetsResponse(svs).foreach(valueSetRepository.save(_))
   }
-
+ 
 }

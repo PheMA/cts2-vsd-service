@@ -26,6 +26,9 @@ import edu.mayo.cts2.framework.plugin.service.mat.profile.valueset.MatValueSetUt
 import edu.mayo.cts2.framework.plugin.service.mat.uri.UriUtils
 import edu.mayo.cts2.framework.model.valuesetdefinition.CompleteValueSetReference
 import edu.mayo.cts2.framework.plugin.service.mat.model.ValueSetVersion
+import org.apache.commons.lang.StringUtils
+import edu.mayo.cts2.framework.model.core.StatusReference
+import edu.mayo.cts2.framework.model.core.types.EntryState
 
 @Component
 class MatValueSetDefinitionReadService extends AbstractService with ValueSetDefinitionReadService {
@@ -84,6 +87,12 @@ class MatValueSetDefinitionReadService extends AbstractService with ValueSetDefi
     valueSetDef.setSourceAndNotation(buildSourceAndNotation())
     valueSetDef.setDefinedValueSet(
     		MatValueSetUtils.buildValueSetReference(valueSetVersion.valueSet,urlConstructor))
+    		
+    valueSetDef.setOfficialResourceVersionId(valueSetVersion.versionId)
+   
+    if(valueSetVersion.revisionDate != null){
+    	valueSetDef.setOfficialReleaseDate(valueSetVersion.revisionDate.getTime)
+    }
 
     val list = valueSetVersion.entries.foldLeft(new SpecificEntityList())((list, entry) => {
       val entity = new URIAndEntityName()
@@ -129,6 +138,14 @@ class MatValueSetDefinitionReadService extends AbstractService with ValueSetDefi
 
     valueSetDef.addSourceAndRole(MatValueSetUtils.sourceAndRole)
 
+    valueSetDef.setEntryState(
+	    if(StringUtils.equalsIgnoreCase(valueSetVersion.getStatus,"inactive")){
+	      EntryState.INACTIVE
+	    } else {
+	      EntryState.ACTIVE
+	    }
+    )
+    
     valueSetDef
   }
 
