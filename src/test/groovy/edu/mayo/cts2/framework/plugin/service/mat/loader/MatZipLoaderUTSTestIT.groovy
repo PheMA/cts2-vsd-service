@@ -7,7 +7,7 @@ import java.util.zip.ZipFile
 import javax.annotation.Resource
 import static org.junit.Assert.*
 
-class MatZipLoaderUTSTest extends AbstractTestBase {
+class MatZipLoaderUTSTestIT extends AbstractTestBase {
 	@Resource
 	def MatZipLoaderUTS loaderUts
 	

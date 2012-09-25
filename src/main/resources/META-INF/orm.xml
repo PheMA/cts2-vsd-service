@@ -6,6 +6,7 @@ version="2.0">
 
 <package>edu.mayo.cts2.framework.plugin.service.mat.model</package>
 
+<entity class="ValueSetVersion" metadata-complete="false"/>
 <entity class="ValueSet" metadata-complete="false"/>
 
 </entity-mappings>

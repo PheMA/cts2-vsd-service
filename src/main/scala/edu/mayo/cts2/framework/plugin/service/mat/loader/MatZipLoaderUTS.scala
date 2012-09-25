@@ -7,18 +7,22 @@ import gov.nih.nlm.umls.uts.webservice.Psf
 
 @Component
 class MatZipLoaderUTS {
-  
+
   @Resource
   var utsDao: UtsDao = _
-  
-    def getDescriptionFromUTS(codeSystem: String, code: String) : String = {
-    
+
+  def getDescriptionFromUTS(codeSystem: String, code: String): String = {
+
     val csv = codeSystem
     val fn = utsDao.utsContentService.getCodeAtoms _
 
     val atoms = utsDao.callSecurely(fn(_, _, code, codeSystem, new Psf()))
-    
-    return atoms.get(0).getTermString().getDefaultPreferredName()
+
+    if (atoms.size > 0) {
+      atoms.get(0).getTermString().getDefaultPreferredName()
+    } else {
+      null
+    }
   }
 
 }

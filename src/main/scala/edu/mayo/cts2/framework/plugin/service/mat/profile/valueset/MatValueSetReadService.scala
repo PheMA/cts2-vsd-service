@@ -35,8 +35,8 @@ class MatValueSetReadService extends AbstractService with ValueSetReadService {
         val uri = identifier.getUri
 
         val lookupKey =
-          if (StringUtils.startsWith(uri, UriUtils.oidUriPrefix)) {
-            StringUtils.substringAfter(identifier.getUri, UriUtils.oidUriPrefix)
+          if (StringUtils.startsWith(uri, UriUtils.OID_URI_PREFIX)) {
+            StringUtils.substringAfter(identifier.getUri, UriUtils.OID_URI_PREFIX)
           } else {
             uri
           }

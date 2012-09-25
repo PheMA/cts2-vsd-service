@@ -8,18 +8,46 @@ import ihe.iti.svs._2008.DescribedValueSet
 import ihe.iti.svs._2008.RetrieveMultipleValueSetsResponseType
 import javax.annotation.Resource
 import edu.mayo.cts2.framework.plugin.service.mat.svs.SvsTransform
+import java.util.zip.ZipFile
+import javax.xml.bind.JAXBContext
+import java.io.InputStream
 
 @Component
 class SvsLoader {
 
   @Resource
   var valueSetRepository: ValueSetRepository = _
-  
+
   @Resource
   var svsTransform: SvsTransform = _
 
-  def loadRetrieveMultipleValueSetsResponse(svs: RetrieveMultipleValueSetsResponseType): Unit = {
-     svsTransform.transformMultipleValueSetsResponse(svs).foreach(valueSetRepository.save(_))
+  def loadSvsZip(zip: ZipFile): Unit = {
+    try {
+      val entries = zip.entries();
+
+      while (entries.hasMoreElements()) {
+        val zipEntry = entries.nextElement()
+
+        loadRetrieveMultipleValueSetsResponse(unmarshall(zip.getInputStream(zipEntry)))
+      }
+
+    } finally {
+      zip.close()
+    }
   }
-  
+
+  def unmarshall(stream: InputStream) = {
+    try {
+      val jc = JAXBContext.newInstance(classOf[RetrieveMultipleValueSetsResponseType])
+      val u = jc.createUnmarshaller()
+      u.unmarshal(stream).asInstanceOf[RetrieveMultipleValueSetsResponseType]
+    } finally {
+      stream.close()
+    }
+  }: RetrieveMultipleValueSetsResponseType
+
+  def loadRetrieveMultipleValueSetsResponse(svs: RetrieveMultipleValueSetsResponseType): Unit = {
+    svsTransform.transformMultipleValueSetsResponse(svs).foreach(valueSetRepository.save(_))
+  }
+
 }

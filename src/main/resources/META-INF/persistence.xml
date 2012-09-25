@@ -7,10 +7,10 @@
 		<mapping-file>META-INF/orm.xml</mapping-file>
 		<exclude-unlisted-classes />
 		<properties>
-			<property name="hibernate.dialect" value="org.hibernate.dialect.MySQL5Dialect" />
-			<property name="hibernate.hbm2ddl.auto" value="create_drop" />
-			<property name="javax.persistence.query.timeout" value="20" />
-			<property name="hibernate.show_sql" value="false" />
+			<property name="hibernate.dialect" value="org.hibernate.dialect.HSQLDialect" />
+			<property name="hibernate.hbm2ddl.auto" value="create" />
+			<property name="javax.persistence.query.timeout" value="0" />
+			<property name="hibernate.show_sql" value="true" />
 			<property name="hibernate.jdbc.batch_size" value="100"/>
 		    <property name="hibernate.order_inserts" value="true"/>
 		    <property name="hibernate.order_updates" value="true"/>	

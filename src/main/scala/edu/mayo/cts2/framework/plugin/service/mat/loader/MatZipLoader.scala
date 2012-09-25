@@ -15,11 +15,17 @@ import edu.mayo.cts2.framework.plugin.service.mat.model.ValueSet
 import edu.mayo.cts2.framework.plugin.service.mat.model.ValueSetEntry
 import edu.mayo.cts2.framework.plugin.service.mat.repository.ValueSetRepository
 import javax.annotation.Resource
+import org.springframework.beans.factory.annotation.Value
+import edu.mayo.cts2.framework.plugin.service.mat.model.ValueSetVersion
 
 @Component
 class MatZipLoader {
 
   def GROUPING_CODE_SYSTEM = "GROUPING"
+
+  @scala.reflect.BeanProperty
+  @Value("${fetchCptDescriptions}")
+  var fetchCPTDescriptions: Boolean = _
     
   @Resource  
   var loaderUts: MatZipLoaderUTS = _  
@@ -69,18 +75,9 @@ class MatZipLoader {
       val valueSet = mapEntry._2
       val foundEntries = result.valueSetEntries.get(mapEntry._1)
       if(foundEntries.isDefined){
-        valueSet.entries = foundEntries.get
+        valueSet.currentVersion.entries = foundEntries.get
       }
 
-      /*
-      if(valueSet.includesValueSets.size > 0){
-        valueSet.includesValueSets.foreach( oid => {
-            val entries = result.valueSetEntries.get(oid).getOrElse(throw new RuntimeException(valueSet.oid + " "  + oid))
-            valueSet.entries.addAll(entries)
-        	}
-        )
-      }
-      */
       set + valueSet
     })
 
@@ -126,7 +123,7 @@ class MatZipLoader {
               result.valueSetEntries = result.valueSetEntries updated (oid, (result.valueSetEntries.get(oid).get ++ Seq(valueSetEntry)))
             }
           } else {
-            result.valueSets.get(oid).get.includesValueSets += valueSetEntry.code
+            result.valueSets.get(oid).get.currentVersion.includesValueSets += valueSetEntry.code
           }
 
         }
@@ -145,8 +142,9 @@ class MatZipLoader {
     valueSet.oid = getCellValue(row.getCell(OID_CELL))
     valueSet.name = valueSet.oid
     valueSet.formalName = getCellValue(row.getCell(NAME_CELL))
-    valueSet.valueSetDeveloper = getCellValue(row.getCell(DEVELOPER_CELL))
-    valueSet.qdmCategory = getCellValue(row.getCell(QDM_CATEGORY_CELL))
+    valueSet.addVersion(new ValueSetVersion())
+    valueSet.currentVersion.valueSetDeveloper = getCellValue(row.getCell(DEVELOPER_CELL))
+    valueSet.currentVersion.qdmCategory = getCellValue(row.getCell(QDM_CATEGORY_CELL))
 
     valueSet
   }
@@ -173,11 +171,15 @@ class MatZipLoader {
 
     valueSetEntry.codeSystem = getCellValue(row.getCell(CODE_SYSTEM_CELL))
     valueSetEntry.codeSystemVersion = getCellValue(row.getCell(CODE_SYSTEM_VERSION_CELL))
-    if(valueSetEntry.codeSystem == "CPT"){
+    
+    val description = getCellValue(row.getCell(DESCRIPTOR_CELL))
+    if(StringUtils.isBlank(description) &&
+        fetchCPTDescriptions && 
+        valueSetEntry.codeSystem.equals("CPT")){
     	valueSetEntry.description = loaderUts.getDescriptionFromUTS(valueSetEntry.codeSystem, valueSetEntry.code)
     }
     else{
-          valueSetEntry.description = getCellValue(row.getCell(DESCRIPTOR_CELL))
+          valueSetEntry.description = description
     }
 
     valueSetEntry

@@ -9,6 +9,9 @@ import ihe.iti.svs._2008.DescribedValueSet
 import scala.collection.JavaConversions._
 import edu.mayo.cts2.framework.plugin.service.mat.model.ValueSetEntry
 import ihe.iti.svs._2008.CE
+import edu.mayo.cts2.framework.plugin.service.mat.model.ValueSetVersion
+import edu.mayo.cts2.framework.plugin.service.mat.model.ValueSetProperty
+import ihe.iti.svs._2008.GroupType
 
 @Component
 class SvsTransform {
@@ -25,23 +28,39 @@ class SvsTransform {
   }
 
   def describedValueSetToValueSet(svsValueSet: DescribedValueSet) = {
-    val valueSet = new ValueSet()
+    val valueSet = new ValueSet(svsValueSet.getID)
     valueSet.name = svsValueSet.getID
-    valueSet.oid = svsValueSet.getID
-    valueSet.valueSetType = svsValueSet.getType
-    valueSet.source = svsValueSet.getSource
-    valueSet.binding = svsValueSet.getBinding
-    valueSet.version = svsValueSet.getVersion
-    valueSet.revisionDate = svsValueSet.getRevisionDate.toGregorianCalendar
-
+    
+    val valueSetVersion = new ValueSetVersion() 
+    valueSetVersion.valueSetType = svsValueSet.getType
+    valueSetVersion.source = svsValueSet.getSource
+    valueSetVersion.binding = svsValueSet.getBinding
+    valueSetVersion.revisionDate = svsValueSet.getRevisionDate.toGregorianCalendar
+    valueSetVersion.versionId = svsValueSet.getVersion
+    
+    val properties = 
+      svsValueSet.getGroup.foldLeft(Seq[ValueSetProperty]())(_ :+ groupToValueSetProperty(_))
+      
+    valueSet.properties = properties
+    
     val entries =
       svsValueSet.getConceptList.getConcept.foldLeft(Seq[ValueSetEntry]())(_ :+ conceptToValueSetEntry(_))
 
-    valueSet.entries = entries
+    valueSetVersion.entries = entries
+    
+    valueSet.addVersion(valueSetVersion)
     
     valueSet
   }
 
+  def groupToValueSetProperty(group: GroupType) = {
+    val prop = new ValueSetProperty()
+    prop.name = group.getDisplayName
+    prop.value = group.getKeyword.get(0)
+    
+    prop
+  }
+  
   def conceptToValueSetEntry(ce: CE) = {
     val entry = new ValueSetEntry()
     entry.code = ce.getCode

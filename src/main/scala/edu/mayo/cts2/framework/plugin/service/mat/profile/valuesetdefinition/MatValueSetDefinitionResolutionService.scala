@@ -81,14 +81,14 @@ class MatValueSetDefinitionResolutionService extends AbstractService with ValueS
     }
 
     val synopsises: (Seq[ValueSetEntry], Int) =
-      if (CollectionUtils.isNotEmpty(valueSet.includesValueSets)) {
-        valueSet.includesValueSets.foldLeft[(Seq[ValueSetEntry], Int)]((valueSet.entries, valueSet.entries.size))(
+      if (CollectionUtils.isNotEmpty(valueSet.currentVersion.includesValueSets)) {
+        valueSet.currentVersion.includesValueSets.foldLeft[(Seq[ValueSetEntry], Int)]((valueSet.currentVersion.entries, valueSet.currentVersion.entries.size))(
           (list, oid) => {
             val result = getEntriesFromOid(oid)
             (list._1 ++ result._1, list._2 + result._2)
           })
       } else {
-        (valueSet.entries, valueSet.entries.size)
+        (valueSet.currentVersion.entries, valueSet.currentVersion.entries.size)
       }
 
     val entries = synopsises._1.slice(page.getStart, page.getEnd).
@@ -99,11 +99,11 @@ class MatValueSetDefinitionResolutionService extends AbstractService with ValueS
 
   private def getEntriesFromOid(oid: String): (Seq[ValueSetEntry], Int) = {
     val vs = valueSetRepository.findOne(oid)
-    val includes = valueSetRepository.findOne(oid).includesValueSets
+    val includes = valueSetRepository.findOne(oid).currentVersion.includesValueSets
     if (includes.size == 0) {
-      (vs.entries, vs.entries.size)
+      (vs.currentVersion.entries, vs.currentVersion.entries.size)
     } else {
-      includes.foldLeft[(Seq[ValueSetEntry], Int)]((vs.entries, vs.entries.size))(
+      includes.foldLeft[(Seq[ValueSetEntry], Int)]((vs.currentVersion.entries, vs.currentVersion.entries.size))(
         (list, oid) => {
           val result = getEntriesFromOid(oid)
           val size = list._2 + result._2
@@ -145,7 +145,7 @@ class MatValueSetDefinitionResolutionService extends AbstractService with ValueS
 
     header.setResolutionOf(valueDefSetRef)
 
-    val codeSystemVersions = valueSetRepository.findCodeSystemVersionsByName(valueSet.name).asInstanceOf[java.util.List[Array[Object]]]
+    val codeSystemVersions = new java.util.ArrayList[Array[String]]()//valueSetRepository.findCodeSystemVersionsByName(valueSet.name).asInstanceOf[java.util.List[Array[Object]]]
 
     val itr = codeSystemVersions.asScala
 
