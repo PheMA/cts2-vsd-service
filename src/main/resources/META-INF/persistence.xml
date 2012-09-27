@@ -7,7 +7,6 @@
 		<mapping-file>META-INF/orm.xml</mapping-file>
 		<exclude-unlisted-classes />
 		<properties>
-			<property name="hibernate.dialect" value="org.hibernate.dialect.HSQLDialect" />
 			<property name="hibernate.hbm2ddl.auto" value="create" />
 			<property name="javax.persistence.query.timeout" value="0" />
 			<property name="hibernate.show_sql" value="false" />

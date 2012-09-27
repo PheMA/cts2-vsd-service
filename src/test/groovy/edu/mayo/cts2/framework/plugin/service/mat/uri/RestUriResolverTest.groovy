@@ -9,6 +9,24 @@ class RestUriResolverTest {
 	
 	def resolver
 
+	def foundCodeSystems = [
+		"SNOMEDCT",
+		"ICD9CM",
+		"ICD10CM",
+		"AdministrativeSex",
+		"SCTUSX",
+		"LNC",
+		"ICD10PCS",
+		"RXNORM",
+		"DischargeDisposition",
+		"CPT",
+		"HCPCS",
+		"CVX",
+		"CDT",
+		"HSLOC",
+		"SOP",
+		"CDCREC"]
+	
 	@Before
 	void SetUp(){
 		resolver = new RestUriResolver()
@@ -38,5 +56,13 @@ class RestUriResolverTest {
 	@Test
 	void TestIdAndVersionToName() {
 		assertEquals "LNC238", resolver.idAndVersionToVersionName("LNC", "238", IdType.CODE_SYSTEM())
+	}
+	
+	@Test
+	void TestGetAllPossibleUris() {
+		foundCodeSystems.each {
+			assertNotNull it, resolver.idToUri(it, IdType.CODE_SYSTEM())
+			assertNotNull it, resolver.idToBaseUri(it)
+		}
 	}
 }

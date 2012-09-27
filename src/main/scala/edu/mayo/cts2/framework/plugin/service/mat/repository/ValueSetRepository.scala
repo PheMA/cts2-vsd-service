@@ -23,25 +23,21 @@ trait ValueSetRepository extends CrudRepository[ValueSet, String] {
   @Query("select vs from ValueSet vs where upper(vs.name) like upper(:query) or upper(vs.formalName) like upper(:query) " +
   		"or upper(vs.id.oid) like upper(:query)")
   def findByAnyLikeIgnoreCase(@Param("query") query:String, pageable: Pageable): Page[ValueSet]
+  
+  @Query("select vs from ValueSet vs join vs.properties vsp " +
+  		"where vsp.name = :propertyName and upper(vsp.value) like upper(:query)" )
+  def findByPropertyLikeIgnoreCase(
+      @Param("propertyName") propertyName:String, 
+      @Param("query") query:String, 
+      pageable: Pageable): Page[ValueSet]
 
   @Query("select vs.currentVersion.id from ValueSet vs where vs.name = :name")
   def findCurrentVersionIdByName(@Param("name") name:String): String
-  
-  @Query("select vsv from ValueSetVersion vsv where vsv.valueSet.name = :name and (vsv.id = :id or vsv.versionId = :id)")
-  def findVersionByIdOrVersionIdAndValueSetName(@Param("name") name:String, @Param("id") id:String): ValueSetVersion
-
+ 
   def findByNameLikeIgnoreCase(query:String, pageable: Pageable): Page[ValueSet]
   
   def findByFormalNameLikeIgnoreCase(query:String, pageable: Pageable): Page[ValueSet]
   
   def findOneByName(query:String): ValueSet
-
-  @Query("select distinct entries.codeSystem, entries.codeSystemVersion from ValueSet valueSet " +
-  		"inner join valueSet.currentVersion.entries entries where valueSet.id.oid = :oid")
-  def findCodeSystemVersionsByOid(@Param("oid") oid:String): java.util.Collection[Array[String]]
-  
-  @Query("select distinct entries.codeSystem, entries.codeSystemVersion from ValueSet valueSet " +
-  		"inner join valueSet.currentVersion.entries entries where valueSet.name = :name")
-  def findCodeSystemVersionsByName(@Param("name") name:String): java.util.Collection[Array[Any]]
 
 }

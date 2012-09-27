@@ -37,12 +37,20 @@ class SvsLoader {
     }
   }
 
+  def loadSvsXml(inputStream: InputStream): Unit = {
+    try {
+      loadRetrieveMultipleValueSetsResponse(unmarshall(inputStream))
+    } finally {
+      inputStream.close()
+    }
+  }
+
   def unmarshall(stream: InputStream) = {
     try {
       val jc = JAXBContext.newInstance(classOf[RetrieveMultipleValueSetsResponseType])
       val u = jc.createUnmarshaller()
       val obj = u.unmarshal(stream)
-      
+
       obj.asInstanceOf[JAXBElement[RetrieveMultipleValueSetsResponseType]].getValue
     } finally {
       stream.close()
@@ -52,5 +60,5 @@ class SvsLoader {
   def loadRetrieveMultipleValueSetsResponse(svs: RetrieveMultipleValueSetsResponseType): Unit = {
     svsTransform.transformMultipleValueSetsResponse(svs).foreach(valueSetRepository.save(_))
   }
- 
+
 }

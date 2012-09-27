@@ -58,7 +58,9 @@ class ValueSetVersionRepositoryTestIT extends AbstractTestBase {
 	@Transactional
 	void TestGetDistinctCodeSystemVersionsWithNumberVersion() {
 		def valueSet = new ValueSet(oid:"1.23.45", name:"testName")
-		valueSet.addVersion(new ValueSetVersion(),true)
+		
+		def version = new ValueSetVersion()
+		valueSet.addVersion(version,true)
 		def entry = new ValueSetEntry(code:"123")
 		entry.setCodeSystem("testcs")
 		entry.setCodeSystemVersion("2011")
@@ -66,7 +68,7 @@ class ValueSetVersionRepositoryTestIT extends AbstractTestBase {
 
 		valueSetRepos.save(valueSet)
 		
-		def val = valueSetRepos.findCodeSystemVersionsByOid("1.23.45")
+		def val = repos.findCodeSystemVersionsByValueSetVersion(version.id)
 		
 		assertEquals 1, val.size()
 		assertEquals "testcs", val[0][0]
@@ -77,7 +79,9 @@ class ValueSetVersionRepositoryTestIT extends AbstractTestBase {
 	@Transactional
 	void TestGetDistinctCodeSystemVersions() {
 		def valueSet = new ValueSet(oid:"1.23.45", name:"testName")
-		valueSet.addVersion(new ValueSetVersion(),true)
+		
+		def version = new ValueSetVersion()
+		valueSet.addVersion(version,true)
 		
 		def entry = new ValueSetEntry(code:"123")
 		entry.setCodeSystem("testcs")
@@ -91,7 +95,7 @@ class ValueSetVersionRepositoryTestIT extends AbstractTestBase {
 		
 		valueSetRepos.save(valueSet)
 		
-		def val = valueSetRepos.findCodeSystemVersionsByOid("1.23.45")
+		def val = repos.findCodeSystemVersionsByValueSetVersion(version.id)
 		
 		assertEquals 2, val.size()
 	}
@@ -106,7 +110,7 @@ class ValueSetVersionRepositoryTestIT extends AbstractTestBase {
 		
 		valueSetRepos.save(valueSet)
 		
-		def val = valueSetRepos.findVersionByIdOrVersionIdAndValueSetName("testName", "999")
+		def val = repos.findVersionByIdOrVersionIdAndValueSetName("testName", "999")
 		
 		assertNotNull val
 	}

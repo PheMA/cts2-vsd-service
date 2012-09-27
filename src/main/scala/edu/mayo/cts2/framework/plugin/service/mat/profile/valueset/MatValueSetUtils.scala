@@ -40,6 +40,10 @@ import org.apache.commons.lang.StringUtils
 
 object MatValueSetUtils {
 
+  def buildValueSetReference(valueSetVersion: ValueSetVersion, urlConstructor: UrlConstructor): ValueSetReference = {
+    buildValueSetReference(valueSetVersion.valueSet, urlConstructor)
+  }
+
   def buildValueSetReference(valueSet: ValueSet, urlConstructor: UrlConstructor): ValueSetReference = {
     val ref = new ValueSetReference()
     ref.setContent(valueSet.name)
@@ -48,6 +52,16 @@ object MatValueSetUtils {
 
     ref
   }
+  
+   def buildValueSetDefinitionReference(
+    valueSetVersion: ValueSetVersion,
+    urlConstructor: UrlConstructor): ValueSetDefinitionReference = {
+     buildValueSetDefinitionReference(
+         valueSetVersion.valueSet.name,
+         UriUtils.oidToUri(valueSetVersion.valueSet.name),
+         valueSetVersion,
+         urlConstructor)
+   }
 
   def buildValueSetDefinitionReference(
     name: String, about: String,

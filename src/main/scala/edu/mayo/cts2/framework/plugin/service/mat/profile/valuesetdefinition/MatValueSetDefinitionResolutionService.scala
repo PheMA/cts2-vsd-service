@@ -38,12 +38,18 @@ import edu.mayo.cts2.framework.service.profile.valuesetdefinition.name.ValueSetD
 import javax.annotation.Resource
 import com.google.common.collect.Lists
 import org.apache.commons.lang.ObjectUtils
+import edu.mayo.cts2.framework.plugin.service.mat.profile.valueset.MatValueSetUtils
+import edu.mayo.cts2.framework.plugin.service.mat.repository.ValueSetVersionRepository
+import edu.mayo.cts2.framework.plugin.service.mat.model.ValueSetVersion
 
 @Component
 class MatValueSetDefinitionResolutionService extends AbstractService with ValueSetDefinitionResolutionService {
 
   @Resource
   var valueSetRepository: ValueSetRepository = _
+  
+  @Resource
+  var valueSetVersionRepository: ValueSetVersionRepository = _
 
   @Resource
   var hrefBuilder: HrefBuilder = _
@@ -74,27 +80,28 @@ class MatValueSetDefinitionResolutionService extends AbstractService with ValueS
 
     val valueSetName = id.getValueSet.getName
 
-    val valueSet = valueSetRepository.findOneByName(valueSetName)
+    val valueSetVersion = 
+      valueSetVersionRepository.findVersionByIdOrVersionIdAndValueSetName(valueSetName, valueSetDefinitionName)
 
-    if (valueSet == null) {
+    if (valueSetVersion == null) {
       return null
     }
 
     val synopsises: (Seq[ValueSetEntry], Int) =
-      if (CollectionUtils.isNotEmpty(valueSet.currentVersion.includesValueSets)) {
-        valueSet.currentVersion.includesValueSets.foldLeft[(Seq[ValueSetEntry], Int)]((valueSet.currentVersion.entries, valueSet.currentVersion.entries.size))(
+      if (CollectionUtils.isNotEmpty(valueSetVersion.includesValueSets)) {
+        valueSetVersion.includesValueSets.foldLeft[(Seq[ValueSetEntry], Int)]((valueSetVersion.entries, valueSetVersion.entries.size))(
           (list, oid) => {
             val result = getEntriesFromOid(oid)
             (list._1 ++ result._1, list._2 + result._2)
           })
       } else {
-        (valueSet.currentVersion.entries, valueSet.currentVersion.entries.size)
+        (valueSetVersion.entries, valueSetVersion.entries.size)
       }
 
     val entries = synopsises._1.slice(page.getStart, page.getEnd).
       foldLeft(Seq[EntitySynopsis]())(valueSetToEntitySynopsis)
 
-    new ResolvedValueSetResult(buildHeader(valueSet), entries, entries.size == synopsises._2);
+    new ResolvedValueSetResult(buildHeader(valueSetVersion), entries, entries.size == synopsises._2);
   }
 
   private def getEntriesFromOid(oid: String): (Seq[ValueSetEntry], Int) = {
@@ -129,23 +136,14 @@ class MatValueSetDefinitionResolutionService extends AbstractService with ValueS
     seq ++ Seq(synopsis)
   }: Seq[EntitySynopsis]
 
-  private def buildHeader(valueSet: ValueSet): ResolvedValueSetHeader = {
+  private def buildHeader(valueSetVersion: ValueSetVersion): ResolvedValueSetHeader = {
     val header = new ResolvedValueSetHeader()
 
-    val valueDefSetRef = new ValueSetDefinitionReference()
-    val valueSetRef = new ValueSetReference(valueSet.getName)
-    valueSetRef.setUri(UriUtils.oidToUri(valueSet.oid))
-    valueSetRef.setHref(urlConstructor.createValueSetUrl(valueSet.getName))
-    valueDefSetRef.setValueSet(valueSetRef)
-
-    val nameAndMeaning = new NameAndMeaningReference("1")
-    nameAndMeaning.setUri(UriUtils.oidToUri(valueSet.oid) + ":1")
-    nameAndMeaning.setHref(urlConstructor.createValueSetDefinitionUrl(valueSet.getName, "1"))
-    valueDefSetRef.setValueSetDefinition(nameAndMeaning)
+    val valueDefSetRef = MatValueSetUtils.buildValueSetDefinitionReference(valueSetVersion, urlConstructor)
 
     header.setResolutionOf(valueDefSetRef)
 
-    val codeSystemVersions = new java.util.ArrayList[Array[String]]()//valueSetRepository.findCodeSystemVersionsByName(valueSet.name).asInstanceOf[java.util.List[Array[Object]]]
+    val codeSystemVersions = valueSetVersionRepository.findCodeSystemVersionsByValueSetVersion(valueSetVersion.id).asInstanceOf[java.util.List[Array[Object]]]
 
     val itr = codeSystemVersions.asScala
 

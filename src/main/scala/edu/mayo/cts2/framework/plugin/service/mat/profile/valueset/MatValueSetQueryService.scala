@@ -29,12 +29,17 @@ import org.apache.commons.collections.CollectionUtils
 import edu.mayo.cts2.framework.model.command.ResolvedFilter
 import edu.mayo.cts2.framework.plugin.service.mat.uri.UriUtils
 import org.apache.commons.lang.StringUtils
+import edu.mayo.cts2.framework.model.core.types.TargetReferenceType
+import edu.mayo.cts2.framework.model.core.URIAndEntityName
 
 @Component
 class MatValueSetQueryService
   extends AbstractService
   with ValueSetQueryService {
 
+  val NQF_NUMBER_PROP:String = "nqfnumber"
+  val EMEASURE_ID_PROP:String = "emeasureid"
+  
   @Resource
   var valueSetRepository: ValueSetRepository = _
 
@@ -49,8 +54,19 @@ class MatValueSetQueryService
     val set = new java.util.HashSet[PropertyReference]() 
     set.add(StandardModelAttributeReference.RESOURCE_NAME.getPropertyReference)
     set.add(StandardModelAttributeReference.RESOURCE_SYNOPSIS.getPropertyReference)
+    set.add(createPropertyReference(NQF_NUMBER_PROP))
+    set.add(createPropertyReference(EMEASURE_ID_PROP))
     
     set
+  }
+  
+  def createPropertyReference(name:String): PropertyReference = { 
+    val ref = new PropertyReference()
+    ref.setReferenceType(TargetReferenceType.PROPERTY);
+    ref.setReferenceTarget(new URIAndEntityName())
+    ref.getReferenceTarget.setName(name)
+    
+    ref
   }
 
   def getSupportedSortReferences: java.util.Set[_ <: PropertyReference] = { new java.util.HashSet[PropertyReference]() }
@@ -88,7 +104,7 @@ class MatValueSetQueryService
     
     val resourceName = StandardModelAttributeReference.RESOURCE_NAME.getPropertyReference.getReferenceTarget.getName
     val resourceSynopsis = StandardModelAttributeReference.RESOURCE_SYNOPSIS.getPropertyReference.getReferenceTarget.getName
-
+   
     val matchAlgorithm = filter.getMatchAlgorithmReference.getContent
     val contains = StandardMatchAlgorithmReference.CONTAINS.getMatchAlgorithmReference.getContent
     val startsWith = StandardMatchAlgorithmReference.STARTS_WITH.getMatchAlgorithmReference.getContent
@@ -96,6 +112,8 @@ class MatValueSetQueryService
     var fn = propertyReference.getReferenceTarget.getName match {
       case `resourceName` => valueSetRepository.findByNameLikeIgnoreCase(_:String, _:Pageable)
       case `resourceSynopsis` => valueSetRepository.findByAnyLikeIgnoreCase(_:String, _:Pageable)
+      case `NQF_NUMBER_PROP` => valueSetRepository.findByPropertyLikeIgnoreCase("NQF Number", _:String, _:Pageable)
+      case `EMEASURE_ID_PROP` => valueSetRepository.findByPropertyLikeIgnoreCase("eMeasure Identifier", _:String, _:Pageable)
     }
     
     val matchValue = filter.getMatchValue

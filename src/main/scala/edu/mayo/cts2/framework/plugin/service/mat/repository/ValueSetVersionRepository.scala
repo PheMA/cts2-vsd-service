@@ -18,4 +18,16 @@ import edu.mayo.cts2.framework.plugin.service.mat.model.ValueSetVersion
 @Transactional
 trait ValueSetVersionRepository extends CrudRepository[ValueSetVersion, String] {
 
+  def findAll(pageable: Pageable): Page[ValueSetVersion]
+  
+  @Query("select vsv from ValueSetVersion vsv where vsv.valueSet.name = :name")
+  def findByValueSetName(@Param("name") name: String, pageable: Pageable): Page[ValueSetVersion]
+
+  @Query("select vsv from ValueSetVersion vsv where vsv.valueSet.name = :name and (vsv.id = :id or vsv.versionId = :id)")
+  def findVersionByIdOrVersionIdAndValueSetName(@Param("name") name:String, @Param("id") id:String): ValueSetVersion
+
+  @Query("select distinct entries.codeSystem, entries.codeSystemVersion from ValueSetVersion valueSet " +
+  		"inner join valueSet.entries entries where valueSet.id = :id")
+  def findCodeSystemVersionsByValueSetVersion(@Param("id") oid:String): java.util.Collection[Array[String]]
+
 }

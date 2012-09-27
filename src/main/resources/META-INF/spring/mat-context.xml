@@ -35,6 +35,11 @@
 				<property name="generateDdl" value="true" />
 			</bean>
 		</property>
+		<property name="jpaProperties">
+			<props>
+				<prop key="org.hibernate.dialect.HSQLDialect">${hibernateDialect}</prop>
+			</props>
+		</property>
 	</bean>
 
 	<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">

@@ -24,8 +24,8 @@ class MatZipLoader {
   def GROUPING_CODE_SYSTEM = "GROUPING"
 
   @scala.reflect.BeanProperty
-  @Value("${fetchCptDescriptions}")
-  var fetchCPTDescriptions: Boolean = _
+  //@Value("${fetchCptDescriptions}")
+  var fetchCptDescriptions: java.lang.Boolean = false
     
   @Resource  
   var loaderUts: MatZipLoaderUTS = _  
@@ -174,7 +174,7 @@ class MatZipLoader {
     
     val description = getCellValue(row.getCell(DESCRIPTOR_CELL))
     if(StringUtils.isBlank(description) &&
-        fetchCPTDescriptions && 
+        fetchCptDescriptions && 
         valueSetEntry.codeSystem.equals("CPT")){
     	valueSetEntry.description = loaderUts.getDescriptionFromUTS(valueSetEntry.codeSystem, valueSetEntry.code)
     }

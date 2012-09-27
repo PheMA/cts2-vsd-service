@@ -14,6 +14,7 @@
 		<AD name="NamespaceService URL" id="namespaceServiceUrl" required="true" type="String" default="http://informatics.mayo.edu/cts2/services/bioportal-rdf/"  />
 		<AD name="UriResolutionService URL" id="uriResolutionServiceUrl" required="true" type="String" default="http://bmidev4:8000/"  />
 		<AD name="Security Check URL" id="securityCheckUrl" required="true" type="String" default="/j_spring_security_check"  />
+		<AD name="Hibernate SQL Dialect" id="hibernateDialect" required="true" type="String" default="org.hibernate.dialect.MySQLDialect"  />
 		<AD name="Fetch Missing CPT Descriptions" id="fetchCptDescriptions" required="true" type="Boolean" default="false"  />
 		<AD name="SNOMEDCT Entity URL Base" id="snomedCtUrlBase" required="false" type="String" default=""  />
 	</OCD>

@@ -97,6 +97,7 @@ class MatValueSetReadService extends AbstractService with ValueSetReadService {
      
      val target = new StatementTarget()
      target.setLiteral( ModelUtils.createOpaqueData(value) )   
+     prop.addValue(target)
      
      prop
   }

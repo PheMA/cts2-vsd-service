@@ -29,12 +29,16 @@ import edu.mayo.cts2.framework.plugin.service.mat.model.ValueSetVersion
 import org.apache.commons.lang.StringUtils
 import edu.mayo.cts2.framework.model.core.StatusReference
 import edu.mayo.cts2.framework.model.core.types.EntryState
+import edu.mayo.cts2.framework.plugin.service.mat.repository.ValueSetVersionRepository
 
 @Component
 class MatValueSetDefinitionReadService extends AbstractService with ValueSetDefinitionReadService {
 
   @Resource
   var valueSetRepository: ValueSetRepository = _
+  
+  @Resource
+  var valueSetVersionRepository: ValueSetVersionRepository = _
 
   /**
    * This is incomplete... this is only here to map the 'CURRENT' tag to a CodeSystemVersionName.
@@ -49,11 +53,11 @@ class MatValueSetDefinitionReadService extends AbstractService with ValueSetDefi
     }
 
     val valueSetName = valueSet.getName()
-    
+
     val versionId = valueSetRepository.findCurrentVersionIdByName(valueSetName)
 
-    if(versionId != null){
-    	new LocalIdValueSetDefinition(versionId, null)
+    if (versionId != null) {
+      new LocalIdValueSetDefinition(versionId, null)
     } else {
       null
     }
@@ -62,7 +66,7 @@ class MatValueSetDefinitionReadService extends AbstractService with ValueSetDefi
   @Override
   def existsByTag(valueSet: NameOrURI,
     tag: VersionTagReference, readContext: ResolvedReadContext): Boolean = {
-    readByTag(valueSet,tag,readContext) != null
+    readByTag(valueSet, tag, readContext) != null
   }
 
   @Override
@@ -72,12 +76,16 @@ class MatValueSetDefinitionReadService extends AbstractService with ValueSetDefi
     readContext: ResolvedReadContext): LocalIdValueSetDefinition = {
     val valueSetName = identifier.getValueSet.getName
 
-    val valueSetVersion = 
-      valueSetRepository.findVersionByIdOrVersionIdAndValueSetName(valueSetName, identifier.getName)
+    val valueSetVersion =
+      valueSetVersionRepository.findVersionByIdOrVersionIdAndValueSetName(valueSetName, identifier.getName)
 
-    val valueSetDef = valueSetVersionToDefinition(valueSetVersion)
+    if (valueSetVersion != null) {
+      val valueSetDef = valueSetVersionToDefinition(valueSetVersion)
 
-    new LocalIdValueSetDefinition(valueSetVersion.getId, valueSetDef)
+      new LocalIdValueSetDefinition(valueSetVersion.getId, valueSetDef)
+    } else {
+      null
+    }
   }
 
   def valueSetVersionToDefinition(valueSetVersion: ValueSetVersion): ValueSetDefinition = {
@@ -86,12 +94,12 @@ class MatValueSetDefinitionReadService extends AbstractService with ValueSetDefi
     valueSetDef.setDocumentURI(UriUtils.uuidToUri(valueSetVersion.id))
     valueSetDef.setSourceAndNotation(buildSourceAndNotation())
     valueSetDef.setDefinedValueSet(
-    		MatValueSetUtils.buildValueSetReference(valueSetVersion.valueSet,urlConstructor))
-    		
+      MatValueSetUtils.buildValueSetReference(valueSetVersion.valueSet, urlConstructor))
+
     valueSetDef.setOfficialResourceVersionId(valueSetVersion.versionId)
-   
-    if(valueSetVersion.revisionDate != null){
-    	valueSetDef.setOfficialReleaseDate(valueSetVersion.revisionDate.getTime)
+
+    if (valueSetVersion.revisionDate != null) {
+      valueSetDef.setOfficialReleaseDate(valueSetVersion.revisionDate.getTime)
     }
 
     val list = valueSetVersion.entries.foldLeft(new SpecificEntityList())((list, entry) => {
@@ -109,13 +117,13 @@ class MatValueSetDefinitionReadService extends AbstractService with ValueSetDefi
       list
     })
 
-    if(list.getReferencedEntityCount > 0){
-	    val vsdEntry = new ValueSetDefinitionEntry()
-	    vsdEntry.setEntryOrder(1)
-	    vsdEntry.setOperator(SetOperator.UNION)
-	    vsdEntry.setEntityList(list)
-	
-	    valueSetDef.addEntry(vsdEntry)
+    if (list.getReferencedEntityCount > 0) {
+      val vsdEntry = new ValueSetDefinitionEntry()
+      vsdEntry.setEntryOrder(1)
+      vsdEntry.setOperator(SetOperator.UNION)
+      vsdEntry.setEntityList(list)
+
+      valueSetDef.addEntry(vsdEntry)
     }
 
     val includesValueSets = valueSetVersion.includesValueSets.foldLeft(Seq[ValueSetDefinitionEntry]())(
@@ -123,14 +131,14 @@ class MatValueSetDefinitionReadService extends AbstractService with ValueSetDefi
         val vsdEntry = new ValueSetDefinitionEntry()
         vsdEntry.setEntryOrder(1)
         vsdEntry.setOperator(SetOperator.UNION)
-        
+
         val valueSet = valueSetRepository.findOne(oid)
-        
+
         val vsRef = new CompleteValueSetReference()
         vsRef.setValueSet(MatValueSetUtils.buildValueSetReference(valueSet, urlConstructor))
-        
+
         vsdEntry.setCompleteValueSet(vsRef)
-     
+
         seq :+ vsdEntry
       })
 
@@ -139,13 +147,12 @@ class MatValueSetDefinitionReadService extends AbstractService with ValueSetDefi
     valueSetDef.addSourceAndRole(MatValueSetUtils.sourceAndRole)
 
     valueSetDef.setEntryState(
-	    if(StringUtils.equalsIgnoreCase(valueSetVersion.getStatus,"inactive")){
-	      EntryState.INACTIVE
-	    } else {
-	      EntryState.ACTIVE
-	    }
-    )
-    
+      if (StringUtils.equalsIgnoreCase(valueSetVersion.getStatus, "inactive")) {
+        EntryState.INACTIVE
+      } else {
+        EntryState.ACTIVE
+      })
+
     valueSetDef
   }
 

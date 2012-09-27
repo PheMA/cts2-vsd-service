@@ -24,6 +24,9 @@ import javax.annotation.Resource
 import edu.mayo.cts2.framework.model.core.ValueSetReference
 import edu.mayo.cts2.framework.model.valuesetdefinition.ValueSetDefinition
 import edu.mayo.cts2.framework.plugin.service.mat.uri.UriUtils
+import edu.mayo.cts2.framework.plugin.service.mat.repository.ValueSetVersionRepository
+import edu.mayo.cts2.framework.plugin.service.mat.model.ValueSetVersion
+import edu.mayo.cts2.framework.plugin.service.mat.profile.valueset.MatValueSetUtils
 
 @Component
 class MatValueSetDefinitionQueryService
@@ -31,7 +34,7 @@ class MatValueSetDefinitionQueryService
   with ValueSetDefinitionQueryService {
 
   @Resource
-  var valueSetRepository: ValueSetRepository = _
+  var valueSetVersionRepository: ValueSetVersionRepository = _
 
   def getSupportedMatchAlgorithms: java.util.Set[_ <: MatchAlgorithmReference] = { 
     val set = new java.util.HashSet[MatchAlgorithmReference]() 
@@ -56,34 +59,30 @@ class MatValueSetDefinitionQueryService
   def getResourceSummaries(query: ValueSetDefinitionQuery, sort: SortCriteria, page: Page = new Page()): DirectoryResult[ValueSetDefinitionDirectoryEntry] = {
     val fn =
     if(query == null || query.getRestrictions == null || query.getRestrictions.getValueSet == null){
-      valueSetRepository.findAll(_:Pageable)
+      valueSetVersionRepository.findAll(_:Pageable)
     } else {
       val name = query.getRestrictions.getValueSet.getName
-      valueSetRepository.findByNameLikeIgnoreCase(name, _:Pageable)
+      valueSetVersionRepository.findByValueSetName(name, _:Pageable)
     }
     
     val valueSets = fn(toPageable(Option(page)))
 
-    val entries = valueSets.foldLeft(Seq[ValueSetDefinitionDirectoryEntry]())(transformValueSet)
+    val entries = valueSets.foldLeft(Seq[ValueSetDefinitionDirectoryEntry]())(transformValueSetVersion)
 
     val totalElements = valueSets.getTotalElements
     
     new DirectoryResult(entries, entries.size == totalElements)
   }
 
-  def transformValueSet = (seq:Seq[ValueSetDefinitionDirectoryEntry], valueSet:ValueSet) => {
+  def transformValueSetVersion = (seq:Seq[ValueSetDefinitionDirectoryEntry], valueSetVersion:ValueSetVersion) => {
     val summary = new ValueSetDefinitionDirectoryEntry()
-    summary.setResourceName("1")
-    summary.setAbout(UriUtils.oidToUri(valueSet.oid))
-    summary.setDocumentURI(summary.getAbout + ":1")
-    summary.setFormalName(valueSet.formalName)
-    summary.setHref(urlConstructor.createValueSetDefinitionUrl(valueSet.name, "1"))
-    
-    val valueSetRef = new ValueSetReference(valueSet.name)
-    valueSetRef.setUri(UriUtils.oidToUri(valueSet.oid))
-    valueSetRef.setHref(urlConstructor.createValueSetUrl(valueSet.name))
+    summary.setResourceName(valueSetVersion.id)
+    summary.setAbout(UriUtils.oidToUri(valueSetVersion.valueSet.oid))
+    summary.setDocumentURI(UriUtils.uuidToUri(valueSetVersion.id))
+    summary.setFormalName(valueSetVersion.valueSet.formalName)
+    summary.setHref(urlConstructor.createValueSetDefinitionUrl(valueSetVersion.valueSet.name, valueSetVersion.id))
 
-    summary.setDefinedValueSet(valueSetRef)
+    summary.setDefinedValueSet(MatValueSetUtils.buildValueSetReference(valueSetVersion, urlConstructor))
     
     seq ++ Seq(summary)
   }:Seq[ValueSetDefinitionDirectoryEntry]

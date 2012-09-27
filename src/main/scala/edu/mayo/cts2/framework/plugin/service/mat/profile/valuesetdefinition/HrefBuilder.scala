@@ -24,6 +24,16 @@ class HrefBuilder {
 
   val SNOMEDCT = "SNOMED-CT"
   val UMLS_CODE_SYSTEMS = Set("CPT", "ICD-10-CM", "ICD-9-CM", "RxNorm")
+  
+  def contains(cs: String, compare:String):Boolean = {
+    contains(cs, Set(compare))
+  }
+  
+  def contains(cs: String, set:Set[String]):Boolean = {
+    ! set.forall( (s) => {
+      ! s.replaceAll("-", "").toLowerCase.equals( cs.replaceAll("-", "").toLowerCase )
+    })
+  }
 
   def createEntityHref(entry: ValueSetEntry) = {
     
@@ -36,9 +46,9 @@ class HrefBuilder {
     
     val cs = entry.codeSystem
     
-    if (UMLS_CODE_SYSTEMS.contains(cs)) {
+    if (contains(cs,UMLS_CODE_SYSTEMS)) {
       createUmlsUtsUrl
-    } else if (cs.equals(SNOMEDCT)) {
+    } else if (contains(cs, Set(SNOMEDCT))) {
       if (StringUtils.isNotBlank(snomedCtUrlBase)) {
         snomedCtUrlBase + "/" + entry.code
       } else {

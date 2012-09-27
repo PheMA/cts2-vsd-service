@@ -31,6 +31,7 @@ class SvsTransform {
   def describedValueSetToValueSet(svsValueSet: DescribedValueSet) = {
     val valueSet = new ValueSet(svsValueSet.getID)
     valueSet.name = svsValueSet.getID
+    valueSet.formalName = svsValueSet.getDisplayName
 
     val valueSetVersion = new ValueSetVersion() 
     valueSetVersion.valueSetType = svsValueSet.getType
@@ -72,7 +73,7 @@ class SvsTransform {
   def conceptToValueSetEntry(ce: CE) = {
     val entry = new ValueSetEntry()
     entry.code = ce.getCode
-    entry.codeSystem = ce.getCodeSystem
+    entry.codeSystem = ce.getCodeSystemName
     entry.codeSystemVersion = ce.getCodeSystemVersion
     entry.description = ce.getDisplayName
 
