@@ -29,7 +29,15 @@
 
 	<bean id="entityManagerFactory"
 		class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+		<property name="persistenceXmlLocation" value="classpath:/META-INF/persistence.xml" />
+		<property name="persistenceUnitName" value="JPAService" />
 		<property name="dataSource" ref="dataSource" />
+		<property name="PersistenceProviderClass" value="org.hibernate.ejb.HibernatePersistence"/>
+		<property name="packagesToScan">
+			<list>
+				<value>edu.mayo.cts2.framework.plugin.service.mat.model</value>
+			</list>
+		</property>
 		<property name="jpaVendorAdapter">
 			<bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
 				<property name="generateDdl" value="true" />
@@ -37,7 +45,14 @@
 		</property>
 		<property name="jpaProperties">
 			<props>
-				<prop key="org.hibernate.dialect.HSQLDialect">${hibernateDialect}</prop>
+				<prop key="hibernate.dialect">${hibernateDialect}</prop>
+				<prop key="hibernate.hbm2ddl.auto">create</prop>
+				<prop key="javax.persistence.query.timeout">0</prop>
+				<prop key="hibernate.show_sql">false</prop>
+				<prop key="hibernate.jdbc.batch_size">100</prop>
+				<prop key="hibernate.order_inserts">true</prop>
+				<prop key="hibernate.order_updates">true</prop>
+				<prop key="hibernate.cache.use_second_level_cache">true</prop>
 			</props>
 		</property>
 	</bean>
