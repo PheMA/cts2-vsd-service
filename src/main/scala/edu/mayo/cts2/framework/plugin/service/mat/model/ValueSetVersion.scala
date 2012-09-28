@@ -64,6 +64,13 @@ class ValueSetVersion extends Equals {
   @ElementCollection
   var includesValueSets: java.util.List[String] = new ArrayList[String]()
 
+  override def hashCode() = this.id.hashCode
+      
+  override def equals(other: Any) = other match {
+    case that: ValueSetVersion => this.id == that.id && this.id == that.id
+    case _ => false
+  }
+  
   def canEqual(other: Any) = {
     other.isInstanceOf[edu.mayo.cts2.framework.plugin.service.mat.model.ValueSetVersion]
   }

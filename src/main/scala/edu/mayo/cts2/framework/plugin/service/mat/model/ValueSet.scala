@@ -43,6 +43,13 @@ class ValueSet(valueSetOid: String) extends Equals {
   @OneToMany(cascade=Array{CascadeType.ALL})
   var properties: java.util.List[ValueSetProperty] = new ArrayList[ValueSetProperty]()
   
+  override def hashCode() = this.oid.hashCode
+  
+  override def equals(other: Any) = other match {
+    case that: ValueSet => this.oid == that.oid && this.oid == that.oid
+    case _ => false
+  }
+  
   def canEqual(other: Any) = {
     other.isInstanceOf[edu.mayo.cts2.framework.plugin.service.mat.model.ValueSet]
   }

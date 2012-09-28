@@ -20,11 +20,11 @@ trait ValueSetRepository extends CrudRepository[ValueSet, String] {
 
   def findAll(pageable: Pageable): Page[ValueSet]
   
-  @Query("select vs from ValueSet vs where upper(vs.name) like upper(:query) or upper(vs.formalName) like upper(:query) " +
+  @Query("select distinct vs from ValueSet vs where upper(vs.name) like upper(:query) or upper(vs.formalName) like upper(:query) " +
   		"or upper(vs.id.oid) like upper(:query)")
   def findByAnyLikeIgnoreCase(@Param("query") query:String, pageable: Pageable): Page[ValueSet]
   
-  @Query("select vs from ValueSet vs join vs.properties vsp " +
+  @Query("select distinct vs from ValueSet vs join vs.properties vsp " +
   		"where vsp.name = :propertyName and upper(vsp.value) like upper(:query)" )
   def findByPropertyLikeIgnoreCase(
       @Param("propertyName") propertyName:String, 
