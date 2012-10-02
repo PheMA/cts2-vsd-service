@@ -21,8 +21,6 @@
 	
 	<osgi:service ref="springSecurityFilterChain" interface="javax.servlet.Filter"/>
 	
-	<osgix:cm-properties id="props" persistent-id="edu.mayo.cts2.framework.plugin.service.mat"/>
-
-	<context:property-placeholder properties-ref="props" system-properties-mode="OVERRIDE" />
+	<osgix:managed-properties update-strategy="container-managed" persistent-id="edu.mayo.cts2.framework.plugin.service.mat" />
 	
 </beans>
