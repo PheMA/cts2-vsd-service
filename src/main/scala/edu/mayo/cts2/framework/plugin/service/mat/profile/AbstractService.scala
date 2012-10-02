@@ -15,6 +15,8 @@ import edu.mayo.cts2.framework.core.url.UrlConstructor
 import org.springframework.data.domain.PageRequest
 import edu.mayo.cts2.framework.model.command.Page
 import edu.mayo.cts2.framework.plugin.service.mat.uri.UriResolver
+import javax.persistence.EntityManager
+import javax.persistence.PersistenceContext
 
 abstract class AbstractService extends BaseService {
 
@@ -30,6 +32,9 @@ abstract class AbstractService extends BaseService {
   
   @Resource
   var uriResolver: UriResolver = _
+  
+  @PersistenceContext
+  var entityManager: EntityManager = _
 
   def toPageable(page:Option[Page]) = {
 	val aPage = page.getOrElse(new Page())

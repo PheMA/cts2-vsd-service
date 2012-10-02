@@ -17,11 +17,11 @@ public abstract class AbstractZipLoadingTestBase extends AbstractTestBase {
 	protected String zipFilePath = "src/test/resources/exampleMatZips/test.zip";
 	protected String svsXmlFilePath = "src/test/resources/exampleSVS/1.3.6.1.4.1.33895.1.3.0.31.xml";
 
-	protected enum SVS_OR_ZIP {
+	public enum SVS_OR_ZIP {
 		SVS, ZIP
 	}
 
-	protected SVS_OR_ZIP svsOrZip = SVS_OR_ZIP.ZIP;
+	public SVS_OR_ZIP svsOrZip = SVS_OR_ZIP.ZIP;
 
 	@Resource
 	public MatZipLoader zipLoader;

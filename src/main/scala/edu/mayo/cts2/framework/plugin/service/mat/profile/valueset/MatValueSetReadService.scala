@@ -24,9 +24,6 @@ import edu.mayo.cts2.framework.model.util.ModelUtils
 
 @Component
 class MatValueSetReadService extends AbstractService with ValueSetReadService {
-  
-  val SVS_NS = "SVS"
-  val SVS_URI = "urn:ihe:iti:svs:2008"
 
   @Resource
   var valueSetRepository: ValueSetRepository = _
@@ -91,8 +88,8 @@ class MatValueSetReadService extends AbstractService with ValueSetReadService {
     
      val predicate = new PredicateReference()
      predicate.setName(name)
-     predicate.setNamespace(SVS_NS)
-     predicate.setUri(SVS_URI + "/" + name)
+     predicate.setNamespace(UriUtils.SVS_NS)
+     predicate.setUri(UriUtils.toSvsUri(name))
      prop.setPredicate(predicate)
      
      val target = new StatementTarget()

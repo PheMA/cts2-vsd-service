@@ -1,71 +1,156 @@
 package edu.mayo.cts2.framework.plugin.service.mat.profile.valueset
 
-import scala.collection.JavaConversions.iterableAsScalaIterable
-import org.springframework.context.annotation.Scope
+import scala.collection.JavaConversions._
+import org.apache.commons.collections.CollectionUtils
+import org.springframework.data.domain.Pageable
+import org.springframework.data.jpa.domain.Specification
+import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Component
 import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Transactional
+import edu.mayo.cts2.framework.filter.`match`.StateAdjustingPropertyReference
+import edu.mayo.cts2.framework.filter.`match`.StateAdjustingPropertyReference.StateUpdater
+import edu.mayo.cts2.framework.filter.directory.DirectoryBuilder
 import edu.mayo.cts2.framework.model.command.Page
+import edu.mayo.cts2.framework.model.command.ResolvedFilter
+import edu.mayo.cts2.framework.model.core.MatchAlgorithmReference
 import edu.mayo.cts2.framework.model.core.PredicateReference
+import edu.mayo.cts2.framework.model.core.PropertyReference
 import edu.mayo.cts2.framework.model.core.SortCriteria
+import edu.mayo.cts2.framework.model.core.URIAndEntityName
+import edu.mayo.cts2.framework.model.core.types.TargetReferenceType
 import edu.mayo.cts2.framework.model.directory.DirectoryResult
 import edu.mayo.cts2.framework.model.valueset.ValueSetCatalogEntry
 import edu.mayo.cts2.framework.model.valueset.ValueSetCatalogEntrySummary
 import edu.mayo.cts2.framework.plugin.service.mat.model.ValueSet
 import edu.mayo.cts2.framework.plugin.service.mat.profile.AbstractService
 import edu.mayo.cts2.framework.plugin.service.mat.repository.ValueSetRepository
+import edu.mayo.cts2.framework.plugin.service.mat.uri.UriUtils
+import edu.mayo.cts2.framework.service.meta.StandardMatchAlgorithmReference
+import edu.mayo.cts2.framework.service.meta.StandardModelAttributeReference
 import edu.mayo.cts2.framework.service.profile.valueset.ValueSetQuery
 import edu.mayo.cts2.framework.service.profile.valueset.ValueSetQueryService
 import javax.annotation.Resource
 import javax.persistence.Entity
-import edu.mayo.cts2.framework.model.core.MatchAlgorithmReference
-import edu.mayo.cts2.framework.model.core.PropertyReference
-import org.springframework.context.annotation.ScopedProxyMode
-import scala.collection.JavaConversions._
-import edu.mayo.cts2.framework.service.meta.StandardMatchAlgorithmReference
-import edu.mayo.cts2.framework.service.meta.StandardModelAttributeReference
-import org.springframework.data.domain.Pageable
-import org.apache.commons.collections.CollectionUtils
-import edu.mayo.cts2.framework.model.command.ResolvedFilter
-import edu.mayo.cts2.framework.plugin.service.mat.uri.UriUtils
-import org.apache.commons.lang.StringUtils
-import edu.mayo.cts2.framework.model.core.types.TargetReferenceType
-import edu.mayo.cts2.framework.model.core.URIAndEntityName
+import javax.persistence.criteria.CriteriaBuilder
+import javax.persistence.criteria.CriteriaQuery
+import javax.persistence.criteria.Root
+import javax.persistence.criteria.Predicate
+import javax.persistence.criteria.Path
+import javax.persistence.criteria.JoinType
+import edu.mayo.cts2.framework.plugin.service.mat.profile.ProfileUtils
+import javax.persistence.criteria.Expression
 
 @Component
 class MatValueSetQueryService
   extends AbstractService
   with ValueSetQueryService {
 
-  val NQF_NUMBER_PROP:String = "nqfnumber"
-  val EMEASURE_ID_PROP:String = "emeasureid"
-  
+  val NQF_NUMBER_PROP: String = "nqfnumber"
+  val EMEASURE_ID_PROP: String = "emeasureid"
+
   @Resource
   var valueSetRepository: ValueSetRepository = _
 
-  def getSupportedMatchAlgorithms: java.util.Set[_ <: MatchAlgorithmReference] = { 
-    val set = new java.util.HashSet[MatchAlgorithmReference]() 
+  def getSupportedMatchAlgorithms: java.util.Set[MatchAlgorithmReference] = {
+    val set = new java.util.HashSet[MatchAlgorithmReference]()
     set.add(StandardMatchAlgorithmReference.CONTAINS.getMatchAlgorithmReference)
     set.add(StandardMatchAlgorithmReference.STARTS_WITH.getMatchAlgorithmReference)
+    set.add(StandardMatchAlgorithmReference.EXACT_MATCH.getMatchAlgorithmReference)
     set
   }
 
-  def getSupportedSearchReferences: java.util.Set[_ <: PropertyReference] = { 
-    val set = new java.util.HashSet[PropertyReference]() 
-    set.add(StandardModelAttributeReference.RESOURCE_NAME.getPropertyReference)
-    set.add(StandardModelAttributeReference.RESOURCE_SYNOPSIS.getPropertyReference)
-    set.add(createPropertyReference(NQF_NUMBER_PROP))
-    set.add(createPropertyReference(EMEASURE_ID_PROP))
-    
+  def getSupportedSearchReferences: java.util.Set[StateAdjustingPropertyReference[Seq[Specification[ValueSet]]]] = {
+    val set = new java.util.HashSet[StateAdjustingPropertyReference[Seq[Specification[ValueSet]]]]()
+
+    val nameRef = StandardModelAttributeReference.RESOURCE_NAME.getPropertyReference
+    val synopsisRef = StandardModelAttributeReference.RESOURCE_SYNOPSIS.getPropertyReference
+
+    set.add(
+      createAttributeReference(
+        nameRef.getReferenceTarget.getName, nameRef.getReferenceTarget.getUri, "name"))
+    set.add(
+      createAttributeReference(
+        synopsisRef.getReferenceTarget.getName, synopsisRef.getReferenceTarget.getUri, "formalName"))
+
+    set.add(createPropertyReference(NQF_NUMBER_PROP, UriUtils.toSvsUri("NQF Number"), "NQF Number"))
+    set.add(createPropertyReference(EMEASURE_ID_PROP, UriUtils.toSvsUri("eMeasure Identifier"), "eMeasure Identifier"))
+
     set
   }
-  
-  def createPropertyReference(name:String): PropertyReference = { 
-    val ref = new PropertyReference()
-    ref.setReferenceType(TargetReferenceType.PROPERTY);
+
+  def createAttributeReference(
+    name: String,
+    uri: String,
+    path: String): StateAdjustingPropertyReference[Seq[Specification[ValueSet]]] = {
+
+    val stateUpdater = new StateUpdater[Seq[Specification[ValueSet]]]() {
+
+      def updateState(
+        currentState: Seq[Specification[ValueSet]],
+        matchAlgorithm: MatchAlgorithmReference,
+        queryString: String): Seq[Specification[ValueSet]] = {
+
+        val specification = new Specification[ValueSet]() {
+
+          def toPredicate(root: Root[ValueSet], query: CriteriaQuery[_], cb: CriteriaBuilder): Predicate = {
+
+            val fn = filterFn(matchAlgorithm)
+            
+            fn(root.get(path).asInstanceOf[Path[String]], queryString)
+          }
+
+        }
+        currentState :+ specification
+      }
+    }
+
+    val ref = new StateAdjustingPropertyReference[Seq[Specification[ValueSet]]](stateUpdater)
+    ref.setReferenceType(TargetReferenceType.ATTRIBUTE);
     ref.setReferenceTarget(new URIAndEntityName())
     ref.getReferenceTarget.setName(name)
-    
+    ref.getReferenceTarget.setUri(uri)
+
+    ref
+  }
+
+  def createPropertyReference(
+    name: String,
+    uri: String,
+    propertyName: String): StateAdjustingPropertyReference[Seq[Specification[ValueSet]]] = {
+
+    val stateUpdater = new StateUpdater[Seq[Specification[ValueSet]]]() {
+
+      def updateState(
+        currentState: Seq[Specification[ValueSet]],
+        matchAlgorithm: MatchAlgorithmReference,
+        queryString: String): Seq[Specification[ValueSet]] = {
+
+        val specification = new Specification[ValueSet]() {
+
+          def toPredicate(root: Root[ValueSet], query: CriteriaQuery[_], cb: CriteriaBuilder): Predicate = {
+
+            val join = root.join("properties", JoinType.INNER)
+            
+            val fn = filterFn(matchAlgorithm)
+            
+            val pred1 = fn(join.get("value").asInstanceOf[Path[String]], queryString)
+            val pred2 = cb.equal(join.get("name").asInstanceOf[Path[String]], propertyName)
+
+            ProfileUtils.and(cb, pred1, pred2)
+          }
+
+        }
+        currentState :+ specification
+      }
+    }
+
+    val ref = new StateAdjustingPropertyReference[Seq[Specification[ValueSet]]](stateUpdater)
+    ref.setReferenceType(TargetReferenceType.PROPERTY)
+    ref.setReferenceTarget(new URIAndEntityName())
+    ref.getReferenceTarget.setName(name)
+    ref.getReferenceTarget.setUri(uri)
+
     ref
   }
 
@@ -74,59 +159,54 @@ class MatValueSetQueryService
   def getKnownProperties: java.util.Set[PredicateReference] = { new java.util.HashSet[PredicateReference]() }
 
   @Transactional
-  def getResourceSummaries(query: ValueSetQuery, sort: SortCriteria, page: Page = new Page()): DirectoryResult[ValueSetCatalogEntrySummary] = {
-    val valueSets = getValueSetQueryFunction(query)(toPageable(Option(page)))
+  def getResourceSummaries(query: ValueSetQuery, sort: SortCriteria, requestedPage: Page = new Page()): DirectoryResult[ValueSetCatalogEntrySummary] = {
+    val page = if (requestedPage == null) new Page() else requestedPage
 
-    val entries = valueSets.foldLeft(Seq[ValueSetCatalogEntrySummary]())(transformValueSet)
+    var directoryBuilder: DirectoryBuilder[ValueSetCatalogEntrySummary] = new HibernateCriteriaDirectoryBuilder[ValueSetCatalogEntrySummary, ValueSet](
+      classOf[ValueSet],
+      entityManager,
+      transformSingleValueSet,
+      getSupportedMatchAlgorithms,
+      getSupportedSearchReferences)
 
-    val totalElements = valueSets.getTotalElements
-    
-    new DirectoryResult(entries, entries.size == totalElements)
-  }
-  
-  def getValueSetQueryFunction(query: ValueSetQuery) = {
-    if(query == null || CollectionUtils.isEmpty(query.getFilterComponent) ){
-    	valueSetRepository.findAll _ 
-    } else {
-      val filters = query.getFilterComponent
-      if(filters.size()	> 1){
-        throw new IllegalStateException("Only one Filter per request is allowed.")
-      } else {
-        val filter = filters.iterator.next
-        
-        filterToQueryFunction(filter)
-      }
+    if (query != null) {
+      directoryBuilder = directoryBuilder.restrict(query.getFilterComponent)
     }
-  }: (Pageable) => org.springframework.data.domain.Page[ValueSet]
-  
-  def filterToQueryFunction(filter:ResolvedFilter) = {
-    val propertyReference = filter.getPropertyReference
-    
-    val resourceName = StandardModelAttributeReference.RESOURCE_NAME.getPropertyReference.getReferenceTarget.getName
-    val resourceSynopsis = StandardModelAttributeReference.RESOURCE_SYNOPSIS.getPropertyReference.getReferenceTarget.getName
-   
-    val matchAlgorithm = filter.getMatchAlgorithmReference.getContent
+
+    directoryBuilder.
+      addStart(page.getStart).
+      addMaxToReturn(page.getMaxToReturn).
+      resolve
+  }
+
+  private def filterFn(ref: MatchAlgorithmReference) = {
+    val matchAlgorithm = ref.getContent
     val contains = StandardMatchAlgorithmReference.CONTAINS.getMatchAlgorithmReference.getContent
     val startsWith = StandardMatchAlgorithmReference.STARTS_WITH.getMatchAlgorithmReference.getContent
+    val exact = StandardMatchAlgorithmReference.EXACT_MATCH.getMatchAlgorithmReference.getContent
 
-    var fn = propertyReference.getReferenceTarget.getName match {
-      case `resourceName` => valueSetRepository.findByNameLikeIgnoreCase(_:String, _:Pageable)
-      case `resourceSynopsis` => valueSetRepository.findByAnyLikeIgnoreCase(_:String, _:Pageable)
-      case `NQF_NUMBER_PROP` => valueSetRepository.findByPropertyLikeIgnoreCase("NQF Number", _:String, _:Pageable)
-      case `EMEASURE_ID_PROP` => valueSetRepository.findByPropertyLikeIgnoreCase("eMeasure Identifier", _:String, _:Pageable)
+    val cb = entityManager.getCriteriaBuilder
+   
+    val cbLikeFn = cb.like(_:Expression[String],_:String)
+    val cbEqualsFn = cb.equal(_:Expression[String],_:String)
+    
+    val likeFn = (ex:Expression[String], formatter:(String) => String, q:String) => {
+      cbLikeFn(cb.lower(ex),formatter(q))
     }
     
-    val matchValue = filter.getMatchValue
+    val equalsFn = (ex:Expression[String], formatter:(String) => String, q:String) => {
+      cbEqualsFn(ex,formatter(q))
+    }
     
     matchAlgorithm match {
-      case `contains` => fn('%'+matchValue+'%', _:Pageable)
-      case `startsWith` => fn(matchValue+'%', _:Pageable)
+      case `contains` => ( likeFn(_:Expression[String], (s:String) => '%'+s.toLowerCase+'%', _:String ) )
+      case `startsWith` => ( likeFn(_:Expression[String], (s:String) => s.toLowerCase+'%', _:String ) )
+      case `exact` => ( equalsFn(_:Expression[String], (s:String) => s, _:String ) )
     }
 
-  }: (Pageable) => org.springframework.data.domain.Page[ValueSet]
-  
-  
-  def transformValueSet = (seq:Seq[ValueSetCatalogEntrySummary], valueSet:ValueSet) => {
+  }: (Expression[String], String) => Predicate
+
+  def transformSingleValueSet = (valueSet: ValueSet) => {
     val summary = new ValueSetCatalogEntrySummary()
     summary.setValueSetName(valueSet.name)
     summary.setAbout(UriUtils.oidToUri(valueSet.oid))
@@ -134,13 +214,17 @@ class MatValueSetQueryService
     summary.setHref(urlConstructor.createValueSetUrl((valueSet.name)))
 
     summary.setCurrentDefinition(
-        MatValueSetUtils.buildValueSetDefinitionReference(
-            summary.getValueSetName, summary.getAbout,
-            valueSet.currentVersion,
-            urlConstructor))
-    
-    seq ++ Seq(summary)
-  }:Seq[ValueSetCatalogEntrySummary]
+      MatValueSetUtils.buildValueSetDefinitionReference(
+        summary.getValueSetName, summary.getAbout,
+        valueSet.currentVersion,
+        urlConstructor))
+
+    summary
+  }: ValueSetCatalogEntrySummary
+
+  def transformValueSet = (seq: Seq[ValueSetCatalogEntrySummary], valueSet: ValueSet) => {
+    seq :+ transformSingleValueSet(valueSet)
+  }: Seq[ValueSetCatalogEntrySummary]
 
   def getResourceList(p1: ValueSetQuery, p2: SortCriteria, p3: Page): DirectoryResult[ValueSetCatalogEntry] = null
 
