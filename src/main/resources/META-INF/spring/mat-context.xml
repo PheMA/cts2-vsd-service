@@ -63,5 +63,12 @@
 		<property name="idleConnectionTestPeriod" value="3000" />
 		<property name="loginTimeout" value="300" />
 	</bean>
-
+	
+	<bean id="utsDao" name="utsDao" class="edu.mayo.cts2.framework.plugin.service.mat.umls.dao.UtsDao">
+		<property name="username" value="${utsUsername}" />
+		<property name="password" value="${utsPassword}" />
+		<property name="umlsRelease" value="${utsUmlsRelease}" />
+		<property name="serviceName" value="${utsServiceName}" />
+	</bean>
+	
 </beans>

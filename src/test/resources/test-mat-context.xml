@@ -8,15 +8,9 @@
 
 	<import resource="META-INF/spring/mat-context.xml" />
 
-	<bean
-		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-		<property name="locations">
-			<list>
-				<value>file:target/testconfigdir/webapp-rest/config/mat-service.properties
-				</value>
-			</list>
-		</property>
-	</bean>
+	<context:property-placeholder
+        location="file:target/testconfigdir/webapp-rest/config/mat-service.properties"
+        system-properties-mode="OVERRIDE" />
 
 	<bean id="serverContext" class="edu.mayo.cts2.framework.core.config.TestServerContext" />
 
@@ -62,5 +56,7 @@
 			</list>
 		</property>
 	</bean>
+
+	<bean id="utsDao" name="utsDao" class="edu.mayo.cts2.framework.plugin.service.mat.umls.dao.UtsDao"/>
 
 </beans>

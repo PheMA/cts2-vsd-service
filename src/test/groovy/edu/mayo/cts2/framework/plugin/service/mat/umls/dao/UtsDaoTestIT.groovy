@@ -12,7 +12,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
 import scala.Function2
 
 @RunWith(SpringJUnit4ClassRunner)
-@ContextConfiguration("/test-mat-context.xml")
+@ContextConfiguration(locations=["/test-mat-context.xml"])
 class UtsDaoTestIT {
 
 	@Resource

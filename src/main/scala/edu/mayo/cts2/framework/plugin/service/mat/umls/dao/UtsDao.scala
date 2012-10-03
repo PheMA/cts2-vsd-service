@@ -1,14 +1,16 @@
 package edu.mayo.cts2.framework.plugin.service.mat.umls.dao;
 
 import java.util.Date
-import scala.collection.JavaConversions._
+
+import scala.reflect.BeanProperty
+
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
+
+import gov.nih.nlm.umls.uts.webservice.UtsFault
 import gov.nih.nlm.umls.uts.webservice.UtsWsContentControllerImplService
 import gov.nih.nlm.umls.uts.webservice.UtsWsSecurityControllerImplService
-import gov.nih.nlm.umls.uts.webservice.UtsFault
 
-@Component
 class UtsDao {
 
   val EIGHT_HOURS = 1000 * 60 * 60 * 8;
