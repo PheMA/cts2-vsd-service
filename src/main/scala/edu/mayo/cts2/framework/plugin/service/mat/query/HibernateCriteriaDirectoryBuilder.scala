@@ -63,16 +63,16 @@ class CriteriaCallback[T, X](
     val entries = query.setFirstResult(start).setMaxResults(maxResults + 1).getResultList.foldLeft(Seq[T]())(
       _ :+ transform(_))
 
-    val isAtEnd: Boolean = !(entries.size == maxResults + 1)
+    val hasMore: Boolean = entries.size == maxResults + 1
 
     val finalEntries =
-      if (isAtEnd) {
-        entries.slice(0, entries.size)
+      if (hasMore) {
+        entries.slice(0, entries.size - 1)
       } else {
         entries
       }
 
-    new DirectoryResult[T](entries, isAtEnd);
+    new DirectoryResult[T](finalEntries, !hasMore);
 
   }
 }
