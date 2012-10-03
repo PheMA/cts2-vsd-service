@@ -57,6 +57,4 @@
 		</property>
 	</bean>
 
-	<bean id="utsDao" name="utsDao" class="edu.mayo.cts2.framework.plugin.service.mat.umls.dao.UtsDao"/>
-
 </beans>
