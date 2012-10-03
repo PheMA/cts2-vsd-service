@@ -39,9 +39,6 @@ class UtsEntityReadService extends AbstractService
   with EntityDescriptionReadService {
 
   @Resource
-  var namespaceResolutionService: NamespaceResolutionService = _
-
-  @Resource
   var utsDao: UtsDao = _
 
   def readEntityDescriptions(p1: EntityNameOrURI, p2: SortCriteria, p3: ResolvedReadContext, p4: Page): DirectoryResult[EntityListEntry] = throw new RuntimeException()

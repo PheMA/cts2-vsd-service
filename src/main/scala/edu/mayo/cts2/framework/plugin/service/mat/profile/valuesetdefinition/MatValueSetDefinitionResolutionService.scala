@@ -54,9 +54,6 @@ class MatValueSetDefinitionResolutionService extends AbstractService with ValueS
   @Resource
   var hrefBuilder: HrefBuilder = _
 
-  @Resource
-  var namespaceResolutionService: NamespaceResolutionService = _
-
   def getSupportedMatchAlgorithms: Set[_ <: MatchAlgorithmReference] = null
 
   def getSupportedSearchReferences: Set[_ <: PropertyReference] = null
