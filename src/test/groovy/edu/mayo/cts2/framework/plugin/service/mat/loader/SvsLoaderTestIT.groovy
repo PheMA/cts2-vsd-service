@@ -8,6 +8,7 @@ import java.util.zip.ZipFile
 import javax.annotation.Resource
 import javax.xml.bind.JAXBContext
 
+import org.apache.commons.io.FileUtils
 import org.junit.Test
 
 import edu.mayo.cts2.framework.plugin.service.mat.repository.ValueSetRepository
@@ -38,8 +39,18 @@ class SvsLoaderTestIT extends AbstractTestBase {
 
 	@Test
 	void TestUnmarshallSVS() {
-		def zip = new ZipFile(new File("src/test/resources/exampleSVS/svsXml.zip"))
-		
-		loader.loadSvsZip(zip)
+		//this is internally protected
+		def file = File.createTempFile(UUID.randomUUID().toString(), "zip")
+		try {
+			def url = 'http://bmidev3/cts2/svsXml.zip'
+			file << new URL(url).openStream()
+			
+			
+			def zip = new ZipFile(file)
+			
+			loader.loadSvsZip(zip)
+		} finally {
+			file.delete()
+		}
 	}
 }
