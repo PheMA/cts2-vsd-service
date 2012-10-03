@@ -2,44 +2,44 @@
 <ns0:RetrieveMultipleValueSetsResponse xmlns:ns0="urn:ihe:iti:svs:2008" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <ns0:DescribedValueSet ID="1.3.6.1.4.1.33895.1.3.0.31" displayName="Hospital Measures-Joint Commission Evidence of a surgical procedure requiring general or neuraxial anesthesia" version="20120917">
         <ns0:ConceptList>
-            <ns0:Concept code="243702000" codeSystemName="SNOMEDCT" codeSystemVersion="2012-07" displayName="Gynecologic examination under general anesthesia (procedure)"/>
-            <ns0:Concept code="241687005" codeSystemName="SNOMEDCT" codeSystemVersion="2012-07" displayName="Induction of general anesthesia (procedure)"/>
-            <ns0:Concept code="241688000" codeSystemName="SNOMEDCT" codeSystemVersion="2012-07" displayName="Intravenous induction of general anesthesia (procedure)"/>
-            <ns0:Concept code="241690004" codeSystemName="SNOMEDCT" codeSystemVersion="2012-07" displayName="Intramuscular induction of general anesthesia (procedure)"/>
-            <ns0:Concept code="241691000" codeSystemName="SNOMEDCT" codeSystemVersion="2012-07" displayName="Rectal induction of general anesthesia (procedure)"/>
-            <ns0:Concept code="241695009" codeSystemName="SNOMEDCT" codeSystemVersion="2012-07" displayName="Maintenance of general anesthesia (procedure)"/>
-            <ns0:Concept code="231255000" codeSystemName="SNOMEDCT" codeSystemVersion="2012-07" displayName="Spinal subdural local anesthetic block (procedure)"/>
-            <ns0:Concept code="231256004" codeSystemName="SNOMEDCT" codeSystemVersion="2012-07" displayName="Cervical subdural block (procedure)"/>
-            <ns0:Concept code="231257008" codeSystemName="SNOMEDCT" codeSystemVersion="2012-07" displayName="Thoracic subdural block (procedure)"/>
-            <ns0:Concept code="231258003" codeSystemName="SNOMEDCT" codeSystemVersion="2012-07" displayName="Lumbar subdural block (procedure)"/>
-            <ns0:Concept code="231261002" codeSystemName="SNOMEDCT" codeSystemVersion="2012-07" displayName="Combined spinal/epidural local anesthetic block (procedure)"/>
-            <ns0:Concept code="231262009" codeSystemName="SNOMEDCT" codeSystemVersion="2012-07" displayName="Combined spinal/epidural technique with needles at separate spaces (procedure)"/>
-            <ns0:Concept code="231263004" codeSystemName="SNOMEDCT" codeSystemVersion="2012-07" displayName="Combined spinal/epidural technique - spinal needle through Tuohy needle (procedure)"/>
-            <ns0:Concept code="18830003" codeSystemName="SNOMEDCT" codeSystemVersion="2012-07" displayName="Myringotomy including aspiration with general anesthesia (procedure)"/>
-            <ns0:Concept code="18831004" codeSystemName="SNOMEDCT" codeSystemVersion="2012-07" displayName="Manipulation of knee joint under general anesthesia (procedure)"/>
-            <ns0:Concept code="405650006" codeSystemName="SNOMEDCT" codeSystemVersion="2012-07" displayName="Neuraxial nerve block (procedure)"/>
-            <ns0:Concept code="19673000" codeSystemName="SNOMEDCT" codeSystemVersion="2012-07" displayName="Manipulation of hip joint with general anesthesia (procedure)"/>
-            <ns0:Concept code="18188000" codeSystemName="SNOMEDCT" codeSystemVersion="2012-07" displayName="Ophthalmoscopy under general anesthesia (procedure)"/>
-            <ns0:Concept code="359960003" codeSystemName="SNOMEDCT" codeSystemVersion="2012-07" displayName="Ophthalmologic examination and evaluation under general anesthesia, limited (procedure)"/>
-            <ns0:Concept code="36609005" codeSystemName="SNOMEDCT" codeSystemVersion="2012-07" displayName="Rhinolaryngologic examination under general anesthesia (procedure)"/>
-            <ns0:Concept code="173476009" codeSystemName="SNOMEDCT" codeSystemVersion="2012-07" displayName="Examination of oral cavity under general anesthesia (procedure)"/>
-            <ns0:Concept code="303356007" codeSystemName="SNOMEDCT" codeSystemVersion="2012-07" displayName="Local anesthetic nerve block around spinal cord meninges (procedure)"/>
-            <ns0:Concept code="303358008" codeSystemName="SNOMEDCT" codeSystemVersion="2012-07" displayName="Neurolytic nerve block around spinal cord meninges (procedure)"/>
+            <ns0:Concept code="2437s02000" codeSystemName="SNOMEDCT" codeSystemVersion="2012-07" displayName="Gynecologic examination under general anesthesia (procedure)"/>
+            <ns0:Concept code="24234687005" codeSystemName="SNOMEDCT" codeSystemVersion="2012-07" displayName="Induction of general anesthesia (procedure)"/>
+            <ns0:Concept code="2416s88000" codeSystemName="SNOMEDCT" codeSystemVersion="2012-07" displayName="Intravenous induction of general anesthesia (procedure)"/>
+            <ns0:Concept code="241as690004" codeSystemName="SNOMEDCT" codeSystemVersion="2012-07" displayName="Intramuscular induction of general anesthesia (procedure)"/>
+            <ns0:Concept code="242349a1000" codeSystemName="SNOMEDCT" codeSystemVersion="2012-07" displayName="Rectal induction of general anesthesia (procedure)"/>
+            <ns0:Concept code="24169s5009" codeSystemName="SNOMEDCT" codeSystemVersion="2012-07" displayName="Maintenance of general anesthesia (procedure)"/>
+            <ns0:Concept code="2312a5s5000" codeSystemName="SNOMEDCT" codeSystemVersion="2012-07" displayName="Spinal subdural local anesthetic block (procedure)"/>
+            <ns0:Concept code="2234d56004" codeSystemName="SNOMEDCT" codeSystemVersion="2012-07" displayName="Cervical subdural block (procedure)"/>
+            <ns0:Concept code="2312f57008" codeSystemName="SNOMEDCT" codeSystemVersion="2012-07" displayName="Thoracic subdural block (procedure)"/>
+            <ns0:Concept code="2312f58003" codeSystemName="SNOMEDCT" codeSystemVersion="2012-07" displayName="Lumbar subdural block (procedure)"/>
+            <ns0:Concept code="232341002" codeSystemName="SNOMEDCT" codeSystemVersion="2012-07" displayName="Combined spinal/epidural local anesthetic block (procedure)"/>
+            <ns0:Concept code="23a1262009" codeSystemName="SNOMEDCT" codeSystemVersion="2012-07" displayName="Combined spinal/epidural technique with needles at separate spaces (procedure)"/>
+            <ns0:Concept code="231s263004" codeSystemName="SNOMEDCT" codeSystemVersion="2012-07" displayName="Combined spinal/epidural technique - spinal needle through Tuohy needle (procedure)"/>
+            <ns0:Concept code="188s30003" codeSystemName="SNOMEDCT" codeSystemVersion="2012-07" displayName="Myringotomy including aspiration with general anesthesia (procedure)"/>
+            <ns0:Concept code="188s31004" codeSystemName="SNOMEDCT" codeSystemVersion="2012-07" displayName="Manipulation of knee joint under general anesthesia (procedure)"/>
+            <ns0:Concept code="4a05650006" codeSystemName="SNOMEDCT" codeSystemVersion="2012-07" displayName="Neuraxial nerve block (procedure)"/>
+            <ns0:Concept code="196s73000" codeSystemName="SNOMEDCT" codeSystemVersion="2012-07" displayName="Manipulation of hip joint with general anesthesia (procedure)"/>
+            <ns0:Concept code="181s88000" codeSystemName="SNOMEDCT" codeSystemVersion="2012-07" displayName="Ophthalmoscopy under general anesthesia (procedure)"/>
+            <ns0:Concept code="359a96wer003" codeSystemName="SNOMEDCT" codeSystemVersion="2012-07" displayName="Ophthalmologic examination and evaluation under general anesthesia, limited (procedure)"/>
+            <ns0:Concept code="366a09005" codeSystemName="SNOMEDCT" codeSystemVersion="2012-07" displayName="Rhinolaryngologic examination under general anesthesia (procedure)"/>
+            <ns0:Concept code="1a734a76009" codeSystemName="SNOMEDCT" codeSystemVersion="2012-07" displayName="Examination of oral cavity under general anesthesia (procedure)"/>
+            <ns0:Concept code="3033a56007" codeSystemName="SNOMEDCT" codeSystemVersion="2012-07" displayName="Local anesthetic nerve block around spinal cord meninges (procedure)"/>
+            <ns0:Concept code="3033a58008" codeSystemName="SNOMEDCT" codeSystemVersion="2012-07" displayName="Neurolytic nerve block around spinal cord meninges (procedure)"/>
             <ns0:Concept code="69534008" codeSystemName="SNOMEDCT" codeSystemVersion="2012-07" displayName="Tympanostomy with general anesthesia (procedure)"/>
-            <ns0:Concept code="57026003" codeSystemName="SNOMEDCT" codeSystemVersion="2012-07" displayName="Reduction of atraumatic hip dislocation with general anesthesia (procedure)"/>
+            <ns0:Concept code="57c026003" codeSystemName="SNOMEDCT" codeSystemVersion="2012-07" displayName="Reduction of atraumatic hip dislocation with general anesthesia (procedure)"/>
             <ns0:Concept code="50697003" codeSystemName="SNOMEDCT" codeSystemVersion="2012-07" displayName="General anesthesia (procedure)"/>
-            <ns0:Concept code="53185004" codeSystemName="SNOMEDCT" codeSystemVersion="2012-07" displayName="Physical examination under general anesthesia (procedure)"/>
+            <ns0:Concept code="531v85a004" codeSystemName="SNOMEDCT" codeSystemVersion="2012-07" displayName="Physical examination under general anesthesia (procedure)"/>
             <ns0:Concept code="88875005" codeSystemName="SNOMEDCT" codeSystemVersion="2012-07" displayName="Orthopedic examination under general anesthesia (procedure)"/>
-            <ns0:Concept code="75771002" codeSystemName="SNOMEDCT" codeSystemVersion="2012-07" displayName="Ear, nose and throat examination under general anesthesia (procedure)"/>
+            <ns0:Concept code="7a5323471a0v02" codeSystemName="SNOMEDCT" codeSystemVersion="2012-07" displayName="Ear, nose and throat examination under general anesthesia (procedure)"/>
             <ns0:Concept code="274507007" codeSystemName="SNOMEDCT" codeSystemVersion="2012-07" displayName="Operative general anesthesia (procedure)"/>
-            <ns0:Concept code="288185006" codeSystemName="SNOMEDCT" codeSystemVersion="2012-07" displayName="Inhalation general anesthesia (procedure)"/>
-            <ns0:Concept code="288186007" codeSystemName="SNOMEDCT" codeSystemVersion="2012-07" displayName="General anesthesia and muscle relaxant (procedure)"/>
-            <ns0:Concept code="244645007" codeSystemName="SNOMEDCT" codeSystemVersion="2012-07" displayName="Pelvic examination under general anesthesia (procedure)"/>
-            <ns0:Concept code="72360005" codeSystemName="SNOMEDCT" codeSystemVersion="2012-07" displayName="Manipulation of ankle under general anesthesia (procedure)"/>
-            <ns0:Concept code="45726002" codeSystemName="SNOMEDCT" codeSystemVersion="2012-07" displayName="Laryngologic examination under general anesthesia (procedure)"/>
-            <ns0:Concept code="433586002" codeSystemName="SNOMEDCT" codeSystemVersion="2012-07" displayName="Care of subject following general anesthesia (regime/therapy)"/>
+            <ns0:Concept code="288a185006" codeSystemName="SNOMEDCT" codeSystemVersion="2012-07" displayName="Inhalation general anesthesia (procedure)"/>
+            <ns0:Concept code="288a186007" codeSystemName="SNOMEDCT" codeSystemVersion="2012-07" displayName="General anesthesia and muscle relaxant (procedure)"/>
+            <ns0:Concept code="2a4v4s645007" codeSystemName="SNOMEDCT" codeSystemVersion="2012-07" displayName="Pelvic examination under general anesthesia (procedure)"/>
+            <ns0:Concept code="7236s0005" codeSystemName="SNOMEDCT" codeSystemVersion="2012-07" displayName="Manipulation of ankle under general anesthesia (procedure)"/>
+            <ns0:Concept code="4572a6002" codeSystemName="SNOMEDCT" codeSystemVersion="2012-07" displayName="Laryngologic examination under general anesthesia (procedure)"/>
+            <ns0:Concept code="4a335d86002" codeSystemName="SNOMEDCT" codeSystemVersion="2012-07" displayName="Care of subject following general anesthesia (regime/therapy)"/>
         </ns0:ConceptList>
-        <ns0:Source>Oklahoma Foundation for Medical Quality</ns0:Source>
+        <ns0:Source>asdfasdfasdf</ns0:Source>
         <ns0:Type>Extensional</ns0:Type>
         <ns0:Binding>Dynamic</ns0:Binding>
         <ns0:Status>Active</ns0:Status>
@@ -51,7 +51,7 @@
             <ns0:Keyword>172</ns0:Keyword>
         </ns0:Group>
         <ns0:Group ID="1" sourceOrganization="National Quality Forum" displayName="GUID">
-            <ns0:Keyword>feea3922-f61f-4b05-98f9-b72a11815f12</ns0:Keyword>
+            <ns0:Keyword>feasdfasdf15f12</ns0:Keyword>
         </ns0:Group>
         <ns0:Group ID="1" sourceOrganization="National Quality Forum" displayName="Endorsed By">
             <ns0:Keyword>National Quality Forum</ns0:Keyword>
@@ -101,7 +101,7 @@
         
         
         <ns0:Group ID="2" sourceOrganization="National Quality Forum" displayName="GUID">
-            <ns0:Keyword>d78ce034-8288-4012-a31e-7f485a74f2a9</ns0:Keyword>
+            <ns0:Keyword>d78ce0asdfasdf85a74f2a9</ns0:Keyword>
         </ns0:Group>
         <ns0:Group ID="2" sourceOrganization="National Quality Forum" displayName="Endorsed By">
             <ns0:Keyword>National Quality Forum</ns0:Keyword>
@@ -146,7 +146,7 @@
             <ns0:Keyword>171</ns0:Keyword>
         </ns0:Group>
         <ns0:Group ID="3" sourceOrganization="National Quality Forum" displayName="GUID">
-            <ns0:Keyword>d09add1d-30f5-462d-b677-3d17d9ccd664</ns0:Keyword>
+            <ns0:Keyword>d09asdfasdf64</ns0:Keyword>
         </ns0:Group>
         <ns0:Group ID="3" sourceOrganization="National Quality Forum" displayName="Endorsed By">
             <ns0:Keyword>National Quality Forum</ns0:Keyword>
