@@ -75,12 +75,14 @@ class MatValueSetDefinitionQueryService
   }
 
   def transformValueSetVersion = (seq:Seq[ValueSetDefinitionDirectoryEntry], valueSetVersion:ValueSetVersion) => {
+    val valueSetDefName = MatValueSetUtils.getValueSetDefName(valueSetVersion)
+    
     val summary = new ValueSetDefinitionDirectoryEntry()
-    summary.setResourceName(valueSetVersion.id)
+    summary.setResourceName(valueSetDefName)
     summary.setAbout(UriUtils.oidToUri(valueSetVersion.valueSet.oid))
     summary.setDocumentURI(UriUtils.uuidToUri(valueSetVersion.id))
     summary.setFormalName(valueSetVersion.valueSet.formalName)
-    summary.setHref(urlConstructor.createValueSetDefinitionUrl(valueSetVersion.valueSet.name, valueSetVersion.id))
+    summary.setHref(urlConstructor.createValueSetDefinitionUrl(valueSetVersion.valueSet.name, valueSetDefName))
 
     summary.setDefinedValueSet(MatValueSetUtils.buildValueSetReference(valueSetVersion, urlConstructor))
     

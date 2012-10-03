@@ -68,17 +68,23 @@ object MatValueSetUtils {
     valueSetVersion: ValueSetVersion,
     urlConstructor: UrlConstructor): ValueSetDefinitionReference = {
 
-    val valueSetDefName =
+    val valueSetDefName = getValueSetDefName(valueSetVersion)
+ 
+    buildValueSetDefinitionReference(
+      name, about,
+      valueSetDefName, UriUtils.uuidToUri(valueSetVersion.id),
+      urlConstructor)
+  }
+  
+  def getValueSetDefName(valueSetVersion: ValueSetVersion) = {
+      val valueSetDefName =
       if (StringUtils.isNotBlank(valueSetVersion.versionId)) {
         valueSetVersion.versionId
       } else {
         valueSetVersion.id
       }
-
-    buildValueSetDefinitionReference(
-      name, about,
-      valueSetDefName, UriUtils.uuidToUri(valueSetVersion.id),
-      urlConstructor)
+      
+      valueSetDefName
   }
 
   def buildValueSetDefinitionReference(
