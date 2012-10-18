@@ -14,12 +14,16 @@ import javax.xml.bind.JAXBContext
 import java.io.InputStream
 import javax.xml.bind.JAXBElement
 import java.util.zip.ZipEntry
+import org.apache.log4j.Logger
+import org.apache.commons.io.IOUtils
 
 @Component
 class SvsLoader {
   
   val BATCH_SIZE = 10
 
+  var logger = Logger.getLogger(classOf[SvsLoader])
+  
   @Resource
   var valueSetRepository: ValueSetRepository = _
 
@@ -53,7 +57,17 @@ class SvsLoader {
   def flushBuffer(buffer: Seq[ZipEntry], zip: ZipFile) = {
     loadRetrieveMultipleValueSetsResponse(
         buffer.foldLeft(Seq[RetrieveMultipleValueSetsResponseType]())(
-            (seq,entry) => seq :+ unmarshall(zip.getInputStream(entry))))
+            (seq,entry) => {
+              try {
+            	  val svs = unmarshall(zip.getInputStream(entry))
+            	  seq :+ svs
+              } catch {
+			      case _: Exception => {
+			        logger.warn("ValueSet: " + entry.getName +" could not be Unmarshalled!")
+			        seq
+			      }
+              }
+            }))
   }
 
   def loadSvsXml(inputStream: InputStream): Unit = {
