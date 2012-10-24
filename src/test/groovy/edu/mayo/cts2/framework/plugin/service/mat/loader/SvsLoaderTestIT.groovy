@@ -8,7 +8,7 @@ import java.util.zip.ZipFile
 import javax.annotation.Resource
 import javax.xml.bind.JAXBContext
 
-import org.apache.commons.io.FileUtils
+import org.junit.Ignore
 import org.junit.Test
 
 import edu.mayo.cts2.framework.plugin.service.mat.repository.ValueSetRepository
@@ -35,6 +35,18 @@ class SvsLoaderTestIT extends AbstractTestBase {
 		def o = u.unmarshal( is );
 
 		assertNotNull o
+	}
+	
+	@Test
+	@Ignore
+	void asdfasdf() {
+		//this is internally protected
+		def f = new File("src/test/resources/exampleSVS/svsXml/svsXml.zip")
+		
+			def zip = new ZipFile(f)
+			
+			loader.loadSvsZip(zip)
+		
 	}
 
 	@Test

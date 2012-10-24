@@ -74,7 +74,13 @@ class UtsEntityReadService extends AbstractService
   }
 
   private def csvNameToSab(csvName: String) = {
-    StringUtils.substringBefore(csvName, "-")
+    val sab = StringUtils.substringBefore(csvName, "-")
+    
+    if(sab.equals("LOINC")){
+      "LNC"
+    } else {
+      sab
+    }
   }
 
   private def atomToNamedEntityDescription(atom: AtomDTO, csv: String): NamedEntityDescription = {

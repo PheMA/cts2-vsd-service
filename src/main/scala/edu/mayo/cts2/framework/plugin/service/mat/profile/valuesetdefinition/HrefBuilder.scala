@@ -23,7 +23,7 @@ class HrefBuilder {
   var snomedCtUrlBase: String = _
 
   val SNOMEDCT = "SNOMED-CT"
-  val UMLS_CODE_SYSTEMS = Set("CPT", "ICD-10-CM", "ICD-9-CM", "RxNorm")
+  val UMLS_CODE_SYSTEMS = Set("CPT", "ICD-10-CM", "ICD-9-CM", "RxNorm", "LOINC")
   
   def contains(cs: String, compare:String):Boolean = {
     contains(cs, Set(compare))
@@ -70,7 +70,10 @@ class HrefBuilder {
   }
 
   def csNameToSab(csName: String) = {
-    StringUtils.upperCase(StringUtils.remove(csName, '-'))
+    csName match {
+      case "LOINC" => "LNC"
+      case _ => StringUtils.upperCase(StringUtils.remove(csName, '-'))
+    }
   }: String
 
 }
