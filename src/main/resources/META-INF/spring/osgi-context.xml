@@ -19,7 +19,11 @@
 
 	<osgi:service ref="zipUploadControllerProvider" interface="edu.mayo.cts2.framework.webapp.rest.extensions.controller.ControllerProvider"/>
 	
-	<osgi:service ref="springSecurityFilterChain" interface="javax.servlet.Filter"/>
+	<osgi:service ref="springSecurityFilterChain" interface="javax.servlet.Filter">
+		<osgi:service-properties>
+			 <entry key="ORDER" value="FIRST"/>
+		</osgi:service-properties>
+	</osgi:service>
 	
 	<osgix:cm-properties id="props" persistent-id="edu.mayo.cts2.framework.plugin.service.mat"/>
 
