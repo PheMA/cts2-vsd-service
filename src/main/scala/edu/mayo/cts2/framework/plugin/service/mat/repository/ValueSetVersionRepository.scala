@@ -27,7 +27,13 @@ trait ValueSetVersionRepository extends CrudRepository[ValueSetVersion, String] 
   def findVersionByIdOrVersionIdAndValueSetName(@Param("name") name:String, @Param("id") id:String): ValueSetVersion
 
   @Query("select distinct entries.codeSystem, entries.codeSystemVersion from ValueSetVersion valueSet " +
-  		"inner join valueSet.entries entries where valueSet.id = :id")
+  		"inner join valueSet._entries entries where valueSet.id = :id")
   def findCodeSystemVersionsByValueSetVersion(@Param("id") oid:String): java.util.Collection[Array[String]]
+
+  @Query("select vse from ValueSetEntry vse where vse.valueSetVersion.id = :id")
+  def findValueSetEntriesByValueSetVersionId(@Param("id") id:String, pageable: Pageable): Page[ValueSetEntry]
+
+  @Query("select vse from ValueSetEntry vse where vse.valueSetVersion.id in (:ids)")
+  def findValueSetEntriesByValueSetVersionIds(@Param("ids") id:java.util.List[String], pageable: Pageable): Page[ValueSetEntry]
 
 }

@@ -9,6 +9,7 @@ import javax.persistence.OneToOne
 import javax.persistence.CascadeType
 import javax.persistence.ElementCollection
 import java.util.ArrayList
+import javax.persistence.FetchType
 
 @Entity
 class ValueSet(valueSetOid: String) extends Equals {
@@ -34,10 +35,10 @@ class ValueSet(valueSetOid: String) extends Equals {
     version.valueSet = this
   }
   
-  @OneToOne(cascade=Array{CascadeType.ALL})
+  @OneToOne(cascade=Array{CascadeType.ALL}, fetch = FetchType.LAZY)
   var currentVersion: ValueSetVersion = _
 
-  @OneToMany(cascade=Array{CascadeType.ALL})
+  @OneToMany(cascade=Array{CascadeType.ALL}, fetch = FetchType.LAZY)
   var versions: java.util.List[ValueSetVersion] = new java.util.ArrayList[ValueSetVersion]
 
   @OneToMany(cascade=Array{CascadeType.ALL})

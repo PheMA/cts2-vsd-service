@@ -8,9 +8,11 @@ import javax.annotation.Resource
 
 import org.junit.Ignore
 import org.junit.Test
+import org.springframework.data.domain.PageRequest
 import org.springframework.transaction.annotation.Transactional
 
 import edu.mayo.cts2.framework.plugin.service.mat.repository.ValueSetRepository
+import edu.mayo.cts2.framework.plugin.service.mat.repository.ValueSetVersionRepository
 import edu.mayo.cts2.framework.plugin.service.mat.test.AbstractTestBase
 
 class MatZipLoaderTestIT extends AbstractTestBase {
@@ -20,6 +22,9 @@ class MatZipLoaderTestIT extends AbstractTestBase {
 	
 	@Resource
 	def ValueSetRepository repo
+	
+	@Resource
+	def ValueSetVersionRepository vrepo
 
 	@Test
 	void TestSetUp() {
@@ -55,9 +60,9 @@ class MatZipLoaderTestIT extends AbstractTestBase {
 		
 		assertNotNull valueSet
 		assertNotNull valueSet.currentVersion
-		assertNotNull valueSet.currentVersion.entries
 		
-		valueSet.currentVersion.entries.each {
+		def entries = vrepo.findValueSetEntriesByValueSetVersionId(valueSet.currentVersion.id, new PageRequest(0, 1000))
+		entries.each {
 			assertTrue it.codeSystem + " - " + it.code, it.code.length() > 1
 		}
 

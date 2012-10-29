@@ -37,6 +37,7 @@ import edu.mayo.cts2.framework.model.core.RoleReference
 import edu.mayo.cts2.framework.plugin.service.mat.uri.UriUtils
 import edu.mayo.cts2.framework.plugin.service.mat.model.ValueSetVersion
 import org.apache.commons.lang.StringUtils
+import edu.mayo.cts2.framework.plugin.service.mat.repository.ValueSetVersionRepository
 
 object MatValueSetUtils {
 
@@ -118,5 +119,15 @@ object MatValueSetUtils {
     sourceAndRoleRef.setSource(sourceRef)
 
     sourceAndRoleRef
+  }
+  
+  def getIncludedVersionIds(version: ValueSetVersion, repos: ValueSetRepository):Seq[String] = {
+    val includedOids = version.includesValueSets
+    
+    includedOids.foldLeft(Seq(version.id))(
+        (seq, oid) => {
+          seq ++ getIncludedVersionIds( repos.findOne( oid ).currentVersion, repos )
+        }
+    )
   }
 }

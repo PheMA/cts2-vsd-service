@@ -49,7 +49,7 @@ class SvsTransform {
     val entries =
       svsValueSet.getConceptList.getConcept.foldLeft(Seq[ValueSetEntry]())(_ :+ conceptToValueSetEntry(_))
 
-    valueSetVersion.entries = entries
+    valueSetVersion.addEntries(entries)
     
     valueSet.addVersion(valueSetVersion)
     

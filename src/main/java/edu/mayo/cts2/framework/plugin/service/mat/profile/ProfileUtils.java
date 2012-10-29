@@ -26,5 +26,4 @@ public final class ProfileUtils {
 		return builder.and(predicates);
 	}
 
-
 }

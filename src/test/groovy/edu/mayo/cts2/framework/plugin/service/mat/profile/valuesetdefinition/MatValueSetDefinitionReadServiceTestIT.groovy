@@ -8,8 +8,8 @@ import javax.xml.transform.stream.StreamResult
 import org.junit.Test
 
 import edu.mayo.cts2.framework.core.xml.DelegatingMarshaller
+import edu.mayo.cts2.framework.model.core.VersionTagReference
 import edu.mayo.cts2.framework.model.util.ModelUtils
-import edu.mayo.cts2.framework.model.valuesetdefinition.ValueSetDefinition
 import edu.mayo.cts2.framework.plugin.service.mat.test.AbstractZipLoadingTestBase
 import edu.mayo.cts2.framework.service.profile.valuesetdefinition.ValueSetDefinitionReadService
 import edu.mayo.cts2.framework.service.profile.valuesetdefinition.name.ValueSetDefinitionReadId
@@ -31,6 +31,14 @@ class MatValueSetDefinitionReadServiceTestIT extends AbstractZipLoadingTestBase 
 		def id = new ValueSetDefinitionReadId("1", ModelUtils.nameOrUriFromName("2.16.840.1.113883.1.11.1"))
 		
 		def result = service.read(id, null)
+		
+		assertNotNull result
+	}
+	
+	@Test
+	void TestReadByTag() {
+		def ref = new VersionTagReference("CURRENT")
+		def result = service.readByTag(ModelUtils.nameOrUriFromName("2.16.840.1.113883.1.11.1"), ref, null)
 		
 		assertNotNull result
 	}

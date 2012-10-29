@@ -30,10 +30,13 @@ import org.apache.commons.lang.StringUtils
 import edu.mayo.cts2.framework.model.core.StatusReference
 import edu.mayo.cts2.framework.model.core.types.EntryState
 import edu.mayo.cts2.framework.plugin.service.mat.repository.ValueSetVersionRepository
+import org.springframework.data.domain.PageRequest
 
 @Component
 class MatValueSetDefinitionReadService extends AbstractService with ValueSetDefinitionReadService {
 
+  val SIZE_LIMIT = 100;
+  
   @Resource
   var valueSetRepository: ValueSetRepository = _
   
@@ -102,7 +105,12 @@ class MatValueSetDefinitionReadService extends AbstractService with ValueSetDefi
       valueSetDef.setOfficialReleaseDate(valueSetVersion.revisionDate.getTime)
     }
 
-    val list = valueSetVersion.entries.foldLeft(new SpecificEntityList())((list, entry) => {
+    val ids = MatValueSetUtils.getIncludedVersionIds(valueSetVersion, valueSetRepository)
+    
+    val entries = valueSetVersionRepository.
+    	findValueSetEntriesByValueSetVersionIds(ids, new PageRequest(0,SIZE_LIMIT)).getContent
+    
+    val list = entries.foldLeft(new SpecificEntityList())((list, entry) => {
       val entity = new URIAndEntityName()
       val prefix = uriResolver.idToName(entry.codeSystem, IdType.CODE_SYSTEM)
       entity.setNamespace(prefix)

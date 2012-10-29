@@ -75,7 +75,7 @@ class MatZipLoader {
       val valueSet = mapEntry._2
       val foundEntries = result.valueSetEntries.get(mapEntry._1)
       if(foundEntries.isDefined){
-        valueSet.currentVersion.entries = foundEntries.get
+        valueSet.currentVersion.addEntries(foundEntries.get)
       }
 
       set + valueSet

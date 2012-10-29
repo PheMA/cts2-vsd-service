@@ -1,25 +1,22 @@
 package edu.mayo.cts2.framework.plugin.service.mat.model
 
-import javax.persistence.Entity
-import scala.reflect.BeanProperty
 import java.util.ArrayList
-import javax.persistence.OneToMany
-import javax.persistence.ElementCollection
-import javax.persistence.FetchType
-import javax.persistence.Id
-import scala.collection.JavaConversions._
-import javax.persistence.GeneratedValue
-import javax.persistence.GenerationType
-import javax.persistence.Column
-import java.util.Date
 import java.util.Calendar
-import javax.persistence.Embeddable
-import javax.persistence.EmbeddedId
-import javax.persistence.ManyToOne
-import javax.persistence.JoinColumn
-import javax.persistence.Table
-import org.hibernate.annotations.GenericGenerator
 import java.util.UUID
+import scala.collection.JavaConversions._
+import scala.reflect.BeanProperty
+import org.hibernate.annotations.BatchSize
+import org.hibernate.annotations.LazyCollection
+import javax.persistence.ElementCollection
+import javax.persistence.Entity
+import javax.persistence.Id
+import javax.persistence.JoinColumn
+import javax.persistence.ManyToOne
+import javax.persistence.OneToMany
+import org.hibernate.annotations.LazyCollectionOption
+import javax.persistence.FetchType
+import javax.persistence.CascadeType
+import org.hibernate.annotations.IndexColumn
 
 @Entity
 class ValueSetVersion extends Equals {
@@ -58,8 +55,17 @@ class ValueSetVersion extends Equals {
   @BeanProperty
   var qdmCategory: String = _
 
-  @ElementCollection
-  var entries: java.util.List[ValueSetEntry] = new ArrayList[ValueSetEntry]()
+  @OneToMany(mappedBy="valueSetVersion", fetch = FetchType.LAZY, cascade = Array{CascadeType.ALL})
+  private var _entries: java.util.List[ValueSetEntry] = new ArrayList[ValueSetEntry]()
+  
+  def addEntry(entry:ValueSetEntry) = {
+    entry.valueSetVersion = this
+    _entries.add(entry)
+  }
+  
+  def addEntries(entries:Seq[ValueSetEntry]) = {
+    entries.foreach(addEntry(_))
+  }
 
   @ElementCollection
   var includesValueSets: java.util.List[String] = new ArrayList[String]()

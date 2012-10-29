@@ -1,12 +1,15 @@
 package edu.mayo.cts2.framework.plugin.service.mat.profile.valuesetdefinition
 
 import java.util.Set
+
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
-import org.apache.commons.collections.CollectionUtils
+
+import org.apache.commons.lang.ObjectUtils
 import org.apache.commons.lang.StringUtils
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
+
 import edu.mayo.cts2.framework.model.command.Page
 import edu.mayo.cts2.framework.model.command.ResolvedReadContext
 import edu.mayo.cts2.framework.model.core.CodeSystemReference
@@ -18,29 +21,23 @@ import edu.mayo.cts2.framework.model.core.PredicateReference
 import edu.mayo.cts2.framework.model.core.PropertyReference
 import edu.mayo.cts2.framework.model.core.SortCriteria
 import edu.mayo.cts2.framework.model.core.ValueSetDefinitionReference
-import edu.mayo.cts2.framework.model.core.ValueSetReference
 import edu.mayo.cts2.framework.model.entity.EntityDirectoryEntry
 import edu.mayo.cts2.framework.model.service.core.NameOrURI
 import edu.mayo.cts2.framework.model.valuesetdefinition.ResolvedValueSet
 import edu.mayo.cts2.framework.model.valuesetdefinition.ResolvedValueSetHeader
-import edu.mayo.cts2.framework.plugin.service.mat.model.ValueSet
 import edu.mayo.cts2.framework.plugin.service.mat.model.ValueSetEntry
-import edu.mayo.cts2.framework.plugin.service.mat.namespace.NamespaceResolutionService
+import edu.mayo.cts2.framework.plugin.service.mat.model.ValueSetVersion
 import edu.mayo.cts2.framework.plugin.service.mat.profile.AbstractService
+import edu.mayo.cts2.framework.plugin.service.mat.profile.valueset.MatValueSetUtils
 import edu.mayo.cts2.framework.plugin.service.mat.repository.ValueSetRepository
+import edu.mayo.cts2.framework.plugin.service.mat.repository.ValueSetVersionRepository
 import edu.mayo.cts2.framework.plugin.service.mat.uri.IdType
 import edu.mayo.cts2.framework.plugin.service.mat.uri.UriResolver
-import edu.mayo.cts2.framework.plugin.service.mat.uri.UriUtils
 import edu.mayo.cts2.framework.service.profile.valuesetdefinition.ResolvedValueSetResolutionEntityQuery
 import edu.mayo.cts2.framework.service.profile.valuesetdefinition.ResolvedValueSetResult
 import edu.mayo.cts2.framework.service.profile.valuesetdefinition.ValueSetDefinitionResolutionService
 import edu.mayo.cts2.framework.service.profile.valuesetdefinition.name.ValueSetDefinitionReadId
 import javax.annotation.Resource
-import com.google.common.collect.Lists
-import org.apache.commons.lang.ObjectUtils
-import edu.mayo.cts2.framework.plugin.service.mat.profile.valueset.MatValueSetUtils
-import edu.mayo.cts2.framework.plugin.service.mat.repository.ValueSetVersionRepository
-import edu.mayo.cts2.framework.plugin.service.mat.model.ValueSetVersion
 
 @Component
 class MatValueSetDefinitionResolutionService extends AbstractService with ValueSetDefinitionResolutionService {
@@ -72,7 +69,6 @@ class MatValueSetDefinitionResolutionService extends AbstractService with ValueS
     readContext: ResolvedReadContext,
     page: Page): ResolvedValueSetResult[EntitySynopsis] = {
 
-    //NOTE: Currently not using this variable...
     val valueSetDefinitionName = id.getName
 
     val valueSetName = id.getValueSet.getName
@@ -83,37 +79,22 @@ class MatValueSetDefinitionResolutionService extends AbstractService with ValueS
     if (valueSetVersion == null) {
       return null
     }
+    
+    val pageable = this.toPageable(Option(page))
+    
+    val ids = MatValueSetUtils.getIncludedVersionIds(valueSetVersion, valueSetRepository)
+    
+    val entryPage = valueSetVersionRepository.
+    	findValueSetEntriesByValueSetVersionIds(ids, pageable)
+    	
+    val entries = entryPage.getContent
 
-    val synopsises: (Seq[ValueSetEntry], Int) =
-      if (CollectionUtils.isNotEmpty(valueSetVersion.includesValueSets)) {
-        valueSetVersion.includesValueSets.foldLeft[(Seq[ValueSetEntry], Int)]((valueSetVersion.entries, valueSetVersion.entries.size))(
-          (list, oid) => {
-            val result = getEntriesFromOid(oid)
-            (list._1 ++ result._1, list._2 + result._2)
-          })
-      } else {
-        (valueSetVersion.entries, valueSetVersion.entries.size)
-      }
-
-    val entries = synopsises._1.slice(page.getStart, page.getEnd).
+    val directoryEntries = entries.
       foldLeft(Seq[EntitySynopsis]())(valueSetToEntitySynopsis)
 
-    new ResolvedValueSetResult(buildHeader(valueSetVersion), entries, entries.size == synopsises._2);
-  }
-
-  private def getEntriesFromOid(oid: String): (Seq[ValueSetEntry], Int) = {
-    val vs = valueSetRepository.findOne(oid)
-    val includes = valueSetRepository.findOne(oid).currentVersion.includesValueSets
-    if (includes.size == 0) {
-      (vs.currentVersion.entries, vs.currentVersion.entries.size)
-    } else {
-      includes.foldLeft[(Seq[ValueSetEntry], Int)]((vs.currentVersion.entries, vs.currentVersion.entries.size))(
-        (list, oid) => {
-          val result = getEntriesFromOid(oid)
-          val size = list._2 + result._2
-          (list._1 ++ result._1, size)
-        })
-    }
+    new ResolvedValueSetResult(
+        buildHeader(valueSetVersion), 
+        directoryEntries, entries.size == entryPage.getTotalElements);
   }
 
   private def valueSetToEntitySynopsis = (seq: Seq[EntitySynopsis], entry: ValueSetEntry) => {

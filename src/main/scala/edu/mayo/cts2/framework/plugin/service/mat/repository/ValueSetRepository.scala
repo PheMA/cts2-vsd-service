@@ -34,7 +34,7 @@ trait ValueSetRepository extends CrudRepository[ValueSet, String] {
 
   @Query("select vs.currentVersion.id from ValueSet vs where vs.name = :name")
   def findCurrentVersionIdByName(@Param("name") name:String): String
- 
+  
   def findByNameLikeIgnoreCase(query:String, pageable: Pageable): Page[ValueSet]
   
   def findByFormalNameLikeIgnoreCase(query:String, pageable: Pageable): Page[ValueSet]
