@@ -55,11 +55,11 @@ class MatZipLoader {
   var valueSetRepository: ValueSetRepository = _
   
 
-  def loadCombinedMatZip(zip: ZipFile): Unit = {
+  def loadCombinedMatZip(zip: ZipFile) {
     MatZipLoaderUtils.doWithCombinedMatZip(zip, processSpreadSheet)
   }
 
-  def loadMatZip(zip: ZipFile): Unit = {
+  def loadMatZip(zip: ZipFile) {
     MatZipLoaderUtils.doWithMatZip(zip, processSpreadSheet)
   }
 
@@ -77,8 +77,12 @@ class MatZipLoader {
       if(foundEntries.isDefined){
         valueSet.currentVersion.addEntries(foundEntries.get)
       }
-
-      set + valueSet
+      if(!valueSetRepository.exists(valueSet.oid)){
+        set + valueSet
+      }
+      else {
+        set
+      }
     })
 
     valueSetRepository.save(valueSets)
@@ -98,7 +102,7 @@ class MatZipLoader {
   private def loadSheets(zip: MatZip) = {
 
     val fs = new POIFSFileSystem(zip.spreadSheet)
-    val wb = new HSSFWorkbook(fs);
+    val wb = new HSSFWorkbook(fs)
 
     val sheetIterator = getSheetRowIterator(wb)
 
