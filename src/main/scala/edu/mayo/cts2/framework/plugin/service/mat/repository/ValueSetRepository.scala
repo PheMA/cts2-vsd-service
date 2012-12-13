@@ -1,15 +1,9 @@
-package edu.mayo.cts2.framework.plugin.service.mat.repository;
+package edu.mayo.cts2.framework.plugin.service.mat.repository
 
-import scala.collection.JavaConversions._
-import scala.collection.JavaConverters._
-import scala.reflect.BeanProperty
 import org.springframework.data.repository.CrudRepository
 import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Transactional
 import edu.mayo.cts2.framework.plugin.service.mat.model.ValueSet
-import edu.mayo.cts2.framework.plugin.service.mat.model.ValueSetEntry
-import edu.mayo.cts2.framework.plugin.service.mat.model.ValueSetVersion
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor
 import org.springframework.data.repository.query.Param
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.domain.Pageable
