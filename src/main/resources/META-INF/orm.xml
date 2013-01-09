@@ -6,14 +6,10 @@ version="2.0">
 
 	<package>edu.mayo.cts2.framework.plugin.service.mat.model</package>
 
-	<entity class="MatChangeSet" metadata-complete="false"/>
-	<entity class="MatChangeDescription" metadata-complete="false"/>
-	<entity class="MatChangeSetMember" metadata-complete="false"/>
-	<entity class="MatValueSetDefinition" metadata-complete="false"/>
-	<entity class="MatValueSetDefinitionEntry" metadata-complete="false"/>
 	<entity class="ValueSet" metadata-complete="false"/>
-	<entity class="ValueSetVersion" metadata-complete="false"/>
-	<entity class="ValueSetProperty" metadata-complete="false"/>
+	<entity class="ValueSetChange" metadata-complete="false"/>
 	<entity class="ValueSetEntry" metadata-complete="false"/>
+	<entity class="ValueSetProperty" metadata-complete="false"/>
+	<entity class="ValueSetVersion" metadata-complete="false"/>
 
 </entity-mappings>

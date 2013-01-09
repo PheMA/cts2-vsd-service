@@ -17,7 +17,8 @@ class ValueSetEntry extends Equals  {
   @Id
   @BeanProperty
   var id: String = UUID.randomUUID.toString
-  
+
+  @BeanProperty
   @ManyToOne(cascade=Array{CascadeType.ALL}, fetch = FetchType.LAZY)
   @JoinColumn(nullable=false)
   var valueSetVersion: ValueSetVersion = _

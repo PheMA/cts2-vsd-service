@@ -6,13 +6,13 @@ import java.net.URI
 import java.util.{UUID, Date}
 
 import edu.mayo.cts2.framework.model.core.{OpaqueData, SourceReference}
-import edu.mayo.cts2.framework.plugin.service.mat.model.MatChangeSet
+import edu.mayo.cts2.framework.plugin.service.mat.model.{ValueSetChange}
 import edu.mayo.cts2.framework.plugin.service.mat.repository.ChangeSetRepository
 import edu.mayo.cts2.framework.service.profile.update.ChangeSetService
 import edu.mayo.cts2.framework.plugin.service.mat.profile.AbstractService
 import org.springframework.stereotype.Component
-import edu.mayo.cts2.framework.model.core.types.FinalizableState
-import edu.mayo.cts2.framework.plugin.service.mat.model.util.MatChangeSetUtils
+import edu.mayo.cts2.framework.model.core.types.{ChangeType, FinalizableState}
+import edu.mayo.cts2.framework.model.updates.ChangeSet
 
 @Component
 class MatChangeSetService extends AbstractService with ChangeSetService {
@@ -21,35 +21,36 @@ class MatChangeSetService extends AbstractService with ChangeSetService {
   var changeSetRepository: ChangeSetRepository = _
 
   def readChangeSet(changeSetUri: String) = {
-    val changeSet = changeSetRepository.findOne(changeSetUri)
-    MatChangeSetUtils.transformToChangeSet(changeSet)
+    val changeSet = Option[ValueSetChange](changeSetRepository.findOne(changeSetUri))
+    changeSet match {
+      case None => null
+      case Some(cs) => cs.convertToChangeSet
+    }
   }
 
   def createChangeSet() = {
-    val changeSet = doCreateChangeSet()
-    changeSetRepository.save(changeSet)
-    MatChangeSetUtils.transformToChangeSet(changeSet)
+    val valueSetChange = new ValueSetChange
+    valueSetChange.setChangeType(ChangeType.CREATE)
+    changeSetRepository.save(valueSetChange)
+    valueSetChange.convertToChangeSet
   }
-
-  def doCreateChangeSet(): MatChangeSet = {
-    val changeSet = new MatChangeSet(createChangeSetUri)
-    changeSet.setState(FinalizableState.OPEN)
-    changeSet
-  }
-
-  def createChangeSetUri = "urn:uuid:" + UUID.randomUUID.toString
 
   def updateChangeSetMetadata(changeSetId: String,
                               creator: SourceReference,
                               changeInstructions: OpaqueData,
                               officialEffectiveDate: Date) {
-    val changeSet = MatChangeSetUtils.transformToMatChangeSet(readChangeSet(changeSetId))
+    val changeSet = changeSetRepository.findOne(changeSetId)
+    if (changeSet != null) {
+      if (creator != null) {
+        changeSet.setAuthor(creator.getContent)
+      }
 
-    if (creator != null) changeSet.setCreator(creator.getContent)
-    if (changeInstructions != null) changeSet.setChangeInstructions(changeInstructions.getValue.asInstanceOf[String])
-    if (officialEffectiveDate != null) changeSet.setOfficialEffectiveDate(officialEffectiveDate)
+      if (changeInstructions != null) {
+        changeSet.setDescription(changeInstructions.getValue.toString)
+      }
 
-    changeSetRepository.save(changeSet)
+      changeSetRepository.save(changeSet)
+    }
   }
 
   def rollbackChangeSet(changeSetId: String) {
@@ -57,7 +58,6 @@ class MatChangeSetService extends AbstractService with ChangeSetService {
   }
 
   def commitChangeSet(changeSetId: String) {
-    val changeSet = MatChangeSetUtils.transformToMatChangeSet(readChangeSet(changeSetId))
     throw new RuntimeException
   }
 

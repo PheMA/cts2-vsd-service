@@ -8,10 +8,9 @@ import edu.mayo.cts2.framework.model.valuesetdefinition.{ValueSetDefinitionEntry
 import edu.mayo.cts2.framework.model.extension.LocalIdValueSetDefinition
 import edu.mayo.cts2.framework.service.profile.UpdateChangeableMetadataRequest
 import org.springframework.stereotype.Component
-import edu.mayo.cts2.framework.plugin.service.mat.repository.{ChangeSetRepository, ValueSetDefinitionRepository}
-import edu.mayo.cts2.framework.plugin.service.mat.model.util.MatValueSetDefinitionUtils
+import edu.mayo.cts2.framework.plugin.service.mat.repository.{ValueSetRepository, ValueSetVersionRepository, ChangeSetRepository}
 import javax.annotation.Resource
-import edu.mayo.cts2.framework.plugin.service.mat.model.MatChangeSet
+import edu.mayo.cts2.framework.plugin.service.mat.model.{ValueSetEntry, ValueSetVersion, ValueSetChange}
 import edu.mayo.cts2.framework.model.core.{URIAndEntityName, ChangeDescription}
 import edu.mayo.cts2.framework.model.core.types.{FinalizableState, ChangeCommitted, ChangeType}
 import java.util.{UUID, Date}
@@ -22,7 +21,10 @@ import edu.mayo.cts2.framework.model.service.core.{EntityNameOrURI, EntityNameOr
 class MatValueSetDefinitionMaintenanceService extends AbstractService with ValueSetDefinitionMaintenanceService {
 
   @Resource
-  var valueSetDefinitionRepository: ValueSetDefinitionRepository = _
+  var valueSetVersionRepository: ValueSetVersionRepository = _
+
+  @Resource
+  var valueSetRepository: ValueSetRepository = _
 
   @Resource
   var changeSetRepository: ChangeSetRepository = _
@@ -51,7 +53,7 @@ class MatValueSetDefinitionMaintenanceService extends AbstractService with Value
     val changeSet = getChangeSet(changeSetUri)
     if (isChangeSetWritable(changeSet)) {
       val vsd = getValueSetDefinition(valueSetDefinitionReadId)
-      if (isValueSetDefintionWritable(vsd)) {
+      if (isValueSetDefinitionWritable(vsd)) {
 
         val group = vsd.getChangeableElementGroup
 
@@ -84,22 +86,49 @@ class MatValueSetDefinitionMaintenanceService extends AbstractService with Value
 
   }
 
-
   private def resolveEntity(nameOrUri: EntityNameOrURI): URIAndEntityName = {
     null
   }
 
-  private def isChangeSetWritable(changeSet: MatChangeSet) = {
+  private def isChangeSetWritable(changeSet: ValueSetChange) = {
     changeSet != null && changeSet.getState.eq(FinalizableState.OPEN)
   }
 
-  private def isValueSetDefintionWritable(valueSetDef: ValueSetDefinition) = {
-    valueSetDef == null && valueSetDef.getState.eq(FinalizableState.OPEN)
+  private def isValueSetDefinitionWritable(valueSetDef: ValueSetDefinition) = {
+    valueSetDef != null && valueSetDef.getState != null && valueSetDef.getState.eq(FinalizableState.OPEN)
   }
 
   private def saveValueSetDefinition(vsd: ValueSetDefinition) {
-    valueSetDefinitionRepository.save(MatValueSetDefinitionUtils.transformToMatValueSetDefinition(vsd))
-    vsd
+    val version = new ValueSetVersion
+    version.setId(vsd.getDocumentURI)
+    version.valueSet = valueSetRepository.findOne(vsd.getDefinedValueSet.getContent)
+    version.setValueSetDeveloper(vsd.getSourceAndRole(0).getSource.getContent)
+    if (vsd.getVersionTagCount > 0)
+      version.setVersionId(vsd.getVersionTag(0).getContent)
+
+    if (valueSetVersionRepository.findVersionByIdOrVersionIdAndValueSetName(version.valueSet.getOid, version.getVersionId) == null) {
+      vsd.getEntry.foreach(entry => {
+        var codeSystemVersion = ""
+        if (entry.getCompleteCodeSystem != null && entry.getCompleteCodeSystem.getCodeSystemVersion != null && entry.getCompleteCodeSystem.getCodeSystemVersion.getVersion != null)
+        Option(entry.getCompleteCodeSystem.getCodeSystemVersion.getVersion.getContent) match {
+          case Some(entryVersion) => codeSystemVersion = entryVersion
+          case None => codeSystemVersion = ""
+        }
+        entry.getEntityList.getReferencedEntity.foreach(entity => {
+          val vsEntry = new ValueSetEntry
+          vsEntry.setId(UUID.randomUUID.toString)
+          vsEntry.setCodeSystem(entity.getNamespace)
+          vsEntry.setCodeSystemVersion(codeSystemVersion)
+          vsEntry.setValueSetVersion(version)
+          vsEntry.setCode(entity.getName)
+          //        vsEntry.setUri(entity.getUri)
+          //        vsEntry.setHref(entity.getHref)
+          version.addEntry(vsEntry)
+        })
+      })
+
+      valueSetVersionRepository.save(version)
+    }
   }
 
   private def removeDefinitionEntry(changeSetUri: String, valueSetDefinitionUri: String, entryToRemove: Int): ValueSetDefinition = {
@@ -110,16 +139,18 @@ class MatValueSetDefinitionMaintenanceService extends AbstractService with Value
     null
   }
 
-  private def getChangeSet(changeSetUri: String): MatChangeSet = {
+  private def getChangeSet(changeSetUri: String): ValueSetChange = {
     changeSetRepository.findOne(changeSetUri)
   }
 
-  private def getValueSetDefinition(vsdReadId: ValueSetDefinitionReadId, changeSetUri: String): MatChangeSet = {
+  private def getValueSetDefinition(vsdReadId: ValueSetDefinitionReadId, changeSetUri: String): ValueSetChange = {
     null
   }
 
+  /* TODO: implement */
   private def getValueSetDefinition(vsdReadId: ValueSetDefinitionReadId): ValueSetDefinition = {
-    MatValueSetDefinitionUtils.transformToValueSetDefinition(valueSetDefinitionRepository.findOne(vsdReadId.getUri))
+//    MatValueSetDefinitionUtils.transformToValueSetDefinition(valueSetDefinitionRepository.findOne(vsdReadId.getUri))
+    null
   }
 
 }

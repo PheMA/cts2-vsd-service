@@ -4,7 +4,7 @@ import java.lang.Override
 import scala.collection.JavaConversions._
 import org.springframework.stereotype.Component
 import edu.mayo.cts2.framework.model.command.ResolvedReadContext
-import edu.mayo.cts2.framework.model.core.VersionTagReference
+import edu.mayo.cts2.framework.model.core._
 import edu.mayo.cts2.framework.model.extension.LocalIdValueSetDefinition
 import edu.mayo.cts2.framework.model.service.core.NameOrURI
 import edu.mayo.cts2.framework.plugin.service.mat.profile.AbstractService
@@ -17,17 +17,13 @@ import edu.mayo.cts2.framework.plugin.service.mat.model.ValueSet
 import org.springframework.transaction.annotation.Transactional
 import edu.mayo.cts2.framework.model.valuesetdefinition.ValueSetDefinitionEntry
 import edu.mayo.cts2.framework.model.valuesetdefinition.SpecificEntityList
-import edu.mayo.cts2.framework.model.core.URIAndEntityName
 import edu.mayo.cts2.framework.model.core.types.SetOperator
 import edu.mayo.cts2.framework.plugin.service.mat.uri.IdType
-import edu.mayo.cts2.framework.model.core.SourceAndNotation
-import edu.mayo.cts2.framework.model.core.ValueSetReference
 import edu.mayo.cts2.framework.plugin.service.mat.profile.valueset.MatValueSetUtils
 import edu.mayo.cts2.framework.plugin.service.mat.uri.UriUtils
 import edu.mayo.cts2.framework.model.valuesetdefinition.CompleteValueSetReference
 import edu.mayo.cts2.framework.plugin.service.mat.model.ValueSetVersion
 import org.apache.commons.lang.StringUtils
-import edu.mayo.cts2.framework.model.core.StatusReference
 import edu.mayo.cts2.framework.model.core.types.EntryState
 import edu.mayo.cts2.framework.plugin.service.mat.repository.ValueSetVersionRepository
 import org.springframework.data.domain.PageRequest
@@ -152,7 +148,16 @@ class MatValueSetDefinitionReadService extends AbstractService with ValueSetDefi
 
     includesValueSets.foreach(valueSetDef.addEntry(_))
 
-    valueSetDef.addSourceAndRole(MatValueSetUtils.sourceAndRole)
+
+    if (valueSetVersion.getValueSetDeveloper != null) {
+      val snr: SourceAndRoleReference = new SourceAndRoleReference
+      snr.setSource(new SourceReference(valueSetVersion.getValueSetDeveloper))
+      snr.setRole(MatValueSetUtils.creatorRole)
+      valueSetDef.addSourceAndRole(snr)
+    }
+    else {
+      valueSetDef.addSourceAndRole(MatValueSetUtils.sourceAndRole)
+    }
 
     valueSetDef.setEntryState(
       if (StringUtils.equalsIgnoreCase(valueSetVersion.getStatus, "inactive")) {

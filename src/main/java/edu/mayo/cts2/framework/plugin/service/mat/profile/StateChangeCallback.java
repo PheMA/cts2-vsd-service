@@ -1,8 +1,6 @@
 package edu.mayo.cts2.framework.plugin.service.mat.profile;
 
-import edu.mayo.cts2.framework.plugin.service.mat.model.MatChangeSet;
-import edu.mayo.cts2.framework.plugin.service.mat.model.MatChangeSetMember;
-import edu.mayo.cts2.framework.plugin.service.mat.model.util.MatChangeSetUtils;
+import edu.mayo.cts2.framework.plugin.service.mat.model.ValueSetChange;
 import edu.mayo.cts2.framework.plugin.service.mat.repository.ChangeSetRepository;
 import org.springframework.stereotype.Component;
 
@@ -43,13 +41,7 @@ public class StateChangeCallback {
 	}
 
 	protected void addToChangeSet(String changeSetUri, ChangeableResource changeable){
-		MatChangeSet changeSet = changeSetRepository.findOne(changeSetUri);
-		long count = changeSet.getEntryCount();
-		count ++;
-		changeable.setEntryOrder(count);
-		changeSet.setEntryCount(count);
-		if (changeable instanceof MatChangeSetMember)
-			changeSet.addMember((MatChangeSetMember)changeable);
+		ValueSetChange changeSet = changeSetRepository.findOne(changeSetUri);
 		changeSetRepository.save(changeSet);
 	}
 

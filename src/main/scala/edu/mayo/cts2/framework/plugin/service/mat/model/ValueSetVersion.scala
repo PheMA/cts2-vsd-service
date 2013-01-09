@@ -7,21 +7,13 @@ import scala.collection.JavaConversions._
 import scala.reflect.BeanProperty
 import org.hibernate.annotations.BatchSize
 import org.hibernate.annotations.LazyCollection
-import javax.persistence.ElementCollection
-import javax.persistence.Entity
-import javax.persistence.Id
-import javax.persistence.JoinColumn
-import javax.persistence.ManyToOne
-import javax.persistence.OneToMany
+import javax.persistence._
 import org.hibernate.annotations.LazyCollectionOption
-import javax.persistence.FetchType
-import javax.persistence.CascadeType
 import org.hibernate.annotations.IndexColumn
+import edu.mayo.cts2.framework.model.valuesetdefinition.ValueSetDefinition
 
 @Entity
 class ValueSetVersion extends Equals {
-  
-  val DEFAULT_VERSION_ID = "1"
 
   @Id
   @BeanProperty
@@ -32,7 +24,7 @@ class ValueSetVersion extends Equals {
   var valueSet: ValueSet = _
   
   @BeanProperty
-  var versionId: String = DEFAULT_VERSION_ID
+  var versionId: String = _
 
   @BeanProperty
   var valueSetDeveloper: String = _
@@ -54,6 +46,9 @@ class ValueSetVersion extends Equals {
 
   @BeanProperty
   var qdmCategory: String = _
+
+  @BeanProperty
+  var changeSetUri: String = _
 
   @OneToMany(mappedBy="valueSetVersion", fetch = FetchType.LAZY, cascade = Array{CascadeType.ALL})
   private var _entries: java.util.List[ValueSetEntry] = new ArrayList[ValueSetEntry]()

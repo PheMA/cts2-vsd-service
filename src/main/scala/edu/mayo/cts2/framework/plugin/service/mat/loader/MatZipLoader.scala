@@ -11,12 +11,11 @@ import org.apache.poi.poifs.filesystem.POIFSFileSystem
 import org.apache.poi.ss.usermodel.Row
 import org.apache.poi.ss.usermodel.Cell
 import org.springframework.stereotype.Component
-import edu.mayo.cts2.framework.plugin.service.mat.model.ValueSet
-import edu.mayo.cts2.framework.plugin.service.mat.model.ValueSetEntry
-import edu.mayo.cts2.framework.plugin.service.mat.repository.ValueSetRepository
+import edu.mayo.cts2.framework.plugin.service.mat.model.{ValueSetChange, ValueSet, ValueSetEntry, ValueSetVersion}
+import edu.mayo.cts2.framework.plugin.service.mat.repository.{ChangeSetRepository, ValueSetRepository}
 import javax.annotation.Resource
 import org.springframework.beans.factory.annotation.Value
-import edu.mayo.cts2.framework.plugin.service.mat.model.ValueSetVersion
+import edu.mayo.cts2.framework.model.core.types.{ChangeCommitted, ChangeType}
 
 @Component
 class MatZipLoader {
@@ -53,6 +52,9 @@ class MatZipLoader {
 
   @Resource
   var valueSetRepository: ValueSetRepository = _
+
+  @Resource
+  var changeSetRepository: ChangeSetRepository = _
   
 
   def loadCombinedMatZip(zip: ZipFile) {
@@ -86,6 +88,13 @@ class MatZipLoader {
     })
 
     valueSetRepository.save(valueSets)
+    valueSets.foreach(vs => {
+      val change = new ValueSetChange
+      change.setAuthor("MAT Authoring Tool")
+      change.setChangeType(ChangeType.CREATE)
+      change.setChangeCommitted(ChangeCommitted.PENDING)
+      changeSetRepository.save(change)
+    })
   }: Unit
 
   private def getSheetRowIterator(wb:HSSFWorkbook) = {

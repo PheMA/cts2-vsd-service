@@ -8,7 +8,7 @@ import edu.mayo.cts2.framework.plugin.service.mat.profile.AbstractService
 import edu.mayo.cts2.framework.model.service.core.Query
 import edu.mayo.cts2.framework.model.command.ResolvedFilter
 import edu.mayo.cts2.framework.service.command.restriction.ChangeSetQueryExtensionRestrictions
-import edu.mayo.cts2.framework.model.core.{PredicateReference, PropertyReference, MatchAlgorithmReference, SortCriteria}
+import edu.mayo.cts2.framework.model.core._
 import edu.mayo.cts2.framework.service.meta.{StandardModelAttributeReference, StandardMatchAlgorithmReference}
 import edu.mayo.cts2.framework.plugin.service.mat.repository.ChangeSetRepository
 import javax.annotation.Resource
@@ -16,7 +16,7 @@ import edu.mayo.cts2.framework.model.command.Page
 import org.springframework.transaction.annotation.Transactional
 import edu.mayo.cts2.framework.model.directory.DirectoryResult
 import edu.mayo.cts2.framework.model.updates.ChangeSetDirectoryEntry
-import edu.mayo.cts2.framework.plugin.service.mat.model.MatChangeSet
+import edu.mayo.cts2.framework.plugin.service.mat.model.{ValueSetChange}
 
 @Component
 class MatChangeSetQueryService extends AbstractService with ChangeSetQuery with ChangeSetQueryExtension {
@@ -37,21 +37,21 @@ class MatChangeSetQueryService extends AbstractService with ChangeSetQuery with 
   def getResourceSummaries(query: ChangeSetQuery,
                            sort: SortCriteria,
                            page: Page): DirectoryResult[ChangeSetDirectoryEntry] = {
-    var changeSets: org.springframework.data.domain.Page[MatChangeSet] = null
+    var changeSets: org.springframework.data.domain.Page[ValueSetChange] = null
     val filters = query.getFilterComponent
 
-//    var creator: String = null
-//    var valuesetoid: String = null
-//
-//    filters.foreach((filter: ResolvedFilter) =>
-//      if (filter.getPropertyReference.getReferenceTarget.getName.equals("creator")) {
-//        creator = filter.getMatchValue
-//      }
-//    else if (filter.getPropertyReference.getReferenceTarget.getName.equals("valuesetoid")) {
-//        valuesetoid = filter.getMatchValue
-//      }
-//    )
-//
+    var creator: String = null
+    var valuesetoid: String = null
+
+    filters.foreach((filter: ResolvedFilter) =>
+      if (filter.getPropertyReference.getReferenceTarget.getName.equals("creator")) {
+        creator = filter.getMatchValue
+      }
+    else if (filter.getPropertyReference.getReferenceTarget.getName.equals("valuesetoid")) {
+        valuesetoid = filter.getMatchValue
+      }
+    )
+
 //    if (valuesetoid != null && creator != null) {
 //      changeSets = changeSetRepository.findChangeSetsByValueSetIdAndCreator(valuesetoid, creator, toPageable(Option(page)))
 //    }
@@ -71,20 +71,22 @@ class MatChangeSetQueryService extends AbstractService with ChangeSetQuery with 
     new DirectoryResult(entries, entries.size == totalElements)
   }
 
-  def transformChangeSet = (seq:Seq[ChangeSetDirectoryEntry], changeSet:MatChangeSet) => {
+  def transformChangeSet = (seq:Seq[ChangeSetDirectoryEntry], changeSet:ValueSetChange) => {
     seq :+ transformSingleChangeSet(changeSet)
   }:Seq[ChangeSetDirectoryEntry]
 
-  def transformSingleChangeSet = (changeSet: MatChangeSet) => {
+  def transformSingleChangeSet = (changeSet: ValueSetChange) => {
     val entry = new ChangeSetDirectoryEntry
-    entry.setChangeSetURI(changeSet.id)
-    entry.setResourceName(changeSet.id)
-    entry.setCloseDate(changeSet.closeDate)
-    entry.setCreationDate(changeSet.creationDate)
-    entry.setOfficialEffectiveDate(changeSet.officialEffectiveDate)
-    entry.setChangeSetElementGroup(changeSet.getChangeSetElementGroup)
-    entry.setEntryCount(long2Long(changeSet.getEntryCount))
-    entry.setState(changeSet.state)
+    entry.setChangeSetURI(changeSet.getId)
+    entry.setResourceName(changeSet.getId)
+    entry.setCreationDate(changeSet.getDate)
+    entry.setState(changeSet.getState)
+
+    val group = new ChangeSetElementGroup
+    val sourceRef = new SourceReference
+    sourceRef.setContent(changeSet.getAuthor)
+    group.setCreator(sourceRef)
+    entry.setChangeSetElementGroup(group)
     entry
   }: ChangeSetDirectoryEntry
 

@@ -109,16 +109,19 @@ object MatValueSetUtils {
 
   def sourceAndRole = {
     val sourceAndRoleRef = new SourceAndRoleReference()
-
-    val roleRef = new RoleReference()
-    roleRef.setContent("creator")
-    roleRef.setUri("http://purl.org/dc/elements/1.1/creator")
-    sourceAndRoleRef.setRole(roleRef)
+    sourceAndRoleRef.setRole(creatorRole)
 
     val sourceRef = new SourceReference("National Committee for Quality Assurance")
     sourceAndRoleRef.setSource(sourceRef)
 
     sourceAndRoleRef
+  }
+
+  def creatorRole = {
+    val role = new RoleReference()
+    role.setContent("creator")
+    role.setUri("http://purl.org/dc/elements/1.1/creator")
+    role
   }
   
   def getIncludedVersionIds(version: ValueSetVersion, repos: ValueSetRepository):Seq[String] = {
