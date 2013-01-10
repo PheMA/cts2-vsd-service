@@ -23,7 +23,7 @@ trait ValueSetVersionRepository extends CrudRepository[ValueSetVersion, String] 
   @Query("select vsv from ValueSetVersion vsv where vsv.valueSet.name = :name")
   def findByValueSetName(@Param("name") name: String, pageable: Pageable): Page[ValueSetVersion]
 
-  @Query("select vsv from ValueSetVersion vsv where vsv.valueSet.oid = :name and (vsv.id = :id or vsv.versionId = :id)")
+  @Query("select vsv from ValueSetVersion vsv where vsv.valueSet.name = :name and (vsv.id = :id or vsv.versionId = :id)")
   def findVersionByIdOrVersionIdAndValueSetName(@Param("name") name:String, @Param("id") id:String): ValueSetVersion
 
   @Query("select distinct entries.codeSystem, entries.codeSystemVersion from ValueSetVersion valueSet " +
@@ -35,5 +35,11 @@ trait ValueSetVersionRepository extends CrudRepository[ValueSetVersion, String] 
 
   @Query("select vse from ValueSetEntry vse where vse.valueSetVersion.id in (:ids)")
   def findValueSetEntriesByValueSetVersionIds(@Param("ids") id:java.util.List[String], pageable: Pageable): Page[ValueSetEntry]
+
+  @Query("select vsv from ValueSetVersion vsv where vsv.valueSet.name = :name and vsv.valueSetDeveloper = :creator")
+  def findByValueSetNameAndCreator(@Param("name") name: String, @Param("creator") creator: String, pageable: Pageable): Page[ValueSetVersion]
+
+  @Query("select vsv from ValueSetVersion vsv where vsv.valueSetDeveloper = :creator")
+  def findByCreator(@Param("creator") creator: String, pageable: Pageable): Page[ValueSetVersion]
 
 }
