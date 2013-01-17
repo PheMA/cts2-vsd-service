@@ -8,7 +8,6 @@ import javax.annotation.Resource;
 
 import org.junit.Before;
 
-import edu.mayo.cts2.framework.plugin.service.mat.loader.SvsLoader;
 import edu.mayo.cts2.framework.plugin.service.mat.loader.MatZipLoader;
 import edu.mayo.cts2.framework.plugin.service.mat.repository.ValueSetRepository;
 
@@ -25,9 +24,6 @@ public abstract class AbstractZipLoadingTestBase extends AbstractTestBase {
 
 	@Resource
 	public MatZipLoader zipLoader;
-	
-	@Resource
-	public SvsLoader svsLoader;
 
 	@Resource
 	public ValueSetRepository repo;
@@ -35,10 +31,6 @@ public abstract class AbstractZipLoadingTestBase extends AbstractTestBase {
 	@Before
 	public void Load() throws Exception {
 		switch (svsOrZip) {
-		case SVS: {
-			svsLoader.loadSvsXml(new FileInputStream(svsXmlFilePath));
-			break;
-		}
 		case ZIP: {
 			ZipFile zip = new ZipFile(new File(zipFilePath));
 

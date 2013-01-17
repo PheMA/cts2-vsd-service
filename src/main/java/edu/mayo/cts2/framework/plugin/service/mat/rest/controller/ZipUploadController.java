@@ -19,7 +19,6 @@ import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 
 import edu.mayo.cts2.framework.plugin.service.mat.loader.MatZipLoader;
-import edu.mayo.cts2.framework.plugin.service.mat.loader.SvsLoader;
 import edu.mayo.cts2.framework.webapp.rest.extensions.controller.ControllerProvider;
 
 @Controller("zipUploadControllerProvider")
@@ -29,9 +28,6 @@ public class ZipUploadController implements ControllerProvider,
 	@Resource
 	private MatZipLoader matZipLoader;
 	
-	@Resource
-	private SvsLoader svsZipLoader;
-
 	@Autowired(required = false)
 	private HttpService httpService;
 
@@ -43,40 +39,6 @@ public class ZipUploadController implements ControllerProvider,
 		}
 	}
 	
-	@RequestMapping(value = "/mat/svs", method = RequestMethod.POST)
-	public String loadSvsXml(HttpServletRequest request) throws Exception {
-
-		MultipartResolver multipartResolver = new CommonsMultipartResolver(
-				request.getSession().getServletContext());
-
-		if (!multipartResolver.isMultipart(request)) {
-			throw new IllegalStateException(
-					"ServletRequest expected to be of type MultipartHttpServletRequest");
-		}
-
-		MultipartHttpServletRequest multipartRequest = multipartResolver
-				.resolveMultipart(request);
-
-		MultipartFile multipartFile = multipartRequest.getFile("file");
-
-		final File zip = File.createTempFile(UUID.randomUUID().toString(),
-				".zip");
-
-		multipartFile.transferTo(zip);
-
-		ZipFile zipFile = new ZipFile(zip);
-
-		try {
-			svsZipLoader.loadSvsZip(zipFile);
-
-			return "uploadComplete";
-		} finally {
-			if (zipFile != null) {
-				zipFile.close();
-			}
-		}
-	}
-
 	@RequestMapping(value = "/mat/zips", method = RequestMethod.POST)
 	public String loadZip(HttpServletRequest request) throws Exception {
 
