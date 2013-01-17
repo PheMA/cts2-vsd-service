@@ -39,7 +39,11 @@ class ValueSetEntry extends Equals  {
   override def hashCode() = this.id.hashCode
       
   override def equals(other: Any) = other match {
-    case that: ValueSetEntry => this.id == that.id && this.id == that.id
+    case that: ValueSetEntry => {
+      this.codeSystem == that.codeSystem &&
+      this.codeSystemVersion == that.codeSystemVersion &&
+      this.code == that.code
+    }
     case _ => false
   }
   

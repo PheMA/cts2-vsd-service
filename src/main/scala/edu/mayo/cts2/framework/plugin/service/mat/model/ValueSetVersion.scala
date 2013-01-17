@@ -1,16 +1,12 @@
 package edu.mayo.cts2.framework.plugin.service.mat.model
 
 import java.util.ArrayList
-import java.util.Calendar
 import java.util.UUID
 import scala.collection.JavaConversions._
 import scala.reflect.BeanProperty
-import org.hibernate.annotations.BatchSize
-import org.hibernate.annotations.LazyCollection
 import javax.persistence._
-import org.hibernate.annotations.LazyCollectionOption
-import org.hibernate.annotations.IndexColumn
-import edu.mayo.cts2.framework.model.valuesetdefinition.ValueSetDefinition
+import edu.mayo.cts2.framework.model.core.types.FinalizableState
+import java.util
 
 @Entity
 class ValueSetVersion extends Equals {
@@ -22,48 +18,63 @@ class ValueSetVersion extends Equals {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(nullable=false)
   var valueSet: ValueSet = _
-  
+
   @BeanProperty
-  var versionId: String = _
+  var versionId: String = UUID.randomUUID.toString
 
   @BeanProperty
   var valueSetDeveloper: String = _
 
   @BeanProperty
-  var source: String = _
+  var notes: String = _
 
   @BeanProperty
-  var valueSetType: String = _
+  var status: String = "active"
 
   @BeanProperty
-  var binding: String = _
-
-  @BeanProperty
-  var status: String = _
-
-  @BeanProperty
-  var revisionDate: Calendar = _
+  @Column(nullable = false)
+  var state: FinalizableState = FinalizableState.OPEN
 
   @BeanProperty
   var qdmCategory: String = _
 
   @BeanProperty
-  var changeSetUri: String = _
+  var valueSetType: String = _
+
+  @BeanProperty
+  var source: String = _
+
+  @BeanProperty
+  var binding: String = _
+
+  @ManyToOne(cascade = Array{CascadeType.ALL})
+  var changeDescription: ValueSetChangeDescription = _
+  def setChangeDescription(description: ValueSetChangeDescription) {
+    if (Option(changeDescription).isDefined) {
+      successor.add(changeDescription)
+    }
+    changeDescription = description
+  }
+  def getChangeDescription = changeDescription
+
+  @BeanProperty
+  @ElementCollection
+  var successor: util.List[ValueSetChangeDescription] = new util.ArrayList[ValueSetChangeDescription]()
 
   @OneToMany(mappedBy="valueSetVersion", fetch = FetchType.LAZY, cascade = Array{CascadeType.ALL})
-  private var _entries: java.util.List[ValueSetEntry] = new ArrayList[ValueSetEntry]()
+  private var _entries: util.List[ValueSetEntry] = new ArrayList[ValueSetEntry]()
   
   def addEntry(entry:ValueSetEntry) = {
     entry.valueSetVersion = this
     _entries.add(entry)
   }
   
-  def addEntries(entries:Seq[ValueSetEntry]) = {
+  def addEntries(entries:Seq[ValueSetEntry]) {
     entries.foreach(addEntry(_))
   }
 
   @ElementCollection
-  var includesValueSets: java.util.List[String] = new ArrayList[String]()
+  var includesValueSets: util.List[String] = new util.ArrayList[String]()
 
   override def hashCode() = this.id.hashCode
       

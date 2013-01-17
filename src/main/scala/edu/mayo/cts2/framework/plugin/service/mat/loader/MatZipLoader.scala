@@ -5,17 +5,15 @@ import java.util.zip.ZipFile
 import scala.collection.JavaConversions._
 import scala.collection.Seq
 import org.apache.commons.lang.StringUtils
-import org.apache.poi.hssf.usermodel.HSSFSheet
 import org.apache.poi.hssf.usermodel.HSSFWorkbook
 import org.apache.poi.poifs.filesystem.POIFSFileSystem
 import org.apache.poi.ss.usermodel.Row
 import org.apache.poi.ss.usermodel.Cell
 import org.springframework.stereotype.Component
-import edu.mayo.cts2.framework.plugin.service.mat.model.{ValueSetChange, ValueSet, ValueSetEntry, ValueSetVersion}
-import edu.mayo.cts2.framework.plugin.service.mat.repository.{ChangeSetRepository, ValueSetRepository}
+import edu.mayo.cts2.framework.plugin.service.mat.model._
+import edu.mayo.cts2.framework.plugin.service.mat.repository.{ValueSetChangeDescriptionRepository, ChangeSetRepository, ValueSetRepository}
 import javax.annotation.Resource
-import org.springframework.beans.factory.annotation.Value
-import edu.mayo.cts2.framework.model.core.types.{ChangeCommitted, ChangeType}
+import edu.mayo.cts2.framework.model.core.types.{FinalizableState, ChangeType}
 
 @Component
 class MatZipLoader {
@@ -23,7 +21,6 @@ class MatZipLoader {
   def GROUPING_CODE_SYSTEM = "GROUPING"
 
   @scala.reflect.BeanProperty
-  //@Value("${fetchCptDescriptions}")
   var fetchCptDescriptions: java.lang.Boolean = false
     
   @Resource  
@@ -55,6 +52,10 @@ class MatZipLoader {
 
   @Resource
   var changeSetRepository: ChangeSetRepository = _
+
+
+  @Resource
+  var descRepos: ValueSetChangeDescriptionRepository = _
   
 
   def loadCombinedMatZip(zip: ZipFile) {
@@ -75,6 +76,7 @@ class MatZipLoader {
 
     val valueSets = result.valueSets.foldLeft(Set[ValueSet]())((set, mapEntry) => {
       val valueSet = mapEntry._2
+
       val foundEntries = result.valueSetEntries.get(mapEntry._1)
       if(foundEntries.isDefined){
         valueSet.currentVersion.addEntries(foundEntries.get)
@@ -87,14 +89,18 @@ class MatZipLoader {
       }
     })
 
-    valueSetRepository.save(valueSets)
     valueSets.foreach(vs => {
       val change = new ValueSetChange
       change.setAuthor("MAT Authoring Tool")
-      change.setChangeType(ChangeType.CREATE)
-      change.setChangeCommitted(ChangeCommitted.PENDING)
+      val desc = new ValueSetChangeDescription
+      desc.setChangeType(ChangeType.CREATE)
+      desc.setAuthor(change.getAuthor)
+      desc.setContainingChangeSet(change.getId)
+      vs.currentVersion.setChangeDescription(desc)
+      descRepos.save(desc)
       changeSetRepository.save(change)
     })
+    valueSetRepository.save(valueSets)
   }: Unit
 
   private def getSheetRowIterator(wb:HSSFWorkbook) = {
@@ -156,6 +162,8 @@ class MatZipLoader {
     valueSet.name = valueSet.oid
     valueSet.formalName = getCellValue(row.getCell(NAME_CELL))
     valueSet.addVersion(new ValueSetVersion())
+    valueSet.currentVersion.setVersionId("1")
+    valueSet.currentVersion.setState(FinalizableState.FINAL)
     valueSet.currentVersion.valueSetDeveloper = getCellValue(row.getCell(DEVELOPER_CELL))
     valueSet.currentVersion.qdmCategory = getCellValue(row.getCell(QDM_CATEGORY_CELL))
 

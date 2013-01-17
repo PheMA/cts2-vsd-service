@@ -46,6 +46,8 @@ class MatValueSetDefinitionQueryService
 
   def getSupportedSearchReferences: java.util.Set[_ <: PropertyReference] = {
     val set = new java.util.HashSet[PropertyReference]()
+    set.add(StandardModelAttributeReference.RESOURCE_NAME.getPropertyReference)
+    set.add(StandardModelAttributeReference.RESOURCE_SYNOPSIS.getPropertyReference)
     set.add(createAttributeReference("creator", "http://purl.org/dc/elements/1.1/creator", "valueSetDeveloper"))
     set
   }

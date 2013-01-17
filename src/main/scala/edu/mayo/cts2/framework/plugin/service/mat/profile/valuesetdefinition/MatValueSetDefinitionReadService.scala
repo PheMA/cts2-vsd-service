@@ -97,8 +97,8 @@ class MatValueSetDefinitionReadService extends AbstractService with ValueSetDefi
 
     valueSetDef.setOfficialResourceVersionId(valueSetVersion.versionId)
 
-    if (valueSetVersion.revisionDate != null) {
-      valueSetDef.setOfficialReleaseDate(valueSetVersion.revisionDate.getTime)
+    if (valueSetVersion.getChangeDescription.getDate != null) {
+      valueSetDef.setOfficialReleaseDate(valueSetVersion.getChangeDescription.getDate.getTime)
     }
 
     val ids = MatValueSetUtils.getIncludedVersionIds(valueSetVersion, valueSetRepository)
@@ -148,7 +148,6 @@ class MatValueSetDefinitionReadService extends AbstractService with ValueSetDefi
 
     includesValueSets.foreach(valueSetDef.addEntry(_))
 
-
     if (valueSetVersion.getValueSetDeveloper != null) {
       val snr: SourceAndRoleReference = new SourceAndRoleReference
       snr.setSource(new SourceReference(valueSetVersion.getValueSetDeveloper))
@@ -165,6 +164,8 @@ class MatValueSetDefinitionReadService extends AbstractService with ValueSetDefi
       } else {
         EntryState.ACTIVE
       })
+
+    valueSetDef.setState(valueSetVersion.getState)
 
     valueSetDef
   }

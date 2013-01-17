@@ -1,119 +1,163 @@
 package edu.mayo.cts2.framework.plugin.service.mat.profile.valuesetdefinition
 
 import scala.collection.JavaConversions._
-import edu.mayo.cts2.framework.plugin.service.mat.profile.{StateChangeCallback, AbstractService}
+import edu.mayo.cts2.framework.plugin.service.mat.profile.AbstractService
 import edu.mayo.cts2.framework.service.profile.valuesetdefinition.ValueSetDefinitionMaintenanceService
 import edu.mayo.cts2.framework.service.profile.valuesetdefinition.name.ValueSetDefinitionReadId
-import edu.mayo.cts2.framework.model.valuesetdefinition.{ValueSetDefinitionEntry, SpecificEntityList, ValueSetDefinition}
+import edu.mayo.cts2.framework.model.valuesetdefinition.ValueSetDefinition
 import edu.mayo.cts2.framework.model.extension.LocalIdValueSetDefinition
 import edu.mayo.cts2.framework.service.profile.UpdateChangeableMetadataRequest
 import org.springframework.stereotype.Component
-import edu.mayo.cts2.framework.plugin.service.mat.repository.{ValueSetRepository, ValueSetVersionRepository, ChangeSetRepository}
+import edu.mayo.cts2.framework.plugin.service.mat.repository.{ValueSetChangeDescriptionRepository, ValueSetRepository, ValueSetVersionRepository, ChangeSetRepository}
 import javax.annotation.Resource
-import edu.mayo.cts2.framework.plugin.service.mat.model.{ValueSetEntry, ValueSetVersion, ValueSetChange}
-import edu.mayo.cts2.framework.model.core.{URIAndEntityName, ChangeDescription}
-import edu.mayo.cts2.framework.model.core.types.{FinalizableState, ChangeCommitted, ChangeType}
-import java.util.{UUID, Date}
-import edu.mayo.cts2.framework.model.updates.ChangeableResource
-import edu.mayo.cts2.framework.model.service.core.{EntityNameOrURI, EntityNameOrURIList}
+import edu.mayo.cts2.framework.plugin.service.mat.model.{ValueSetChangeDescription, ValueSetEntry, ValueSetVersion}
+import edu.mayo.cts2.framework.model.core.types.{FinalizableState, ChangeType}
+import java.util.UUID
+import edu.mayo.cts2.framework.model.service.exception.{ResourceIsNotOpen, ChangeSetIsNotOpen, UnknownChangeSet}
+import java.util
 
 @Component
 class MatValueSetDefinitionMaintenanceService extends AbstractService with ValueSetDefinitionMaintenanceService {
 
   @Resource
-  var valueSetVersionRepository: ValueSetVersionRepository = _
+  var versionRepo: ValueSetVersionRepository = _
 
   @Resource
-  var valueSetRepository: ValueSetRepository = _
+  var changeDescRepo: ValueSetChangeDescriptionRepository = _
 
   @Resource
-  var changeSetRepository: ChangeSetRepository = _
+  var valueSetRepo: ValueSetRepository = _
 
   @Resource
-  var stateChangeCallback: StateChangeCallback = _
+  var changeSetRepo: ChangeSetRepository = _
 
-  override def updateChangeableMetadata(readId: ValueSetDefinitionReadId, request: UpdateChangeableMetadataRequest) {}
+  /* TODO: implement */
+  override def updateChangeableMetadata(readId: ValueSetDefinitionReadId, request: UpdateChangeableMetadataRequest) {
+//    val changeSet = changeSetRepo.findOne(request.getChangeSetUri)
+//
+//    if (changeSet.eq(null))
+//      throw new UnknownChangeSet
+//
+//    if (changeSet.getFinalizableState.ne(FinalizableState.OPEN))
+//      throw new ChangeSetIsNotOpen
+//
+//    Option(versionRepo.findOne(readId.getUri)) match {
+//      case Some(version) => {
+//        /* update desc */
+//        val changeDesc = new ValueSetChangeDescription
+//        changeDesc.setChangeType(ChangeType.METADATA)
+//        changeDesc.setContainingChangeSet(changeSet.getId)
+//        changeDescRepo.save(changeDesc)
+//
+//        version.setChangeDescription(changeDesc)
+//        versionRepo.save(version)
+//      }
+//      case None => null
+//    }
+  }
 
   override def updateResource(resource: LocalIdValueSetDefinition) {
-    /* TODO: implement */
-    val choice : ChangeableResource = new ChangeableResource
-    choice.setValueSetDefinition(resource.getResource)
-    stateChangeCallback.resourceUpdated(choice)
+    val changeSet = changeSetRepo.findOne(resource.getChangeableElementGroup.getChangeDescription.getContainingChangeSet)
+    if (changeSet.eq(null))
+      throw new UnknownChangeSet
+
+    if (changeSet.getFinalizableState.ne(FinalizableState.OPEN))
+      throw new ChangeSetIsNotOpen
+
+    Option(versionRepo.findOne(resource.getResource.getDocumentURI)) match {
+      case Some(version) => {
+        val valueSetDefinition = resource.getResource
+        val version: ValueSetVersion = toValueSetVersion(valueSetDefinition)
+        /* update desc */
+        val changeDesc = new ValueSetChangeDescription
+        changeDesc.setChangeType(ChangeType.UPDATE)
+        changeDesc.setContainingChangeSet(changeSet.getId)
+        changeDesc.setAuthor(valueSetDefinition.getSourceAndRole(0).getSource.getContent)
+        changeDescRepo.save(changeDesc)
+
+        version.setChangeDescription(changeDesc)
+        versionRepo.save(version)
+      }
+      case None => null
+    }
   }
 
   override def createResource(valueSetDefinition: ValueSetDefinition): LocalIdValueSetDefinition = {
-    saveValueSetDefinition(valueSetDefinition)
-    val choice: ChangeableResource = new ChangeableResource
-    choice.setValueSetDefinition(valueSetDefinition)
-    stateChangeCallback.resourceAdded(choice)
-    new LocalIdValueSetDefinition(UUID.randomUUID().toString, valueSetDefinition)
+    val changeSet = changeSetRepo.findOne(valueSetDefinition.getChangeableElementGroup.getChangeDescription.getContainingChangeSet)
+    if (changeSet.eq(null))
+      throw new UnknownChangeSet
+
+    val version: ValueSetVersion = toValueSetVersion(valueSetDefinition)
+    /* update desc */
+    val changeDesc = new ValueSetChangeDescription
+    changeDesc.setChangeType(ChangeType.CREATE)
+    changeDesc.setContainingChangeSet(changeSet.getId)
+    changeDesc.setAuthor(valueSetDefinition.getSourceAndRole(0).getSource.getContent)
+    changeDescRepo.save(changeDesc)
+
+    version.setChangeDescription(changeDesc)
+    versionRepo.save(version)
+
+    changeSet.addVersion(version)
+    changeSetRepo.save(changeSet)
+
+    new LocalIdValueSetDefinition(version.getId, valueSetDefinition)
   }
 
   override def deleteResource(valueSetDefinitionReadId: ValueSetDefinitionReadId, changeSetUri: String) {
-    val changeSet = getChangeSet(changeSetUri)
-    if (isChangeSetWritable(changeSet)) {
-      val vsd = getValueSetDefinition(valueSetDefinitionReadId)
-      if (isValueSetDefinitionWritable(vsd)) {
 
-        val group = vsd.getChangeableElementGroup
+    val changeSet = changeSetRepo.findOne(changeSetUri)
+    if (changeSet.eq(null)) {
+      throw new UnknownChangeSet
+    }
 
-        val changeDesc = new ChangeDescription
-        changeDesc.setChangeDate(new Date())
-        changeDesc.setChangeType(ChangeType.DELETE)
-        changeDesc.setCommitted(ChangeCommitted.PENDING)
-        changeDesc.setContainingChangeSet(changeSetUri)
+    if (changeSet.getFinalizableState.ne(FinalizableState.OPEN)) {
+      throw new ChangeSetIsNotOpen
+    }
 
-        group.setChangeDescription(changeDesc)
-        saveValueSetDefinition(vsd)
+    Option(versionRepo.findOne(valueSetDefinitionReadId.getUri)) match {
+      case Some(version) => {
+        if (version.getState.eq(FinalizableState.FINAL)) {
+          throw new ResourceIsNotOpen
+        } else {
+          val desc = new ValueSetChangeDescription
+          desc.setContainingChangeSet(changeSetUri)
+          desc.setChangeType(ChangeType.DELETE)
+          desc.setAuthor(version.getValueSetDeveloper)
+          changeDescRepo.save(desc)
 
-        val choice = new ChangeableResource
-        choice.setValueSetDefinition(vsd)
-        stateChangeCallback.resourceDeleted(choice, changeSetUri)
+          version.setChangeDescription(desc)
+          versionRepo.save(version)
+        }
       }
+      case None => null
     }
 
   }
 
-  def createSpecificEntityListDefinition(changeSetUri: String, valueSetId: String, entities: EntityNameOrURIList) {
-    val changeSet = changeSetRepository.findOne(changeSetUri)
-    if (isChangeSetWritable(changeSet)) {
-      val specificList: SpecificEntityList = new SpecificEntityList()
-      val vsd = new ValueSetDefinition
-      val entry = new ValueSetDefinitionEntry
-      entry.setEntityList(specificList)
-      vsd.addEntry(entry)
-    }
-
-  }
-
-  private def resolveEntity(nameOrUri: EntityNameOrURI): URIAndEntityName = {
-    null
-  }
-
-  private def isChangeSetWritable(changeSet: ValueSetChange) = {
-    changeSet != null && changeSet.getState.eq(FinalizableState.OPEN)
-  }
-
-  private def isValueSetDefinitionWritable(valueSetDef: ValueSetDefinition) = {
-    valueSetDef != null && valueSetDef.getState != null && valueSetDef.getState.eq(FinalizableState.OPEN)
-  }
-
-  private def saveValueSetDefinition(vsd: ValueSetDefinition) {
+  private def toValueSetVersion(vsd: ValueSetDefinition): ValueSetVersion = {
     val version = new ValueSetVersion
     version.setId(vsd.getDocumentURI)
-    version.valueSet = valueSetRepository.findOne(vsd.getDefinedValueSet.getContent)
+    version.valueSet = valueSetRepo.findOne(vsd.getDefinedValueSet.getContent)
     version.setValueSetDeveloper(vsd.getSourceAndRole(0).getSource.getContent)
+    version.setState(FinalizableState.OPEN)
+
     if (vsd.getVersionTagCount > 0)
       version.setVersionId(vsd.getVersionTag(0).getContent)
 
-    if (valueSetVersionRepository.findVersionByIdOrVersionIdAndValueSetName(version.valueSet.getOid, version.getVersionId) == null) {
+    val page = new edu.mayo.cts2.framework.model.command.Page()
+    page.setMaxToReturn(1000)
+
+    val entries = versionRepo.findValueSetEntriesByValueSetVersionId(version.getId, toPageable(Option(page))).getContent
+
+    if (versionRepo.findVersionByIdOrVersionIdAndValueSetName(version.valueSet.getOid, version.getVersionId) == null) {
       vsd.getEntry.foreach(entry => {
         var codeSystemVersion = ""
         if (entry.getCompleteCodeSystem != null && entry.getCompleteCodeSystem.getCodeSystemVersion != null && entry.getCompleteCodeSystem.getCodeSystemVersion.getVersion != null)
-        Option(entry.getCompleteCodeSystem.getCodeSystemVersion.getVersion.getContent) match {
-          case Some(entryVersion) => codeSystemVersion = entryVersion
-          case None => codeSystemVersion = ""
-        }
+          Option(entry.getCompleteCodeSystem.getCodeSystemVersion.getVersion.getContent) match {
+            case Some(entryVersion) => codeSystemVersion = entryVersion
+            case None => codeSystemVersion = ""
+          }
         entry.getEntityList.getReferencedEntity.foreach(entity => {
           val vsEntry = new ValueSetEntry
           vsEntry.setId(UUID.randomUUID.toString)
@@ -121,36 +165,13 @@ class MatValueSetDefinitionMaintenanceService extends AbstractService with Value
           vsEntry.setCodeSystemVersion(codeSystemVersion)
           vsEntry.setValueSetVersion(version)
           vsEntry.setCode(entity.getName)
-          //        vsEntry.setUri(entity.getUri)
-          //        vsEntry.setHref(entity.getHref)
-          version.addEntry(vsEntry)
+          if (!entries.contains(vsEntry))
+            version.addEntry(vsEntry)
         })
       })
 
-      valueSetVersionRepository.save(version)
     }
-  }
-
-  private def removeDefinitionEntry(changeSetUri: String, valueSetDefinitionUri: String, entryToRemove: Int): ValueSetDefinition = {
-    //    val vsd = valueSetDefinitionRepository.findOne(valueSetDefinitionUri)
-    //    vsd.removeEntry(entryToRemove)
-    //    valueSetDefinitionRepository.save(vsd)
-    //    MatValueSetDefinitionUtils.transformToValueSetDefinition(vsd)
-    null
-  }
-
-  private def getChangeSet(changeSetUri: String): ValueSetChange = {
-    changeSetRepository.findOne(changeSetUri)
-  }
-
-  private def getValueSetDefinition(vsdReadId: ValueSetDefinitionReadId, changeSetUri: String): ValueSetChange = {
-    null
-  }
-
-  /* TODO: implement */
-  private def getValueSetDefinition(vsdReadId: ValueSetDefinitionReadId): ValueSetDefinition = {
-//    MatValueSetDefinitionUtils.transformToValueSetDefinition(valueSetDefinitionRepository.findOne(vsdReadId.getUri))
-    null
+    version
   }
 
 }

@@ -7,18 +7,22 @@ import java.util.{UUID, Date}
 
 import edu.mayo.cts2.framework.model.core.{OpaqueData, SourceReference}
 import edu.mayo.cts2.framework.plugin.service.mat.model.{ValueSetChange}
-import edu.mayo.cts2.framework.plugin.service.mat.repository.ChangeSetRepository
+import edu.mayo.cts2.framework.plugin.service.mat.repository.{ValueSetVersionRepository, ChangeSetRepository}
 import edu.mayo.cts2.framework.service.profile.update.ChangeSetService
 import edu.mayo.cts2.framework.plugin.service.mat.profile.AbstractService
 import org.springframework.stereotype.Component
-import edu.mayo.cts2.framework.model.core.types.{ChangeType, FinalizableState}
+import edu.mayo.cts2.framework.model.core.types.{ChangeCommitted, ChangeType, FinalizableState}
 import edu.mayo.cts2.framework.model.updates.ChangeSet
+import edu.mayo.cts2.framework.model.service.exception.{UnknownValueSetDefinition, ChangeSetIsNotOpen, UnknownChangeSet}
 
 @Component
 class MatChangeSetService extends AbstractService with ChangeSetService {
 
   @Resource
   var changeSetRepository: ChangeSetRepository = _
+
+  @Resource
+  var valueSetVersionRepository: ValueSetVersionRepository = _
 
   def readChangeSet(changeSetUri: String) = {
     val changeSet = Option[ValueSetChange](changeSetRepository.findOne(changeSetUri))
@@ -30,7 +34,6 @@ class MatChangeSetService extends AbstractService with ChangeSetService {
 
   def createChangeSet() = {
     val valueSetChange = new ValueSetChange
-    valueSetChange.setChangeType(ChangeType.CREATE)
     changeSetRepository.save(valueSetChange)
     valueSetChange.convertToChangeSet
   }
@@ -58,7 +61,33 @@ class MatChangeSetService extends AbstractService with ChangeSetService {
   }
 
   def commitChangeSet(changeSetId: String) {
-    throw new RuntimeException
+    Option(changeSetRepository.findOne(changeSetId)) match {
+      case Some(change) => {
+        if (change.getFinalizableState.eq(FinalizableState.OPEN)) {
+          commitChangeSet(change)
+        } else {
+          throw new ChangeSetIsNotOpen
+        }
+      }
+      case None => throw new UnknownChangeSet
+    }
+  }
+
+  private def commitChangeSet(change: ValueSetChange) {
+//    change.getChangeType match {
+//      case ChangeType.DELETE => {
+//        Option(valueSetVersionRepository.findByChangeSetUri(change.getId)) match {
+//          case Some(valueSetVersion) => valueSetVersionRepository.delete(valueSetVersion)
+//          case None => throw new UnknownValueSetDefinition
+//        }
+//      }
+//      case ChangeType.UPDATE => {}
+//      case ChangeType.CREATE => {}
+//      case default => throw new UnsupportedOperationException
+//    }
+//    change.setChangeCommitted(ChangeCommitted.COMMITTED)
+//    change.setFinalizableState(FinalizableState.FINAL)
+//    changeSetRepository.save(change)
   }
 
   def importChangeSet(changeSetURI: URI) = {
