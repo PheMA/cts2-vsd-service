@@ -44,26 +44,24 @@ class MatChangeSetQueryService extends AbstractService with ChangeSetQuery with 
     var valuesetoid: String = null
 
     filters.foreach((filter: ResolvedFilter) =>
-      if (filter.getPropertyReference.getReferenceTarget.getName.equals("creator")) {
-        creator = filter.getMatchValue
-      }
-    else if (filter.getPropertyReference.getReferenceTarget.getName.equals("valuesetoid")) {
-        valuesetoid = filter.getMatchValue
+      Option(filter) match {
+        case Some(aFilter) => {
+          if (aFilter.getPropertyReference.getReferenceTarget.getName.equalsIgnoreCase("creator"))
+            creator = aFilter.getMatchValue
+          else if (aFilter.getPropertyReference.getReferenceTarget.getName.equalsIgnoreCase("valuesetoid"))
+            valuesetoid = aFilter.getMatchValue
+        }
+
+        case None => /* Do nothing */
       }
     )
 
-//    if (valuesetoid != null && creator != null) {
-//      changeSets = changeSetRepository.findChangeSetsByValueSetIdAndCreator(valuesetoid, creator, toPageable(Option(page)))
-//    }
-//    else if (creator != null) {
-//      changeSets = changeSetRepository.findChangeSetsByCreator(creator, toPageable(Option(page)))
-//    }
-//    else if (valuesetoid != null) {
-//      changeSets = changeSetRepository.findChangeSetsByValueSetId(valuesetoid, toPageable(Option(page)))
-//    }
-//    else {
+    if (creator != null) {
+      changeSets = changeSetRepository.findChangeSetsByCreator(creator, toPageable(Option(page)))
+    }
+    else {
       changeSets = changeSetRepository.findAll(toPageable(Option(page)))
-//    }
+    }
 
     val entries = changeSets.foldLeft(Seq[ChangeSetDirectoryEntry]())(transformChangeSet)
     val totalElements = changeSets.getTotalElements

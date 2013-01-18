@@ -97,8 +97,9 @@ class MatValueSetDefinitionReadService extends AbstractService with ValueSetDefi
 
     valueSetDef.setOfficialResourceVersionId(valueSetVersion.versionId)
 
-    if (valueSetVersion.getChangeDescription.getDate != null) {
-      valueSetDef.setOfficialReleaseDate(valueSetVersion.getChangeDescription.getDate.getTime)
+    Option(valueSetVersion.getChangeDescription) match {
+      case Some(changeDesc) => valueSetDef.setOfficialReleaseDate(changeDesc.getDate.getTime)
+      case None => /* do nothing */
     }
 
     val ids = MatValueSetUtils.getIncludedVersionIds(valueSetVersion, valueSetRepository)
