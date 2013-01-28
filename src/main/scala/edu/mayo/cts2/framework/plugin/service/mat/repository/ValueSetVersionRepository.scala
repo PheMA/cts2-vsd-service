@@ -19,23 +19,29 @@ trait ValueSetVersionRepository extends CrudRepository[ValueSetVersion, String] 
   @Query("select vsv from ValueSetVersion vsv where vsv.valueSet.name = :name")
   def findByValueSetName(@Param("name") name: String, pageable: Pageable): Page[ValueSetVersion]
 
-  @Query("select vsv from ValueSetVersion vsv where vsv.valueSet.name = :name and (vsv.id = :id or vsv.versionId = :id)")
-  def findVersionByIdOrVersionIdAndValueSetName(@Param("name") name:String, @Param("id") id:String): ValueSetVersion
+  @Query("select vs.currentVersion from ValueSet vs where vs.name = :name")
+  def findCurrentVersionByValueSetName(@Param("name") name: String): ValueSetVersion
+
+//  @Query("select vsv from ValueSetVersion vsv where vsv.valueSet.name = :name and (vsv.id = :id or vsv.version = :id)")
+//  def findVersionByIdOrVersionIdAndValueSetName(@Param("name") name:String, @Param("id") id:String): ValueSetVersion
 
   @Query("select distinct entries.codeSystem, entries.codeSystemVersion from ValueSetVersion valueSet " +
-  		"inner join valueSet._entries entries where valueSet.id = :id")
-  def findCodeSystemVersionsByValueSetVersion(@Param("id") oid:String): java.util.Collection[Array[String]]
+  		"inner join valueSet.entries entries where valueSet.version = :version")
+  def findCodeSystemVersionsByValueSetVersion(@Param("version") version:String): java.util.Collection[Array[String]]
 
-  @Query("select vse from ValueSetEntry vse where vse.valueSetVersion.id = :id")
-  def findValueSetEntriesByValueSetVersionId(@Param("id") id:String, pageable: Pageable): Page[ValueSetEntry]
+  @Query("select vse from ValueSetEntry vse where vse.valueSetVersion.changeSetUri = :changeSetUri")
+  def findValueSetEntriesByChangeSetUri(@Param("changeSetUri") changeSetUri:String, pageable: Pageable): Page[ValueSetEntry]
 
-  @Query("select vse from ValueSetEntry vse where vse.valueSetVersion.id in (:ids)")
+  @Query("select vse from ValueSetEntry vse where vse.valueSetVersion.documentUri in (:ids)")
   def findValueSetEntriesByValueSetVersionIds(@Param("ids") id:java.util.List[String], pageable: Pageable): Page[ValueSetEntry]
 
-  @Query("select vsv from ValueSetVersion vsv where vsv.valueSet.name = :name and vsv.valueSetDeveloper = :creator")
+  @Query("select vsv from ValueSetVersion vsv where vsv.valueSet.name = :name and vsv.creator = :creator")
   def findByValueSetNameAndCreator(@Param("name") name: String, @Param("creator") creator: String, pageable: Pageable): Page[ValueSetVersion]
 
-  @Query("select vsv from ValueSetVersion vsv where vsv.valueSetDeveloper = :creator")
+  @Query("select vsv from ValueSetVersion vsv where vsv.creator = :creator")
   def findByCreator(@Param("creator") creator: String, pageable: Pageable): Page[ValueSetVersion]
+
+  @Query("select c.currentVersion from ValueSetChange c where c.changeSetUri = :changeSetUri")
+  def findByChangeSetUri(@Param("changeSetUri") changeSetUri: String): ValueSetVersion
 
 }

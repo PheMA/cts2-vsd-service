@@ -35,7 +35,7 @@ class MatValueSetReadService extends AbstractService with ValueSetReadService {
     readContext: ResolvedReadContext): ValueSetCatalogEntry = {
     val valueSet =
       if (identifier.getName != null) {
-        valueSetRepository.findOneByName(identifier.getName)
+        valueSetRepository.findOne(identifier.getName)
       } else {
         val uri = identifier.getUri
 
@@ -54,8 +54,8 @@ class MatValueSetReadService extends AbstractService with ValueSetReadService {
 
   def valueSetToValueSetCatalogEntry(valueSet: ValueSet): ValueSetCatalogEntry = {
     val valueSetCatalogEntry = new ValueSetCatalogEntry()
-    valueSetCatalogEntry.setAbout(UriUtils.oidToUri(valueSet.oid))
-    valueSetCatalogEntry.addAlternateID(valueSet.oid)
+    valueSetCatalogEntry.setAbout(UriUtils.oidToUri(valueSet.name))
+    valueSetCatalogEntry.addAlternateID(valueSet.name)
     valueSetCatalogEntry.setValueSetName(valueSet.getName)
     valueSetCatalogEntry.setFormalName(valueSet.formalName)
     valueSetCatalogEntry.addSourceAndRole(MatValueSetUtils.sourceAndRole)

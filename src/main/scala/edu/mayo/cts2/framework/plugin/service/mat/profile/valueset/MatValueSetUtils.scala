@@ -48,7 +48,7 @@ object MatValueSetUtils {
   def buildValueSetReference(valueSet: ValueSet, urlConstructor: UrlConstructor): ValueSetReference = {
     val ref = new ValueSetReference()
     ref.setContent(valueSet.name)
-    ref.setUri(UriUtils.oidToUri(valueSet.oid))
+    ref.setUri(UriUtils.oidToUri(valueSet.name))
     ref.setHref(urlConstructor.createValueSetUrl(valueSet.name))
 
     ref
@@ -73,16 +73,16 @@ object MatValueSetUtils {
  
     buildValueSetDefinitionReference(
       name, about,
-      valueSetDefName, UriUtils.uuidToUri(valueSetVersion.id),
+      valueSetDefName, UriUtils.uuidToUri(valueSetVersion.documentUri),
       urlConstructor)
   }
   
   def getValueSetDefName(valueSetVersion: ValueSetVersion) = {
       val valueSetDefName =
-      if (StringUtils.isNotBlank(valueSetVersion.versionId)) {
-        valueSetVersion.versionId
+      if (StringUtils.isNotBlank(valueSetVersion.version)) {
+        valueSetVersion.version
       } else {
-        valueSetVersion.id
+        valueSetVersion.documentUri
       }
       
       valueSetDefName
@@ -127,7 +127,7 @@ object MatValueSetUtils {
   def getIncludedVersionIds(version: ValueSetVersion, repos: ValueSetRepository):Seq[String] = {
     val includedOids = version.includesValueSets
     
-    includedOids.foldLeft(Seq(version.id))(
+    includedOids.foldLeft(Seq(version.documentUri))(
         (seq, oid) => {
           seq ++ getIncludedVersionIds( repos.findOne( oid ).currentVersion, repos )
         }

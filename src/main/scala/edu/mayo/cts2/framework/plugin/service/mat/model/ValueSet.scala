@@ -18,23 +18,19 @@ class ValueSet(valueSetOid: String) extends Equals {
 
   @Id
   @BeanProperty
-  var oid: String = valueSetOid
-
-  @BeanProperty
-  @Column(nullable = false)
-  var name: String = _
+  var name: String = valueSetOid
 
   @BeanProperty
   var formalName: String = _
-  
+
   def addVersion(version: ValueSetVersion,current: Boolean = false) {
     if(currentVersion == null || current){
       currentVersion = version
-    } 
+    }
     versions.add(version)
     version.valueSet = this
   }
-  
+
   @OneToOne(cascade=Array{CascadeType.ALL}, fetch = FetchType.LAZY)
   var currentVersion: ValueSetVersion = _
 
@@ -43,14 +39,14 @@ class ValueSet(valueSetOid: String) extends Equals {
 
   @OneToMany(cascade=Array{CascadeType.ALL})
   var properties: java.util.List[ValueSetProperty] = new ArrayList[ValueSetProperty]()
-  
-  override def hashCode() = this.oid.hashCode
-  
+
+  override def hashCode() = this.name.hashCode
+
   override def equals(other: Any) = other match {
-    case that: ValueSet => this.oid == that.oid && this.oid == that.oid
+    case that: ValueSet => this.name == that.name
     case _ => false
   }
-  
+
   def canEqual(other: Any) = {
     other.isInstanceOf[edu.mayo.cts2.framework.plugin.service.mat.model.ValueSet]
   }

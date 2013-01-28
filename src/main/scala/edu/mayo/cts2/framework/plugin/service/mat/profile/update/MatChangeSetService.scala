@@ -3,7 +3,7 @@ package edu.mayo.cts2.framework.plugin.service.mat.profile.update
 import javax.annotation.Resource
 
 import java.net.URI
-import java.util.{UUID, Date}
+import java.util.{Calendar, UUID, Date}
 
 import edu.mayo.cts2.framework.model.core.{OpaqueData, SourceReference}
 import edu.mayo.cts2.framework.plugin.service.mat.model.{ValueSetChange}
@@ -45,11 +45,17 @@ class MatChangeSetService extends AbstractService with ChangeSetService {
     val changeSet = changeSetRepository.findOne(changeSetId)
     if (changeSet != null) {
       if (creator != null) {
-        changeSet.setAuthor(creator.getContent)
+        changeSet.setCreator(creator.getContent)
       }
 
       if (changeInstructions != null) {
-        changeSet.setDescription(changeInstructions.getValue.toString)
+        changeSet.setInstructions(changeInstructions.getValue.toString)
+      }
+
+      if (officialEffectiveDate != null) {
+        val calendar = Calendar.getInstance()
+        calendar.setTime(officialEffectiveDate)
+        changeSet.setDate(calendar)
       }
 
       changeSetRepository.save(changeSet)
@@ -63,7 +69,7 @@ class MatChangeSetService extends AbstractService with ChangeSetService {
   def commitChangeSet(changeSetId: String) {
     Option(changeSetRepository.findOne(changeSetId)) match {
       case Some(change) => {
-        if (change.getFinalizableState.eq(FinalizableState.OPEN)) {
+        if (change.getState.eq(FinalizableState.OPEN)) {
           commitChangeSet(change)
         } else {
           throw new ChangeSetIsNotOpen
@@ -74,6 +80,7 @@ class MatChangeSetService extends AbstractService with ChangeSetService {
   }
 
   private def commitChangeSet(change: ValueSetChange) {
+    throw new RuntimeException
 //    change.getChangeType match {
 //      case ChangeType.DELETE => {
 //        Option(valueSetVersionRepository.findByChangeSetUri(change.getId)) match {

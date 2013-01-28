@@ -42,7 +42,7 @@
 				<prop key="javax.persistence.validation.mode">none</prop>
 				<prop key="hibernate.dialect">${hibernateDialect}</prop>
 				<prop key="hibernate.hbm2ddl.auto">update</prop>
-<!-- 				<prop key="javax.persistence.query.timeout">0</prop> -->
+ 				<prop key="javax.persistence.query.timeout">0</prop>
 				<prop key="hibernate.show_sql">false</prop>
 				<prop key="hibernate.jdbc.batch_size">1000</prop>
 				<prop key="hibernate.order_inserts">true</prop>
@@ -60,8 +60,8 @@
 		<property name="minPoolSize" value="5" />
 		<property name="maxPoolSize" value="20" />
 		<property name="maxStatements" value="0" />
-<!-- 		<property name="idleConnectionTestPeriod" value="3000" /> -->
-<!-- 		<property name="loginTimeout" value="300" /> -->
+ 		<property name="idleConnectionTestPeriod" value="3000" />
+ 		<property name="loginTimeout" value="300" />
 	</bean>
 	
 	<bean id="utsDao" name="utsDao" class="edu.mayo.cts2.framework.plugin.service.mat.umls.dao.UtsDao">

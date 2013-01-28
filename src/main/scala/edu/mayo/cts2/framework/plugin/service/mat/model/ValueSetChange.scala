@@ -16,41 +16,43 @@ class ValueSetChange(uuid: String) {
 
   @Id
   @BeanProperty
-  var id: String = uuid
+  var changeSetUri: String = uuid
 
   @BeanProperty
-  var author: String = _
+  var creator: String = _
 
   @BeanProperty
   var date = Calendar.getInstance
 
   @BeanProperty
-  var name: String = _
+  var state: FinalizableState = FinalizableState.OPEN
 
   @BeanProperty
-  var description: String = _
+  var instructions: String = _
 
   @BeanProperty
-  var finalizableState: FinalizableState = FinalizableState.OPEN
+  @OneToOne
+  var currentVersion: ValueSetVersion = _
 
   @BeanProperty
   @OneToMany(cascade=Array{CascadeType.ALL}, fetch = FetchType.EAGER)
   var versions: util.List[ValueSetVersion] = new util.ArrayList[ValueSetVersion]()
 
   def addVersion(version: ValueSetVersion) {
+    currentVersion = version
     versions.add(version)
   }
 
   def convertToChangeSet: ChangeSet = {
     val changeSet = new ChangeSet
-    changeSet.setChangeSetURI(id)
+    changeSet.setChangeSetURI(changeSetUri)
     changeSet.setCreationDate(date.getTime)
     val eg = new ChangeSetElementGroup
-    val creator = new SourceReference()
-    creator.setContent(author)
-    eg.setCreator(creator)
+    val creatorRef = new SourceReference()
+    creatorRef.setContent(creator)
+    eg.setCreator(creatorRef)
     changeSet.setChangeSetElementGroup(eg)
-    changeSet.setState(finalizableState)
+    changeSet.setState(state)
     changeSet.setMember(convertMembers)
     changeSet
   }

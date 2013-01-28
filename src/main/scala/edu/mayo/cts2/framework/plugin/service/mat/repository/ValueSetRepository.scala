@@ -15,8 +15,7 @@ trait ValueSetRepository extends CrudRepository[ValueSet, String] {
 
   def findAll(pageable: Pageable): Page[ValueSet]
   
-  @Query("select distinct vs from ValueSet vs where upper(vs.name) like upper(:query) or upper(vs.formalName) like upper(:query) " +
-  		"or upper(vs.id.oid) like upper(:query)")
+  @Query("select distinct vs from ValueSet vs where upper(vs.name) like upper(:query) or upper(vs.formalName) like upper(:query)")
   def findByAnyLikeIgnoreCase(@Param("query") query:String, pageable: Pageable): Page[ValueSet]
   
   @Query("select distinct vs from ValueSet vs join vs.properties vsp " +
@@ -29,10 +28,4 @@ trait ValueSetRepository extends CrudRepository[ValueSet, String] {
   @Query("select vs.currentVersion.id from ValueSet vs where vs.name = :name")
   def findCurrentVersionIdByName(@Param("name") name:String): String
   
-  def findByNameLikeIgnoreCase(query:String, pageable: Pageable): Page[ValueSet]
-  
-  def findByFormalNameLikeIgnoreCase(query:String, pageable: Pageable): Page[ValueSet]
-  
-  def findOneByName(query:String): ValueSet
-
 }

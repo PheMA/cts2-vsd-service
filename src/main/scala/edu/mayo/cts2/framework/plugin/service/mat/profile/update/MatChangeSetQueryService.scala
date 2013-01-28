@@ -75,14 +75,14 @@ class MatChangeSetQueryService extends AbstractService with ChangeSetQuery with 
 
   def transformSingleChangeSet = (changeSet: ValueSetChange) => {
     val entry = new ChangeSetDirectoryEntry
-    entry.setChangeSetURI(changeSet.getId)
-    entry.setResourceName(changeSet.getId)
+    entry.setChangeSetURI(changeSet.getChangeSetUri)
+    entry.setResourceName(changeSet.getChangeSetUri)
     entry.setCreationDate(changeSet.getDate.getTime)
-    entry.setState(changeSet.getFinalizableState)
+    entry.setState(changeSet.getState)
 
     val group = new ChangeSetElementGroup
     val sourceRef = new SourceReference
-    sourceRef.setContent(changeSet.getAuthor)
+    sourceRef.setContent(changeSet.getCreator)
     group.setCreator(sourceRef)
     entry.setChangeSetElementGroup(group)
     entry

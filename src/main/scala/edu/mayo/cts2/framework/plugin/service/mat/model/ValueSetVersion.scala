@@ -1,29 +1,31 @@
 package edu.mayo.cts2.framework.plugin.service.mat.model
 
-import java.util.ArrayList
-import java.util.UUID
 import scala.collection.JavaConversions._
 import scala.reflect.BeanProperty
 import javax.persistence._
-import edu.mayo.cts2.framework.model.core.types.FinalizableState
+import edu.mayo.cts2.framework.model.core.types.{ChangeCommitted, ChangeType, FinalizableState}
 import java.util
 
 @Entity
 class ValueSetVersion extends Equals {
 
+  /*************************/
+  /* Definition Properties */
+  /*************************/
   @Id
   @BeanProperty
-  var id: String = UUID.randomUUID.toString
+  var documentUri: String = util.UUID.randomUUID.toString
 
+  @BeanProperty
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(nullable=false)
   var valueSet: ValueSet = _
 
   @BeanProperty
-  var versionId: String = UUID.randomUUID.toString
+  var version: String = _
 
   @BeanProperty
-  var valueSetDeveloper: String = _
+  var creator: String = _
 
   @BeanProperty
   var notes: String = _
@@ -47,26 +49,19 @@ class ValueSetVersion extends Equals {
   @BeanProperty
   var binding: String = _
 
-  @ManyToOne(cascade = Array{CascadeType.ALL})
-  var changeDescription: ValueSetChangeDescription = _
-  def setChangeDescription(description: ValueSetChangeDescription) {
-    if (Option(changeDescription).isDefined) {
-      successor.add(changeDescription)
-    }
-    changeDescription = description
-  }
-  def getChangeDescription = changeDescription
+  @BeanProperty
+  var synopsis: String = _
 
   @BeanProperty
-  @ElementCollection
-  var successor: util.List[ValueSetChangeDescription] = new util.ArrayList[ValueSetChangeDescription]()
+  var successor: String = _
 
+  @BeanProperty
   @OneToMany(mappedBy="valueSetVersion", fetch = FetchType.LAZY, cascade = Array{CascadeType.ALL})
-  private var _entries: util.List[ValueSetEntry] = new ArrayList[ValueSetEntry]()
+  val entries: util.List[ValueSetEntry] = new util.ArrayList[ValueSetEntry]()
   
   def addEntry(entry:ValueSetEntry) = {
     entry.valueSetVersion = this
-    _entries.add(entry)
+    entries.add(entry)
   }
   
   def addEntries(entries:Seq[ValueSetEntry]) {
@@ -76,10 +71,28 @@ class ValueSetVersion extends Equals {
   @ElementCollection
   var includesValueSets: util.List[String] = new util.ArrayList[String]()
 
-  override def hashCode() = this.id.hashCode
+  /*********************************/
+  /* Change Description Properties */
+  /*********************************/
+  @BeanProperty
+  var changeSetUri: String = _
+
+  @BeanProperty
+  var prevChangeSetUri: String = _
+
+  @BeanProperty
+  var changeType: ChangeType = _
+
+  @BeanProperty
+  var changeCommitted: ChangeCommitted = ChangeCommitted.PENDING
+
+  @BeanProperty
+  var revisionDate = util.Calendar.getInstance
+
+  override def hashCode() = this.documentUri.hashCode
       
   override def equals(other: Any) = other match {
-    case that: ValueSetVersion => this.id == that.id && this.id == that.id
+    case that: ValueSetVersion => this.documentUri == that.documentUri
     case _ => false
   }
   

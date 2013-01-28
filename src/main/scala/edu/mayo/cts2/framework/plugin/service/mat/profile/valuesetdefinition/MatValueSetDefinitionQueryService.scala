@@ -137,8 +137,8 @@ class MatValueSetDefinitionQueryService
     
     val summary = new ValueSetDefinitionDirectoryEntry()
     summary.setResourceName(valueSetDefName)
-    summary.setAbout(UriUtils.oidToUri(valueSetVersion.valueSet.oid))
-    summary.setDocumentURI(UriUtils.uuidToUri(valueSetVersion.id))
+    summary.setAbout(UriUtils.oidToUri(valueSetVersion.valueSet.name))
+    summary.setDocumentURI(UriUtils.uuidToUri(valueSetVersion.documentUri))
     summary.setFormalName(valueSetVersion.valueSet.formalName)
     summary.setHref(urlConstructor.createValueSetDefinitionUrl(valueSetVersion.valueSet.name, valueSetDefName))
 

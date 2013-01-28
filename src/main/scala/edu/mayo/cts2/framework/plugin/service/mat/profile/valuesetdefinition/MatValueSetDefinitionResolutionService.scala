@@ -69,28 +69,24 @@ class MatValueSetDefinitionResolutionService extends AbstractService with ValueS
     readContext: ResolvedReadContext,
     page: Page): ResolvedValueSetResult[EntitySynopsis] = {
 
-    val valueSetDefinitionName = id.getName
-
     val valueSetName = id.getValueSet.getName
+    val changeSetUri = Option(readContext).map(_.getChangeSetContextUri).getOrElse("")
+    var valueSetVersion: ValueSetVersion = null
 
-    val valueSetVersion = 
-      valueSetVersionRepository.findVersionByIdOrVersionIdAndValueSetName(valueSetName, valueSetDefinitionName)
+    if (changeSetUri == null || changeSetUri.equals(""))
+      valueSetVersion = valueSetVersionRepository.findCurrentVersionByValueSetName(valueSetName)
+    else
+      valueSetVersion = valueSetVersionRepository.findByChangeSetUri(changeSetUri)
 
     if (valueSetVersion == null) {
       return null
     }
     
     val pageable = this.toPageable(Option(page))
-    
     val ids = MatValueSetUtils.getIncludedVersionIds(valueSetVersion, valueSetRepository)
-    
-    val entryPage = valueSetVersionRepository.
-    	findValueSetEntriesByValueSetVersionIds(ids, pageable)
-    	
+    val entryPage = valueSetVersionRepository.findValueSetEntriesByValueSetVersionIds(ids, pageable)
     val entries = entryPage.getContent
-
-    val directoryEntries = entries.
-      foldLeft(Seq[EntitySynopsis]())(valueSetToEntitySynopsis)
+    val directoryEntries = entries.foldLeft(Seq[EntitySynopsis]())(valueSetToEntitySynopsis)
 
     new ResolvedValueSetResult(
         buildHeader(valueSetVersion), 
@@ -121,7 +117,7 @@ class MatValueSetDefinitionResolutionService extends AbstractService with ValueS
 
     header.setResolutionOf(valueDefSetRef)
 
-    val codeSystemVersions = valueSetVersionRepository.findCodeSystemVersionsByValueSetVersion(valueSetVersion.id).asInstanceOf[java.util.List[Array[Object]]]
+    val codeSystemVersions = valueSetVersionRepository.findCodeSystemVersionsByValueSetVersion(valueSetVersion.documentUri).asInstanceOf[java.util.List[Array[Object]]]
 
     val itr = codeSystemVersions.asScala
 

@@ -11,9 +11,9 @@ import org.apache.poi.ss.usermodel.Row
 import org.apache.poi.ss.usermodel.Cell
 import org.springframework.stereotype.Component
 import edu.mayo.cts2.framework.plugin.service.mat.model._
-import edu.mayo.cts2.framework.plugin.service.mat.repository.{ValueSetChangeDescriptionRepository, ChangeSetRepository, ValueSetRepository}
+import edu.mayo.cts2.framework.plugin.service.mat.repository.{ChangeSetRepository, ValueSetRepository}
 import javax.annotation.Resource
-import edu.mayo.cts2.framework.model.core.types.{FinalizableState, ChangeType}
+import edu.mayo.cts2.framework.model.core.types.{ChangeType, FinalizableState}
 
 @Component
 class MatZipLoader {
@@ -54,10 +54,6 @@ class MatZipLoader {
   var changeSetRepository: ChangeSetRepository = _
 
 
-  @Resource
-  var descRepos: ValueSetChangeDescriptionRepository = _
-  
-
   def loadCombinedMatZip(zip: ZipFile) {
     MatZipLoaderUtils.doWithCombinedMatZip(zip, processSpreadSheet)
   }
@@ -81,7 +77,7 @@ class MatZipLoader {
       if(foundEntries.isDefined){
         valueSet.currentVersion.addEntries(foundEntries.get)
       }
-      if(!valueSetRepository.exists(valueSet.oid)){
+      if(!valueSetRepository.exists(valueSet.name)){
         set + valueSet
       }
       else {
@@ -91,16 +87,14 @@ class MatZipLoader {
 
     valueSets.foreach(vs => {
       val change = new ValueSetChange
-      change.setAuthor("MAT Authoring Tool")
-      val desc = new ValueSetChangeDescription
-      desc.setChangeType(ChangeType.CREATE)
-      desc.setAuthor(change.getAuthor)
-      desc.setContainingChangeSet(change.getId)
-      vs.currentVersion.setChangeDescription(desc)
-      descRepos.save(desc)
+      change.setCreator("MAT Authoring Tool")
+      change.addVersion(vs.currentVersion)
+      vs.currentVersion.setChangeType(ChangeType.CREATE)
+      vs.currentVersion.setChangeSetUri(change.getChangeSetUri)
+      vs.currentVersion.setCreator(change.getCreator)
+      valueSetRepository.save(vs)
       changeSetRepository.save(change)
     })
-    valueSetRepository.save(valueSets)
   }: Unit
 
   private def getSheetRowIterator(wb:HSSFWorkbook) = {
@@ -127,22 +121,22 @@ class MatZipLoader {
         val valueSet = rowToValueSet(row)
         if (valueSet != null) {
 
-          val oid = valueSet.oid
+          val name = valueSet.name
           val valueSetEntry = rowToValueSetEntry(row)
 
-          if (!result.valueSets.contains(oid)) {
-            result.valueSets += (oid -> valueSet)
+          if (!result.valueSets.contains(name)) {
+            result.valueSets += (name -> valueSet)
           }
 
 
          if (!valueSetEntry.codeSystem.equalsIgnoreCase(GROUPING_CODE_SYSTEM)) {
-            if (!result.valueSetEntries.contains(oid)) {
-              result.valueSetEntries += (oid -> Seq(valueSetEntry))
+            if (!result.valueSetEntries.contains(name)) {
+              result.valueSetEntries += (name -> Seq(valueSetEntry))
             } else {
-              result.valueSetEntries = result.valueSetEntries updated (oid, (result.valueSetEntries.get(oid).get ++ Seq(valueSetEntry)))
+              result.valueSetEntries = result.valueSetEntries updated (name, (result.valueSetEntries.get(name).get ++ Seq(valueSetEntry)))
             }
           } else {
-            result.valueSets.get(oid).get.currentVersion.includesValueSets += valueSetEntry.code
+            result.valueSets.get(name).get.currentVersion.includesValueSets += valueSetEntry.code
           }
 
         }
@@ -158,13 +152,12 @@ class MatZipLoader {
     if (!validateCell(row,OID_CELL) || !validateCell(row,NAME_CELL)) {
       return null
     }
-    valueSet.oid = getCellValue(row.getCell(OID_CELL))
-    valueSet.name = valueSet.oid
+    valueSet.name = getCellValue(row.getCell(OID_CELL))
     valueSet.formalName = getCellValue(row.getCell(NAME_CELL))
     valueSet.addVersion(new ValueSetVersion())
-    valueSet.currentVersion.setVersionId("1")
+    valueSet.currentVersion.setVersion("1")
     valueSet.currentVersion.setState(FinalizableState.FINAL)
-    valueSet.currentVersion.valueSetDeveloper = getCellValue(row.getCell(DEVELOPER_CELL))
+    valueSet.currentVersion.creator = getCellValue(row.getCell(DEVELOPER_CELL))
     valueSet.currentVersion.qdmCategory = getCellValue(row.getCell(QDM_CATEGORY_CELL))
 
     valueSet

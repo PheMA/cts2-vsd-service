@@ -15,13 +15,7 @@ trait ChangeSetRepository extends CrudRepository[ValueSetChange, String] {
 
   def findAll(pageable: Pageable): Page[ValueSetChange]
 
-//  @Query("select c from ValueSetChange c where c.valueSet.oid=:oid and c.author=:creator")
-//  def findChangeSetsByValueSetIdAndCreator(@Param("oid")oid: String, @Param("creator")creator: String, pageable: Pageable): Page[ValueSetChange]
-
-//  @Query("select c from ValueSetChange c where c.author=:creator")
-//  def findChangeSetsByCreator(@Param("creator")creator: String, pageable: Pageable): Page[ValueSetChange]
-//
-//  @Query("select c from ValueSetChange c where c.valueSet.oid=:oid")
-//  def findChangeSetsByValueSetId(@Param("oid")oid: String, pageable: Pageable): Page[ValueSetChange]
+  @Query("select c from ValueSetChange c where c.creator=:creator")
+  def findChangeSetsByCreator(@Param("creator")creator: String, pageable: Pageable): Page[ValueSetChange]
 
 }
