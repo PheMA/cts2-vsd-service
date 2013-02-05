@@ -32,6 +32,9 @@ trait ValueSetVersionRepository extends CrudRepository[ValueSetVersion, String] 
   @Query("select vse from ValueSetEntry vse where vse.valueSetVersion.changeSetUri = :changeSetUri")
   def findValueSetEntriesByChangeSetUri(@Param("changeSetUri") changeSetUri:String, pageable: Pageable): Page[ValueSetEntry]
 
+  @Query("select vse from ValueSetEntry vse where vse.valueSetVersion.version = :version)")
+  def findValueSetEntriesByValueSetVersion(@Param("version") version:String, pageable: Pageable): Page[ValueSetEntry]
+
   @Query("select vse from ValueSetEntry vse where vse.valueSetVersion.documentUri in (:ids)")
   def findValueSetEntriesByValueSetVersionIds(@Param("ids") id:java.util.List[String], pageable: Pageable): Page[ValueSetEntry]
 
