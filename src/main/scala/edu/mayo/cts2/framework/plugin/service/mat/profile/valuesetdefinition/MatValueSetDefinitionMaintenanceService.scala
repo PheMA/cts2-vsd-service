@@ -85,12 +85,15 @@ class MatValueSetDefinitionMaintenanceService extends AbstractService with Value
     if (changeSet.eq(null))
       throw new UnknownChangeSet
 
+    if (changeSet.getState.ne(FinalizableState.OPEN))
+      throw new ChangeSetIsNotOpen
+
     val version: ValueSetVersion = toValueSetVersion(valueSetDefinition)
     version.setChangeType(ChangeType.CREATE)
     versionRepo.save(version)
     changeSet.addVersion(version)
     changeSetRepo.save(changeSet)
-    new LocalIdValueSetDefinition(version.getDocumentUri, valueSetDefinition)
+    new LocalIdValueSetDefinition(version.getVersion, valueSetDefinition)
   }
 
   /* TODO: implement */

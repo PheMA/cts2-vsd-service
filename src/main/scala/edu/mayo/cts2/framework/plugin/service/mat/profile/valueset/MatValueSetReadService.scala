@@ -6,20 +6,16 @@ import org.apache.commons.lang.StringUtils
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import edu.mayo.cts2.framework.model.command.ResolvedReadContext
-import edu.mayo.cts2.framework.model.core.Property
-import edu.mayo.cts2.framework.model.core.SourceAndRoleReference
-import edu.mayo.cts2.framework.model.core.ValueSetDefinitionReference
+import edu.mayo.cts2.framework.model.core._
 import edu.mayo.cts2.framework.model.service.core.NameOrURI
 import edu.mayo.cts2.framework.model.valueset.ValueSetCatalogEntry
 import edu.mayo.cts2.framework.plugin.service.mat.model.ValueSet
 import edu.mayo.cts2.framework.plugin.service.mat.model.ValueSetProperty
 import edu.mayo.cts2.framework.plugin.service.mat.profile.AbstractService
-import edu.mayo.cts2.framework.plugin.service.mat.repository.ValueSetRepository
+import edu.mayo.cts2.framework.plugin.service.mat.repository.{ChangeSetRepository, ValueSetRepository}
 import edu.mayo.cts2.framework.plugin.service.mat.uri.UriUtils
 import edu.mayo.cts2.framework.service.profile.valueset.ValueSetReadService
 import javax.annotation.Resource
-import edu.mayo.cts2.framework.model.core.PredicateReference
-import edu.mayo.cts2.framework.model.core.StatementTarget
 import edu.mayo.cts2.framework.model.util.ModelUtils
 
 @Component
@@ -27,6 +23,9 @@ class MatValueSetReadService extends AbstractService with ValueSetReadService {
 
   @Resource
   var valueSetRepository: ValueSetRepository = _
+
+  @Resource
+  var changeRepository: ChangeSetRepository = _
 
   @Override
   @Transactional
@@ -68,11 +67,39 @@ class MatValueSetReadService extends AbstractService with ValueSetReadService {
             valueSet.currentVersion,
             urlConstructor))
 
+    valueSetCatalogEntry.setChangeableElementGroup(getChangeableElementGroup(valueSet.currentVersion.changeSetUri))
+
     valueSet.properties.foreach( (prop) => valueSetCatalogEntry.addProperty( toProperty(prop) ) )
     
     valueSetCatalogEntry
   }
-  
+
+  private def getChangeableElementGroup(changeSetUri: String): ChangeableElementGroup = {
+    val group = new ChangeableElementGroup
+    if (changeSetUri.ne("")) {
+      val change = changeRepository.findOne(changeSetUri)
+      if (change != null) {
+        val changeDesc = new ChangeDescription
+        changeDesc.setContainingChangeSet(change.getChangeSetUri)
+        changeDesc.setChangeDate(change.getCurrentVersion.getRevisionDate.getTime)
+        changeDesc.setChangeType(change.getCurrentVersion.getChangeType)
+        changeDesc.setChangeNotes(ModelUtils.createOpaqueData(change.getInstructions))
+        changeDesc.setCommitted(change.getCurrentVersion.getChangeCommitted)
+
+        /* TODO: populate the rest of the change set details */
+        //        changeDesc.setChangeSource()
+        //        changeDesc.setClonedResource()
+        //        changeDesc.setEffectiveDate()
+        //        changeDesc.setPrevChangeSet()
+        //        changeDesc.setPrevImage()
+
+        group.setChangeDescription(changeDesc)
+        group.setStatus(new StatusReference(change.getCurrentVersion.getStatus))
+      }
+    }
+    group
+  }
+
   def toProperty(valueSetProp: ValueSetProperty) = {
      val prop = createProperty(valueSetProp.getName, valueSetProp.getValue)
      
