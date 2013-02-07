@@ -7,13 +7,12 @@ import edu.mayo.cts2.framework.model.command.ResolvedReadContext
 import edu.mayo.cts2.framework.model.core._
 import edu.mayo.cts2.framework.model.extension.LocalIdValueSetDefinition
 import edu.mayo.cts2.framework.model.service.core.NameOrURI
-import edu.mayo.cts2.framework.plugin.service.mat.profile.AbstractService
+import edu.mayo.cts2.framework.plugin.service.mat.profile.AbstractReadService
 import edu.mayo.cts2.framework.service.profile.valuesetdefinition.ValueSetDefinitionReadService
 import edu.mayo.cts2.framework.service.profile.valuesetdefinition.name.ValueSetDefinitionReadId
-import edu.mayo.cts2.framework.plugin.service.mat.repository.{ChangeSetRepository, ValueSetRepository, ValueSetVersionRepository}
+import edu.mayo.cts2.framework.plugin.service.mat.repository.{ValueSetRepository, ValueSetVersionRepository}
 import javax.annotation.Resource
 import edu.mayo.cts2.framework.model.valuesetdefinition.ValueSetDefinition
-import edu.mayo.cts2.framework.plugin.service.mat.model.ValueSet
 import org.springframework.transaction.annotation.Transactional
 import edu.mayo.cts2.framework.model.valuesetdefinition.ValueSetDefinitionEntry
 import edu.mayo.cts2.framework.model.valuesetdefinition.SpecificEntityList
@@ -27,21 +26,17 @@ import org.apache.commons.lang.StringUtils
 import org.springframework.data.domain.PageRequest
 import java.util.Collections
 import edu.mayo.cts2.framework.model.util.ModelUtils
-import edu.mayo.cts2.framework.core.xml.DelegatingMarshaller
 
 @Component
-class MatValueSetDefinitionReadService extends AbstractService with ValueSetDefinitionReadService {
+class MatValueSetDefinitionReadService extends AbstractReadService with ValueSetDefinitionReadService {
 
-  val SIZE_LIMIT = 100;
+  val SIZE_LIMIT = 1000
   
   @Resource
   var valueSetRepository: ValueSetRepository = _
   
   @Resource
   var valueSetVersionRepository: ValueSetVersionRepository = _
-
-  @Resource
-  var changeRepository: ChangeSetRepository = _
 
   /**
    * This is incomplete... this is only here to map the 'CURRENT' tag to a CodeSystemVersionName.
@@ -83,7 +78,7 @@ class MatValueSetDefinitionReadService extends AbstractService with ValueSetDefi
     var valueSetVersion: ValueSetVersion = null
 
     if (changeSetUri == null || changeSetUri.equals(""))
-      valueSetVersion = valueSetVersionRepository.findCurrentVersionByValueSetName(valueSetName)
+      valueSetVersion = valueSetVersionRepository.findByValueSetNameAndValueSetVersion(valueSetName, identifier.getName)
     else
       valueSetVersion = valueSetVersionRepository.findByChangeSetUri(changeSetUri)
 
@@ -110,7 +105,7 @@ class MatValueSetDefinitionReadService extends AbstractService with ValueSetDefi
     if (valueSetVersion.getNotes != null) {
       val note = new Comment()
       note.setType(NoteType.NOTE)
-      note.setValue(valueSetVersion.getNotes.asInstanceOf[TsAnyType])
+      note.setValue(ModelUtils.toTsAnyType(valueSetVersion.getNotes))
       valueSetDef.setNote(Collections.singletonList(note))
     }
 
@@ -182,32 +177,6 @@ class MatValueSetDefinitionReadService extends AbstractService with ValueSetDefi
     valueSetDef.setChangeableElementGroup(getChangeableElementGroup(valueSetVersion.getChangeSetUri))
 
     valueSetDef
-  }
-
-  private def getChangeableElementGroup(changeSetUri: String): ChangeableElementGroup = {
-    val group = new ChangeableElementGroup
-    if (changeSetUri.ne("")) {
-      val change = changeRepository.findOne(changeSetUri)
-      if (change != null) {
-        val changeDesc = new ChangeDescription
-        changeDesc.setContainingChangeSet(change.getChangeSetUri)
-        changeDesc.setChangeDate(change.getCurrentVersion.getRevisionDate.getTime)
-        changeDesc.setChangeType(change.getCurrentVersion.getChangeType)
-        changeDesc.setChangeNotes(ModelUtils.createOpaqueData(change.getInstructions))
-        changeDesc.setCommitted(change.getCurrentVersion.getChangeCommitted)
-
-        /* TODO: populate the rest of the change set details */
-        //        changeDesc.setChangeSource()
-        //        changeDesc.setClonedResource()
-        //        changeDesc.setEffectiveDate()
-        //        changeDesc.setPrevChangeSet()
-        //        changeDesc.setPrevImage()
-
-        group.setChangeDescription(changeDesc)
-        group.setStatus(new StatusReference(change.getCurrentVersion.getStatus))
-      }
-    }
-    group
   }
 
   private def buildSourceAndNotation(): SourceAndNotation = {

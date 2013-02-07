@@ -134,7 +134,7 @@ class MatValueSetDefinitionMaintenanceService extends AbstractService with Value
     version.setDocumentUri(vsd.getDocumentURI)
     version.setValueSet(valueSetRepo.findOne(vsd.getDefinedValueSet.getContent))
     version.setCreator(Option(vsd.getSourceAndRole(0).getSource.getContent).getOrElse(""))
-    version.setState(FinalizableState.OPEN)
+    version.setState(vsd.getState)
     version.setChangeSetUri(vsd.getChangeableElementGroup.getChangeDescription.getContainingChangeSet)
 
     if (vsd.getVersionTagCount > 0)

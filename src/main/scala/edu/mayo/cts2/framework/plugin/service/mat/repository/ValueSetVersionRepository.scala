@@ -22,6 +22,9 @@ trait ValueSetVersionRepository extends CrudRepository[ValueSetVersion, String] 
   @Query("select vs.currentVersion from ValueSet vs where vs.name = :name")
   def findCurrentVersionByValueSetName(@Param("name") name: String): ValueSetVersion
 
+  @Query("select vsv from ValueSetVersion vsv where vsv.valueSet.name=:name and vsv.version=:version")
+  def findByValueSetNameAndValueSetVersion(@Param("name") name: String, @Param("version") version: String): ValueSetVersion
+
 //  @Query("select vsv from ValueSetVersion vsv where vsv.valueSet.name = :name and (vsv.id = :id or vsv.version = :id)")
 //  def findVersionByIdOrVersionIdAndValueSetName(@Param("name") name:String, @Param("id") id:String): ValueSetVersion
 
