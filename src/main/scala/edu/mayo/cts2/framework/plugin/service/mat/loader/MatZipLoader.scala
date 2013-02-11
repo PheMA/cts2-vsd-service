@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component
 import edu.mayo.cts2.framework.plugin.service.mat.model._
 import edu.mayo.cts2.framework.plugin.service.mat.repository.{ChangeSetRepository, ValueSetRepository}
 import javax.annotation.Resource
-import edu.mayo.cts2.framework.model.core.types.{ChangeType, FinalizableState}
+import edu.mayo.cts2.framework.model.core.types.{ChangeCommitted, ChangeType, FinalizableState}
 
 @Component
 class MatZipLoader {
@@ -91,7 +91,6 @@ class MatZipLoader {
       change.addVersion(vs.currentVersion)
       vs.currentVersion.setChangeType(ChangeType.CREATE)
       vs.currentVersion.setChangeSetUri(change.getChangeSetUri)
-      vs.currentVersion.setCreator(change.getCreator)
       valueSetRepository.save(vs)
       changeSetRepository.save(change)
     })
@@ -157,6 +156,7 @@ class MatZipLoader {
     valueSet.addVersion(new ValueSetVersion())
     valueSet.currentVersion.setVersion("1")
     valueSet.currentVersion.setState(FinalizableState.FINAL)
+    valueSet.currentVersion.setChangeCommitted(ChangeCommitted.COMMITTED)
     valueSet.currentVersion.creator = getCellValue(row.getCell(DEVELOPER_CELL))
     valueSet.currentVersion.qdmCategory = getCellValue(row.getCell(QDM_CATEGORY_CELL))
 

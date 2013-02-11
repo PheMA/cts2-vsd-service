@@ -1,7 +1,6 @@
 package edu.mayo.cts2.framework.plugin.service.mat.profile.valuesetdefinition
 
 import scala.collection.JavaConversions._
-import scala.collection.JavaConversions.iterableAsScalaIterable
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
@@ -66,7 +65,7 @@ class MatValueSetDefinitionQueryService
       else
         valueSetVersionRepository.findByValueSetName(name, _:Pageable)
     }
-    
+
     val valueSets = fn(toPageable(Option(page)))
 
     val entries = valueSets.foldLeft(Seq[ValueSetDefinitionDirectoryEntry]())(transformValueSetVersion)
