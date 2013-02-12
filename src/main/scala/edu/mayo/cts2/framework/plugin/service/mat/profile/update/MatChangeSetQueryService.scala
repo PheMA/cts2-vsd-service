@@ -4,7 +4,7 @@ import scala.collection.JavaConversions._
 import scala.collection.JavaConversions.iterableAsScalaIterable
 import edu.mayo.cts2.framework.service.profile.update.{ChangeSetQueryExtension, ChangeSetQuery}
 import org.springframework.stereotype.Component
-import edu.mayo.cts2.framework.plugin.service.mat.profile.AbstractService
+import edu.mayo.cts2.framework.plugin.service.mat.profile.AbstractQueryService
 import edu.mayo.cts2.framework.model.service.core.Query
 import edu.mayo.cts2.framework.model.command.ResolvedFilter
 import edu.mayo.cts2.framework.service.command.restriction.ChangeSetQueryExtensionRestrictions
@@ -16,13 +16,14 @@ import edu.mayo.cts2.framework.model.command.Page
 import org.springframework.transaction.annotation.Transactional
 import edu.mayo.cts2.framework.model.directory.DirectoryResult
 import edu.mayo.cts2.framework.model.updates.ChangeSetDirectoryEntry
-import edu.mayo.cts2.framework.plugin.service.mat.model.{ValueSetChange}
+import edu.mayo.cts2.framework.plugin.service.mat.model.ValueSetChange
+import scala.Some
 
 @Component
-class MatChangeSetQueryService extends AbstractService with ChangeSetQuery with ChangeSetQueryExtension {
+class MatChangeSetQueryService extends AbstractQueryService with ChangeSetQuery with ChangeSetQueryExtension {
 
   val CREATOR_PROP: String = "creator"
-  val VALUESET_OID_PROP: String = "valuesetoid"
+  val VALUESET_PROP: String = "valueset"
 
   @Resource
   var changeSetRepository: ChangeSetRepository = _
@@ -46,9 +47,9 @@ class MatChangeSetQueryService extends AbstractService with ChangeSetQuery with 
     filters.foreach((filter: ResolvedFilter) =>
       Option(filter) match {
         case Some(aFilter) => {
-          if (aFilter.getPropertyReference.getReferenceTarget.getName.equalsIgnoreCase("creator"))
+          if (aFilter.getPropertyReference.getReferenceTarget.getName.equalsIgnoreCase(CREATOR_PROP))
             creator = aFilter.getMatchValue
-          else if (aFilter.getPropertyReference.getReferenceTarget.getName.equalsIgnoreCase("valuesetoid"))
+          else if (aFilter.getPropertyReference.getReferenceTarget.getName.equalsIgnoreCase(VALUESET_PROP))
             valuesetoid = aFilter.getMatchValue
         }
 
@@ -56,12 +57,14 @@ class MatChangeSetQueryService extends AbstractService with ChangeSetQuery with 
       }
     )
 
-    if (creator != null) {
+    if (creator != null && valuesetoid != null)
+      changeSets = changeSetRepository.findChangeSetsByValueSetNameAndCreator(valuesetoid, creator, toPageable(Option(page)))
+    else if (creator != null)
       changeSets = changeSetRepository.findChangeSetsByCreator(creator, toPageable(Option(page)))
-    }
-    else {
+    else if (valuesetoid != null)
+      changeSets = changeSetRepository.findChangeSetsByValueSetName(valuesetoid, toPageable(Option(page)))
+    else
       changeSets = changeSetRepository.findAll(toPageable(Option(page)))
-    }
 
     val entries = changeSets.foldLeft(Seq[ChangeSetDirectoryEntry]())(transformChangeSet)
     val totalElements = changeSets.getTotalElements
@@ -104,15 +107,9 @@ class MatChangeSetQueryService extends AbstractService with ChangeSetQuery with 
     val set = new java.util.HashSet[PropertyReference]()
     set.add(StandardModelAttributeReference.RESOURCE_NAME.getPropertyReference)
     set.add(StandardModelAttributeReference.RESOURCE_SYNOPSIS.getPropertyReference)
-
+    set.add(createAttributeReference(CREATOR_PROP, "http://purl.org/dc/elements/1.1/creator", "valueSetDeveloper"))
+    set.add(createAttributeReference(VALUESET_PROP, "", "valueSetName"))
     set
   }
 
-  def getSupportedSortReferences: java.util.Set[_ <: PropertyReference] = {
-    new java.util.HashSet[PropertyReference]()
-  }
-
-  def getKnownProperties: java.util.Set[PredicateReference] = {
-    new java.util.HashSet[PredicateReference]()
-  }
 }

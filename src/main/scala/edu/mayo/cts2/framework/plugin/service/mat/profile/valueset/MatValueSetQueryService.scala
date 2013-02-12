@@ -1,29 +1,19 @@
 package edu.mayo.cts2.framework.plugin.service.mat.profile.valueset
 
 import scala.collection.JavaConversions._
-import org.apache.commons.collections.CollectionUtils
-import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.domain.Specification
-import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Component
-import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Transactional
 import edu.mayo.cts2.framework.filter.`match`.StateAdjustingPropertyReference
-import edu.mayo.cts2.framework.filter.`match`.StateAdjustingPropertyReference.StateUpdater
 import edu.mayo.cts2.framework.filter.directory.DirectoryBuilder
 import edu.mayo.cts2.framework.model.command.Page
-import edu.mayo.cts2.framework.model.command.ResolvedFilter
 import edu.mayo.cts2.framework.model.core.MatchAlgorithmReference
-import edu.mayo.cts2.framework.model.core.PredicateReference
-import edu.mayo.cts2.framework.model.core.PropertyReference
 import edu.mayo.cts2.framework.model.core.SortCriteria
-import edu.mayo.cts2.framework.model.core.URIAndEntityName
-import edu.mayo.cts2.framework.model.core.types.TargetReferenceType
 import edu.mayo.cts2.framework.model.directory.DirectoryResult
 import edu.mayo.cts2.framework.model.valueset.ValueSetCatalogEntry
 import edu.mayo.cts2.framework.model.valueset.ValueSetCatalogEntrySummary
 import edu.mayo.cts2.framework.plugin.service.mat.model.ValueSet
-import edu.mayo.cts2.framework.plugin.service.mat.profile.{AbstractQueryService, AbstractService, ProfileUtils}
+import edu.mayo.cts2.framework.plugin.service.mat.profile.AbstractQueryService
 import edu.mayo.cts2.framework.plugin.service.mat.repository.ValueSetRepository
 import edu.mayo.cts2.framework.plugin.service.mat.uri.UriUtils
 import edu.mayo.cts2.framework.service.meta.StandardMatchAlgorithmReference
@@ -31,14 +21,6 @@ import edu.mayo.cts2.framework.service.meta.StandardModelAttributeReference
 import edu.mayo.cts2.framework.service.profile.valueset.ValueSetQuery
 import edu.mayo.cts2.framework.service.profile.valueset.ValueSetQueryService
 import javax.annotation.Resource
-import javax.persistence.Entity
-import javax.persistence.criteria.CriteriaBuilder
-import javax.persistence.criteria.CriteriaQuery
-import javax.persistence.criteria.Root
-import javax.persistence.criteria.Predicate
-import javax.persistence.criteria.Path
-import javax.persistence.criteria.JoinType
-import javax.persistence.criteria.Expression
 
 @Component
 class MatValueSetQueryService
