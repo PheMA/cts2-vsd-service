@@ -1,5 +1,7 @@
 package edu.mayo.cts2.framework.plugin.service.mat.profile.valuesetdefinition
 
+import edu.mayo.cts2.framework.model.command.ResolvedFilter
+
 import static org.junit.Assert.*
 
 import javax.annotation.Resource
@@ -48,16 +50,29 @@ class MatValueSetDefinitionQueryServiceTestIT extends AbstractZipLoadingTestBase
 	@Test
 	void TestQueryDefinitionsOfValueSet() {
 		def summaries = service.getResourceSummaries(
-			{
+			[
 				getRestrictions : {
 					def restrictions = new ValueSetDefinitionQueryServiceRestrictions()
 					restrictions.setValueSet(ModelUtils.nameOrUriFromName("2.16.840.1.113883.3.526.02.99"))
-				
+
 					restrictions
-				}
-			} as ValueSetDefinitionQuery,null,null)
+				},
+				getFilterComponent : { new HashSet() }
+
+			] as ValueSetDefinitionQuery, null, null)
 		
 		assertEquals 1, summaries.entries.size()
+	}
+
+	@Test
+	void TestQueryDefinitionsByCreator() {
+		def summaries = service.getResourceSummaries([
+		    getRestrictions: {},
+				getFilterComponent: {
+					def filters = new HashSet<ResolvedFilter>()
+					filters.add(new ResolvedFilter())
+				}
+		] as ValueSetDefinitionQuery, null, null)
 	}
 	
 	@Test

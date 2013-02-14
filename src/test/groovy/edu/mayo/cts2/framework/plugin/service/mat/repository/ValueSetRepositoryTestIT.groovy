@@ -25,7 +25,7 @@ class ValueSetRepositoryTestIT extends AbstractTestBase {
 	
 	@Test
 	void TestInsertAndRetrieve() {
-		def valueSet = new ValueSet(oid:"1.23.45", name:"testName")
+		def valueSet = new ValueSet(name:"1.23.45")
 		repos.save(valueSet)
 		
 		assertNotNull repos.findOne("1.23.45")
@@ -37,8 +37,7 @@ class ValueSetRepositoryTestIT extends AbstractTestBase {
 		def valueSetVersion = new ValueSetVersion()
 		
 		def valueSet = new ValueSet("1.23.45")
-		valueSet.name = "testName"
-		
+
 		def vsver = new ValueSetVersion()
 		
 		valueSet.addVersion(vsver,false)
@@ -48,49 +47,49 @@ class ValueSetRepositoryTestIT extends AbstractTestBase {
 		def result = repos.findOne("1.23.45")
 		
 		assertNotNull result
-		assertEquals 1, result.versions.size()
+		assertEquals 1, result.versions().size()
 		
-		print result.versions.get(0).id
-		assertNotNull result.versions.get(0).id
+		print result.versions().get(0).documentUri
+		assertNotNull result.versions().get(0).documentUri
 	}
 
-	@Test
-	void TestFindByNameLike() {
-		def valueSet = new ValueSet(oid:"1.23.45", name:"testName")
-		repos.save(valueSet)
-		
-		def page = repos.findByNameLikeIgnoreCase("%est%", new PageRequest(0,100))
-		assertNotNull page
-		assertEquals 1, page.getContent().size()
-	}
+//	@Test
+//	void TestFindByNameLike() {
+//		def valueSet = new ValueSet(name:"1.23.45")
+//		repos.save(valueSet)
+//
+//		def page = repos.findByNameLikeIgnoreCase("%3.45%", new PageRequest(0,100))
+//		assertNotNull page
+//		assertEquals 1, page.getContent().size()
+//	}
+//
+//	@Test
+//	void TestFindByNameLikeCaseInsensitive() {
+//		def valueSet = new ValueSet(name:"1.23.45")
+//		repos.save(valueSet)
+//
+//		assertNotNull repos.findByNameLikeIgnoreCase("%estna%",new PageRequest(0,100))
+//	}
+//
+//	@Test
+//	void TestInsertAndRetrieveByName() {
+//		def valueSet = new ValueSet(name:"1.23.45")
+//		repos.save(valueSet)
+//
+//		assertNotNull repos.findOneByName("testName")
+//	}
 	
-	@Test
-	void TestFindByNameLikeCaseInsensitive() {
-		def valueSet = new ValueSet(oid:"1.23.45", name:"testName")
-		repos.save(valueSet)
-		
-		assertNotNull repos.findByNameLikeIgnoreCase("%estna%",new PageRequest(0,100))
-	}
-	
-	@Test
-	void TestInsertAndRetrieveByName() {
-		def valueSet = new ValueSet(oid:"1.23.45", name:"testName")
-		repos.save(valueSet)
-		
-		assertNotNull repos.findOneByName("testName")
-	}
-	
-	@Test
-	void TestInsertAndRetrieveByWrongName() {
-		def valueSet = new ValueSet(oid:"1.23.45", name:"testName")
-		repos.save(valueSet)
-		
-		assertNull repos.findOneByName("__INVALID__")
-	}
+//	@Test
+//	void TestInsertAndRetrieveByWrongName() {
+//		def valueSet = new ValueSet(name:"1.23.45")
+//		repos.save(valueSet)
+//
+//		assertNull repos.findOneByName("__INVALID__")
+//	}
 	
 	@Test
 	void TestInsertAndRetrieveWrongId() {
-		def valueSet = new ValueSet(oid:"1.23.45", name:"testName")
+		def valueSet = new ValueSet(name:"1.23.45")
 		repos.save(valueSet)
 		
 		assertNull repos.findOne("__INVALID__")

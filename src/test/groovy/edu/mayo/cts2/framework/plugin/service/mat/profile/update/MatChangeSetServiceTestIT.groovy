@@ -7,7 +7,6 @@ import javax.annotation.Resource
 import org.junit.Test
 import edu.mayo.cts2.framework.model.core.SourceReference
 
-import edu.mayo.cts2.framework.plugin.service.mat.model.util.MatModelUtils
 import edu.mayo.cts2.framework.core.xml.DelegatingMarshaller
 
 class MatChangeSetServiceTestIT extends AbstractTestBase {

@@ -1,5 +1,7 @@
 package edu.mayo.cts2.framework.plugin.service.mat.profile.valuesetdefinition
 
+import edu.mayo.cts2.framework.model.valuesetdefinition.ValueSetDefinition
+
 import static org.junit.Assert.*
 
 import javax.annotation.Resource
@@ -82,6 +84,14 @@ class MatValueSetDefinitionResolutionServiceTestIT extends AbstractZipLoadingTes
 		entries.each {
 			marshaller.marshal(it, new StreamResult(new StringWriter()))
 		}
+	}
+
+	@Test
+	void TestICD10Issue() {
+		def id = new ValueSetDefinitionReadId("1", ModelUtils.nameOrUriFromEither("2.16.840.1.113883.3.464.0001.37"))
+		def entries = service.resolveDefinition(id, null, null, null, null, null, new Page()).entries
+
+		assertTrue entries.size() > 0
 	}
 
 }

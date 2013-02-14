@@ -1,55 +1,53 @@
 package edu.mayo.cts2.framework.plugin.service.mat.repository
 
+import edu.mayo.cts2.framework.plugin.service.mat.model.ValueSetChange
+
 import static org.junit.Assert.*
 
 import edu.mayo.cts2.framework.plugin.service.mat.test.AbstractTestBase
 import org.junit.Test
 import javax.annotation.Resource
-import edu.mayo.cts2.framework.plugin.service.mat.model.MatChangeSet
-import edu.mayo.cts2.framework.plugin.service.mat.model.MatChangeSetMember
 
 class ChangeSetRepositoryTestIT extends AbstractTestBase {
 
 	@Resource
 	def ChangeSetRepository changeSetRepository
 
+	@Resource
+	def ValueSetRepository valueSetRepository
+
 	@Test
 	void TestSetUp() {
 		assertNotNull changeSetRepository
+		assertNotNull valueSetRepository
 	}
 
 	@Test
 	void TestInsertAndRetrieve() {
 		def changeSet = createChangeSet()
-		def returnedChangeSet = changeSetRepository.findOne(changeSet.getId())
+		def returnedChangeSet = changeSetRepository.findOne(changeSet.getChangeSetUri())
 
 		assertNotNull returnedChangeSet
-		assertEquals changeSet.getId(), returnedChangeSet.getId()
+		assertEquals changeSet.getChangeSetUri(), returnedChangeSet.getChangeSetUri()
 		assertEquals changeSet.getCreator(), returnedChangeSet.getCreator()
-		assertEquals 2, returnedChangeSet.getEntryCount()
 	}
 
-	private MatChangeSet createChangeSet() {
-		def cs = new MatChangeSet(
-				creator: UUID.randomUUID().toString(),
-				memberList: createChangeSetMembers())
+	private ValueSetChange createChangeSet() {
+		def cs = new ValueSetChange(
+				creator: UUID.randomUUID().toString())
 		changeSetRepository.save(cs)
 		return cs
 	}
 
-	private List<MatChangeSetMember> createChangeSetMembers() {
-		def members = new ArrayList<MatChangeSetMember>(2)
-		members.add(new MatChangeSetMember(
-				code: "code1",
-				codeSystem: "codeSystem1",
-				codeSystemVersion: "codeSystemVersion1",
-				description: "description1"))
-		members.add(new MatChangeSetMember(
-				code: "code2",
-				codeSystem: "codeSystem2",
-				codeSystemVersion: "codeSystemVersion2",
-				description: "description2"))
-		return members
+	@Test
+	void TestFindByCreator() {
+		def changeSet = createChangeSet()
+		def creator = changeSet.getCreator()
+
+		def returnedChangeSet = changeSetRepository.findChangeSetsByCreator(creator, null).getContent().get(0)
+		assertNotNull returnedChangeSet
+		assertEquals changeSet.getChangeSetUri(), returnedChangeSet.getChangeSetUri()
+		assertEquals creator, returnedChangeSet.getCreator()
 	}
 
 }
