@@ -269,6 +269,7 @@
 							!commons-logging,
 							!aopalliance,
 							scala-library,
+							clojure,
 							*;scope=compile|runtime;inline=false
 						</Embed-Dependency>
 						<Spring-Context>*;timeout:=60</Spring-Context>
