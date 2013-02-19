@@ -86,9 +86,15 @@ class MatValueSetDefinitionQueryService
     summary.setHref(urlConstructor.createValueSetDefinitionUrl(valueSetVersion.valueSet.name, valueSetDefName))
     summary.setDefinedValueSet(MatValueSetUtils.buildValueSetReference(valueSetVersion, urlConstructor))
     summary.setVersionTag(Collections.singletonList(new VersionTagReference(valueSetVersion.version)))
-    val note = new EntryDescription
-    note.setValue(ModelUtils.toTsAnyType(Option(valueSetVersion.getNotes).getOrElse("")))
-    summary.setResourceSynopsis(note)
+
+    /* TODO: Add to expansion node when available */
+    /* The note and changeSetURI do not belong in the resource synopsis, this is a temporary place for them. */
+    val sb = new StringBuilder("<note>" + Option(valueSetVersion.getNotes).getOrElse("") + "</note>")
+    sb.append("<changeSetUri>" + Option(valueSetVersion.getChangeSetUri).getOrElse("") + "</changeSetUri>")
+
+    val syn = new EntryDescription
+    syn.setValue(ModelUtils.toTsAnyType(sb.toString()))
+    summary.setResourceSynopsis(syn)
 
     seq ++ Seq(summary)
   }:Seq[ValueSetDefinitionDirectoryEntry]
