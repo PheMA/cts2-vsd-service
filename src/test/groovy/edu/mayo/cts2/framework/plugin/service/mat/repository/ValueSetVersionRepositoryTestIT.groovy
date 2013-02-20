@@ -80,7 +80,8 @@ class ValueSetVersionRepositoryTestIT extends AbstractTestBase {
 	void TestInsertWithTwoValueSetEntry() {
 		def valueSet1 = new ValueSet(name:"1.23.45")
 		valueSet1.addVersion(new ValueSetVersion(),true)
-		
+		valueSet1.currentVersion().changeSetUri = UUID.randomUUID().toString()
+
 		valueSet1.currentVersion().addEntry(new ValueSetEntry(code:"123"))
 		valueSetRepos.save(valueSet1)
 			
@@ -88,7 +89,7 @@ class ValueSetVersionRepositoryTestIT extends AbstractTestBase {
 		valueSet2.currentVersion().addEntry(new ValueSetEntry(code:"456"))
 		valueSetRepos.save(valueSet2)
 			
-		def id = valueSetRepos.findOne("1.23.45").currentVersion().version
+		def id = valueSetRepos.findOne("1.23.45").currentVersion().changeSetUri
 		def entries = repos.findValueSetEntriesByChangeSetUri(id, new PageRequest(0, 100)).content
 		
 		assertEquals 2, entries.size()
@@ -100,6 +101,7 @@ class ValueSetVersionRepositoryTestIT extends AbstractTestBase {
 		def valueSet = new ValueSet(name:"1.23.45")
 		
 		def version = new ValueSetVersion()
+		version.setVersion(UUID.randomUUID().toString())
 		valueSet.addVersion(version,true)
 		def entry = new ValueSetEntry(code:"123")
 		entry.setCodeSystem("testcs")
@@ -108,7 +110,7 @@ class ValueSetVersionRepositoryTestIT extends AbstractTestBase {
 
 		valueSetRepos.save(valueSet)
 		
-		def val = repos.findCodeSystemVersionsByValueSetVersion(version.documentUri)
+		def val = repos.findCodeSystemVersionsByValueSetVersion(version.version)
 		
 		assertEquals 1, val.size()
 		assertEquals "testcs", val[0][0]
@@ -121,6 +123,7 @@ class ValueSetVersionRepositoryTestIT extends AbstractTestBase {
 		def valueSet = new ValueSet(name:"1.23.45")
 		
 		def version = new ValueSetVersion()
+		version.setVersion(UUID.randomUUID().toString())
 		valueSet.addVersion(version,true)
 		
 		def entry = new ValueSetEntry(code:"123")
@@ -135,7 +138,7 @@ class ValueSetVersionRepositoryTestIT extends AbstractTestBase {
 		
 		valueSetRepos.save(valueSet)
 		
-		def val = repos.findCodeSystemVersionsByValueSetVersion(version.documentUri)
+		def val = repos.findCodeSystemVersionsByValueSetVersion(version.version)
 		
 		assertEquals 2, val.size()
 	}
