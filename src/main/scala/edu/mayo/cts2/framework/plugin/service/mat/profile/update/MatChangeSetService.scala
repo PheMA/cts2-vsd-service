@@ -49,7 +49,7 @@ class MatChangeSetService extends AbstractService with ChangeSetService {
       }
 
       if (changeInstructions != null) {
-        changeSet.setInstructions(changeInstructions.getValue.toString)
+        changeSet.setInstructions(changeInstructions.getValue.getContent)
       }
 
       if (officialEffectiveDate != null) {

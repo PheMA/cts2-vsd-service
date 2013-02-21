@@ -15,6 +15,7 @@ import edu.mayo.cts2.framework.model.core.types.{FinalizableState, ChangeType}
 import edu.mayo.cts2.framework.model.service.exception.{ResourceIsNotOpen, ChangeSetIsNotOpen, UnknownChangeSet}
 import java.util
 import util.{Calendar, UUID}
+import edu.mayo.cts2.framework.model.core.TsAnyType
 
 @Component
 class MatValueSetDefinitionMaintenanceService extends AbstractService with ValueSetDefinitionMaintenanceService {
@@ -133,9 +134,10 @@ class MatValueSetDefinitionMaintenanceService extends AbstractService with Value
     val version = new ValueSetVersion
     version.setDocumentUri(vsd.getDocumentURI)
     version.setValueSet(valueSetRepo.findOne(vsd.getDefinedValueSet.getContent))
-    version.setCreator(Option(vsd.getSourceAndRole(0).getSource.getContent).getOrElse(""))
+    version.setCreator(Option(vsd.getSourceAndRole(0)).map(_.getSource.getContent).getOrElse(""))
     version.setState(vsd.getState)
     version.setChangeSetUri(vsd.getChangeableElementGroup.getChangeDescription.getContainingChangeSet)
+    version.setNotes(Option(vsd.getNote(0)).map(_.getValue.getContent).getOrElse(""))
 
     if (vsd.getVersionTagCount > 0)
       version.setVersion(vsd.getVersionTag(0).getContent)
