@@ -44,10 +44,16 @@ trait ValueSetVersionRepository extends CrudRepository[ValueSetVersion, String] 
   @Query("select vsv from ValueSetVersion vsv where vsv.valueSet.name = :name and vsv.creator = :creator")
   def findByValueSetNameAndCreator(@Param("name") name: String, @Param("creator") creator: String, pageable: Pageable): Page[ValueSetVersion]
 
+  @Query("select vsv from ValueSetVersion vsv where vsv.valueSet.name = :name and vsv.creator = :creator and vsv.successor is null")
+  def findCurrentVersionsByValueSetNameAndCreator(@Param("name") name: String, @Param("creator") creator: String, pageable: Pageable): Page[ValueSetVersion]
+
   @Query("select vsv from ValueSetVersion vsv where vsv.creator = :creator")
   def findByCreator(@Param("creator") creator: String, pageable: Pageable): Page[ValueSetVersion]
 
-  @Query("select c.currentVersion from ValueSetChange c where c.changeSetUri = :changeSetUri")
+  @Query("select vsv from ValueSetVersion vsv where vsv.creator = :creator and vsv.successor is null")
+  def findCurrentVersionsByCreator(@Param("creator") creator: String, pageable: Pageable): Page[ValueSetVersion]
+
+  @Query("select vsv from ValueSetVersion vsv where vsv.changeSetUri = :changeSetUri")
   def findByChangeSetUri(@Param("changeSetUri") changeSetUri: String): ValueSetVersion
 
 }

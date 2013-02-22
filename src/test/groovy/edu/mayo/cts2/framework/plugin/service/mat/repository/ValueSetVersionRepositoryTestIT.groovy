@@ -168,7 +168,7 @@ class ValueSetVersionRepositoryTestIT extends AbstractTestBase {
 		valueSet2.addVersion(version3,true)
 		valueSetRepos.save(valueSet2)
 
-		def val = repos.findByValueSetNameAndCreator(oid, creator, new PageRequest(0, 10))
+		def val = repos.findCurrentVersionsByValueSetNameAndCreator(oid, creator, new PageRequest(0, 10))
 		assertNotNull val
 		assertEquals 2, val.numberOfElements
 	}
@@ -197,7 +197,7 @@ class ValueSetVersionRepositoryTestIT extends AbstractTestBase {
 		valueSet2.addVersion(version3,true)
 		valueSetRepos.save(valueSet2)
 
-		def val = repos.findByCreator(creator, new PageRequest(0, 10))
+		def val = repos.findCurrentVersionsByCreator(creator, new PageRequest(0, 10))
 		assertNotNull val
 		assertEquals 3, val.numberOfElements
 	}

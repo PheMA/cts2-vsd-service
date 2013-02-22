@@ -67,6 +67,8 @@ class MatValueSetDefinitionMaintenanceService extends AbstractService with Value
         val updatedVersion: ValueSetVersion = toValueSetVersion(resource.getResource)
         updatedVersion.setDocumentUri(UUID.randomUUID.toString)
         updatedVersion.setChangeType(ChangeType.UPDATE)
+        updatedVersion.setChangeSetUri(changeSet.getChangeSetUri)
+        updatedVersion.setPrevChangeSetUri(origVersion.getChangeSetUri)
         updatedVersion.setRevisionDate(Calendar.getInstance)
 
         origVersion.setSuccessor(updatedVersion.getDocumentUri)

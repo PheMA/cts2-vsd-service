@@ -59,9 +59,9 @@ class MatValueSetDefinitionQueryService
         }
       })
       if (name != null && creator != null)
-        valueSetVersionRepository.findByValueSetNameAndCreator(name, creator, _:Pageable)
+        valueSetVersionRepository.findCurrentVersionsByValueSetNameAndCreator(name, creator, _:Pageable)
       else if (name == null && creator != null)
-        valueSetVersionRepository.findByCreator(creator, _:Pageable)
+        valueSetVersionRepository.findCurrentVersionsByCreator(creator, _:Pageable)
       else
         valueSetVersionRepository.findByValueSetName(name, _:Pageable)
     }
