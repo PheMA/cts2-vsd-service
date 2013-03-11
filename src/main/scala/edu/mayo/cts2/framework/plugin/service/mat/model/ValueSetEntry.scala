@@ -33,6 +33,12 @@ class ValueSetEntry extends Equals  {
   var codeSystemVersion: String = _
 
   @BeanProperty
+  var uri: String = _
+
+  @BeanProperty
+  var href: String = _
+
+  @BeanProperty
   @Column(length = 1024)
   var description: String = _
   

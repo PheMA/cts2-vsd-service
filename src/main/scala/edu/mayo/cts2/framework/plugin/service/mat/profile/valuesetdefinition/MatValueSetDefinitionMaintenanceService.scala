@@ -152,6 +152,8 @@ class MatValueSetDefinitionMaintenanceService extends AbstractService with Value
         vsEntry.setCodeSystemVersion(Option(entry.getCompleteCodeSystem).map(_.getCodeSystemVersion.getVersion.getContent).getOrElse(""))
         vsEntry.setValueSetVersion(version)
         vsEntry.setCode(entity.getName)
+        vsEntry.setHref(entity.getHref)
+        vsEntry.setUri(entity.getUri)
         version.addEntry(vsEntry)
       })
     })
