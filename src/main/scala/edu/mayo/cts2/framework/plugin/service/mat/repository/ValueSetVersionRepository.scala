@@ -16,7 +16,7 @@ trait ValueSetVersionRepository extends CrudRepository[ValueSetVersion, String] 
 
   def findAll(pageable: Pageable): Page[ValueSetVersion]
 
-  @Query("select vsv from ValueSetVersion vsv where vsv.valueSet.name = :name and vsv.changeCommitted = 1")
+  @Query("select vsv from ValueSetVersion vsv where vsv.valueSet.name = :name and vsv.state = 1")
   def findByValueSetName(@Param("name") name: String, pageable: Pageable): Page[ValueSetVersion]
 
   @Query("select vs.currentVersion from ValueSet vs where vs.name = :name")
