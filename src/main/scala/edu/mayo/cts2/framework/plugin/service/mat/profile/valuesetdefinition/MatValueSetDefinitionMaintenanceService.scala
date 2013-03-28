@@ -139,7 +139,8 @@ class MatValueSetDefinitionMaintenanceService extends AbstractService with Value
     version.setCreator(Option(vsd.getSourceAndRole(0)).map(_.getSource.getContent).getOrElse(""))
     version.setState(vsd.getState)
     version.setChangeSetUri(vsd.getChangeableElementGroup.getChangeDescription.getContainingChangeSet)
-    version.setNotes(Option(vsd.getNote(0)).map(_.getValue.getContent).getOrElse(""))
+    if (vsd.getNoteCount > 0)
+      version.setNotes(Option(vsd.getNote(0)).map(_.getValue.getContent).getOrElse(""))
 
     if (vsd.getVersionTagCount > 0)
       version.setVersion(vsd.getVersionTag(0).getContent)
@@ -152,8 +153,6 @@ class MatValueSetDefinitionMaintenanceService extends AbstractService with Value
         vsEntry.setCodeSystemVersion(Option(entry.getCompleteCodeSystem).map(_.getCodeSystemVersion.getVersion.getContent).getOrElse(""))
         vsEntry.setValueSetVersion(version)
         vsEntry.setCode(entity.getName)
-        vsEntry.setHref(entity.getHref)
-        vsEntry.setUri(entity.getUri)
         version.addEntry(vsEntry)
       })
     })

@@ -73,7 +73,7 @@ object MatValueSetUtils {
  
     buildValueSetDefinitionReference(
       name, about,
-      valueSetDefName, UriUtils.uuidToUri(valueSetVersion.documentUri),
+      valueSetDefName, valueSetVersion.documentUri,
       urlConstructor)
   }
   

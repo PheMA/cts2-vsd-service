@@ -25,6 +25,9 @@ class ValueSetChange(uuid: String) {
   var date = Calendar.getInstance
 
   @BeanProperty
+  var closeDate: Calendar = _
+
+  @BeanProperty
   var state: FinalizableState = FinalizableState.OPEN
 
   @BeanProperty

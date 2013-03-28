@@ -34,6 +34,7 @@ class ValueSetVersion extends Equals {
   var status: String = "active"
 
   @BeanProperty
+  @Enumerated(EnumType.STRING)
   @Column(nullable = false)
   var state: FinalizableState = FinalizableState.OPEN
 
@@ -80,9 +81,11 @@ class ValueSetVersion extends Equals {
   @BeanProperty
   var prevChangeSetUri: String = _
 
+  @Enumerated(EnumType.STRING)
   @BeanProperty
   var changeType: ChangeType = _
 
+  @Enumerated(EnumType.STRING)
   @BeanProperty
   var changeCommitted: ChangeCommitted = ChangeCommitted.PENDING
 
