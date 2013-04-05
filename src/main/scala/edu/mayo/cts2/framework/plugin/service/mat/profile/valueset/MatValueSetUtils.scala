@@ -48,7 +48,7 @@ object MatValueSetUtils {
   def buildValueSetReference(valueSet: ValueSet, urlConstructor: UrlConstructor): ValueSetReference = {
     val ref = new ValueSetReference()
     ref.setContent(valueSet.name)
-    ref.setUri(UriUtils.oidToUri(valueSet.name))
+    ref.setUri(valueSet.uri)
     ref.setHref(urlConstructor.createValueSetUrl(valueSet.name))
 
     ref
@@ -59,7 +59,7 @@ object MatValueSetUtils {
     urlConstructor: UrlConstructor): ValueSetDefinitionReference = {
      buildValueSetDefinitionReference(
          valueSetVersion.valueSet.name,
-         UriUtils.oidToUri(valueSetVersion.valueSet.name),
+         valueSetVersion.valueSet.uri,
          valueSetVersion,
          urlConstructor)
    }

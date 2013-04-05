@@ -8,7 +8,6 @@ import org.apache.commons.lang.StringUtils
 import org.apache.poi.hssf.usermodel.HSSFWorkbook
 import org.apache.poi.poifs.filesystem.POIFSFileSystem
 import org.apache.poi.ss.usermodel.Row
-import org.apache.poi.ss.usermodel.Cell
 import org.springframework.stereotype.Component
 import edu.mayo.cts2.framework.plugin.service.mat.model._
 import edu.mayo.cts2.framework.plugin.service.mat.repository.{ChangeSetRepository, ValueSetRepository}
@@ -16,7 +15,7 @@ import javax.annotation.Resource
 import edu.mayo.cts2.framework.model.core.types.{ChangeCommitted, ChangeType, FinalizableState}
 
 @Component
-class MatZipLoader {
+class MatZipLoader extends Loader {
 
   def GROUPING_CODE_SYSTEM = "GROUPING"
 
@@ -167,17 +166,6 @@ class MatZipLoader {
     row.getCell(OID_CELL) != null && StringUtils.isNotBlank(getCellValue(row.getCell(OID_CELL)))
   } :Boolean
 
-  private def getCellValue(cell:Cell) = {
-    val cellType = cell.getCellType
-    
-    cellType match {
-      case Cell.CELL_TYPE_STRING => cell.getStringCellValue
-      case Cell.CELL_TYPE_NUMERIC => cell.getNumericCellValue.asInstanceOf[Int].toString
-      case Cell.CELL_TYPE_BLANK => null
-      case _ => throw new IllegalStateException("Found a Cell of type: " + cellType)
-    }
-  }
-  
   def rowToValueSetEntry(row: Row): ValueSetEntry = {
     val valueSetEntry = new ValueSetEntry()
 

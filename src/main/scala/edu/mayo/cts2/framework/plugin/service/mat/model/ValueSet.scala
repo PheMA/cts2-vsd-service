@@ -23,6 +23,12 @@ class ValueSet(valueSetOid: String) extends Equals {
   @BeanProperty
   var formalName: String = _
 
+  @BeanProperty
+  var uri: String = _
+
+  @BeanProperty
+  var href: String = _
+
   def addVersion(version: ValueSetVersion,current: Boolean = false) {
     if(currentVersion == null || current){
       currentVersion = version

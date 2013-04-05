@@ -50,7 +50,7 @@ class MatValueSetReadService extends AbstractReadService with ValueSetReadServic
 
   def valueSetToValueSetCatalogEntry(valueSet: ValueSet): ValueSetCatalogEntry = {
     val valueSetCatalogEntry = new ValueSetCatalogEntry()
-    valueSetCatalogEntry.setAbout(UriUtils.oidToUri(valueSet.name))
+    valueSetCatalogEntry.setAbout(valueSet.uri)
     valueSetCatalogEntry.addAlternateID(valueSet.name)
     valueSetCatalogEntry.setValueSetName(valueSet.getName)
     valueSetCatalogEntry.setFormalName(valueSet.formalName)

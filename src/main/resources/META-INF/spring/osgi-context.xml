@@ -18,7 +18,9 @@
 	<osgi:service ref="matServiceProvider" interface="edu.mayo.cts2.framework.service.provider.ServiceProvider"/>
 
 	<osgi:service ref="zipUploadControllerProvider" interface="edu.mayo.cts2.framework.webapp.rest.extensions.controller.ControllerProvider"/>
-	
+
+	<osgi:service ref="cts2SpreadSheetLoaderController" interface="edu.mayo.cts2.framework.webapp.rest.extensions.controller.ControllerProvider"/>
+
 	<osgi:service ref="springSecurityFilterChain" interface="javax.servlet.Filter">
 		<osgi:service-properties>
 			 <entry key="ORDER" value="FIRST"/>

@@ -9,7 +9,7 @@
 	</parent>
 
 	<artifactId>mat-service</artifactId>
-	<version>0.1.0-SNAPSHOT</version>
+	<version>0.2.0-SNAPSHOT</version>
 	<packaging>bundle</packaging>
 
 	<description>A CTS2 Framework Service Plugin based on the MAT Zip output.</description>
@@ -254,6 +254,9 @@
 							gov.nih.nlm.umls.uts.webservice,
 							*;resolution:=optional
 						</Import-Package>
+						<Export-Package>
+							org.w3c.dom;version="0.0.0"
+						</Export-Package>
 						<Embed-Transitive>true</Embed-Transitive>
 						<Embed-Dependency>
 							!stax-api,
@@ -476,6 +479,12 @@
 		<dependency>
 			<groupId>org.apache.poi</groupId>
 			<artifactId>poi</artifactId>
+			<version>3.8</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi-ooxml</artifactId>
 			<version>3.8</version>
 		</dependency>
 
