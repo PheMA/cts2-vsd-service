@@ -152,6 +152,7 @@ class MatZipLoader extends Loader {
     }
     valueSet.name = getCellValue(row.getCell(OID_CELL))
     valueSet.formalName = getCellValue(row.getCell(NAME_CELL))
+    valueSet.uri = "urn:oid:" + valueSet.name
     valueSet.addVersion(new ValueSetVersion())
     valueSet.currentVersion.setVersion("1")
     valueSet.currentVersion.setState(FinalizableState.FINAL)
