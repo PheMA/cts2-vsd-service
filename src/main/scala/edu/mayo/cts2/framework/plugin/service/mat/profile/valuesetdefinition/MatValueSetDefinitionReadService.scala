@@ -93,7 +93,7 @@ class MatValueSetDefinitionReadService extends AbstractReadService with ValueSet
 
   def valueSetVersionToDefinition(valueSetVersion: ValueSetVersion): ValueSetDefinition = {
     val valueSetDef = new ValueSetDefinition()
-    valueSetDef.setAbout(valueSetVersion.valueSet.uri)
+    valueSetDef.setAbout(valueSetVersion.valueSet.uri +"/version/" + valueSetVersion.version)
     valueSetDef.setDocumentURI(valueSetVersion.documentUri)
     valueSetDef.setSourceAndNotation(buildSourceAndNotation())
     valueSetDef.setDefinedValueSet(
