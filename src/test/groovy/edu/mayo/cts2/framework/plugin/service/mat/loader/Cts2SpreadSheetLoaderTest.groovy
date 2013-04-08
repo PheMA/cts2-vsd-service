@@ -74,7 +74,7 @@ class Cts2SpreadSheetLoaderTest extends AbstractTestBase {
 	void TestLoadValueSets() {
 		def ss = new File(ssPath)
 
-		def result = loader.testLoadSpreadSheet(ss)
+		def result = loader.loadSpreadSheet(ss)
 		println result
 	}
 

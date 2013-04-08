@@ -1,5 +1,7 @@
 package edu.mayo.cts2.framework.plugin.service.mat.rest.controller;
 
+import scala.collection.Iterator;
+import scala.collection.JavaConversions.*;
 import edu.mayo.cts2.framework.plugin.service.mat.loader.Cts2SpreadSheetLoader;
 import edu.mayo.cts2.framework.webapp.rest.extensions.controller.ControllerProvider;
 import org.osgi.service.http.HttpService;
@@ -17,6 +19,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
+import java.net.URLEncoder;
 import java.util.UUID;
 
 @Controller("cts2SpreadSheetLoaderController")
@@ -41,7 +44,7 @@ public class Cts2SpreadSheetLoaderController implements ControllerProvider, Init
 	}
 
 	@RequestMapping(value="/upload/cts2spreadsheet", method= RequestMethod.POST)
-	public String loadSpreadSheet(HttpServletRequest request, HttpServletResponse response) throws Exception {
+	public void loadSpreadSheet(HttpServletRequest request, HttpServletResponse response) throws Exception {
 
 		MultipartResolver multipartResolver = new CommonsMultipartResolver(request.getSession().getServletContext());
 
@@ -53,8 +56,9 @@ public class Cts2SpreadSheetLoaderController implements ControllerProvider, Init
 		final File ss = File.createTempFile(UUID.randomUUID().toString(), ".xls");
 		multipartFile.transferTo(ss);
 
-		loader.loadSpreadSheet(ss);
+		String result = loader.loadSpreadSheet(ss);
 
-		return "uploadComplete";
+		response.getWriter().write(result);
+		response.setStatus(200);
 	}
 }

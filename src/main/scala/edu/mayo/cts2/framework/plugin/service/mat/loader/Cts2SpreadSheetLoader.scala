@@ -12,7 +12,6 @@ import edu.mayo.cts2.framework.plugin.service.mat.repository.{ValueSetVersionRep
 import javax.annotation
 import collection.mutable.ArrayBuffer
 import edu.mayo.cts2.framework.model.core.types.{ChangeType, ChangeCommitted, FinalizableState}
-import edu.mayo.cts2.framework.model.valuesetdefinition.ValueSetDefinition
 
 @Component
 class Cts2SpreadSheetLoader extends Loader {
@@ -73,11 +72,6 @@ class Cts2SpreadSheetLoader extends Loader {
     var description: String = _
   }
 
-  class LoadResult {
-    var errors = false
-    var messages: Seq[String] = Seq[String]()
-  }
-
   class ResourcesResult {
     var resourceTypes: mutable.Map[String, mutable.Buffer[Resource]] = mutable.HashMap[String, mutable.Buffer[Resource]]()
 
@@ -93,20 +87,10 @@ class Cts2SpreadSheetLoader extends Loader {
     }
   }
 
-  class ValueSetsResult {
-    var valueSets = Map[String, ValueSet]()
-    var valueSetDefinitions = Map[String, ValueSetVersion]()
-    var valueSetEntries = Map[String, Seq[ValueSetEntry]]()
-  }
-
-  def loadSpreadSheet(file: File) {
+  def loadSpreadSheet(file: File) = {
     val wb = WorkbookFactory.create(file)
-    loadValueSets(wb, loadResources(wb, loadReferenceTypes(wb)))
-  }
-
-  def testLoadSpreadSheet(file: File) = {
-    val wb = WorkbookFactory.create(file)
-    loadValueSets(wb, loadResources(wb, loadReferenceTypes(wb)))
+    val result = loadValueSets(wb, loadResources(wb, loadReferenceTypes(wb)))
+    Loader.getXmlResult(result).toString()
   }
 
   /*******************************************************/
@@ -121,8 +105,6 @@ class Cts2SpreadSheetLoader extends Loader {
         val resource = refTypeRowToReferenceType(row, domain)
         domain = resource.domain
         result.addResourceType(resource)
-      } else {
-
       }
       result
     })
