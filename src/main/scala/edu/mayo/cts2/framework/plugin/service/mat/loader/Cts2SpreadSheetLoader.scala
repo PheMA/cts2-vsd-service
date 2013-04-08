@@ -222,6 +222,8 @@ class Cts2SpreadSheetLoader extends Loader {
         } else {
           /* create new version */
           currentVersion = createValueSetVersion(valueSetRow, valueSet, resourcesResults)
+          currentVersion.addEntry(createValueSetEntry(valueSetRow))
+
           val changeSet = new ValueSetChange
           changeSet.setCreator("CTS2 Spreadsheet Loader")
           changeSet.addVersion(currentVersion)
@@ -230,7 +232,7 @@ class Cts2SpreadSheetLoader extends Loader {
           valueSetVersionRepository save currentVersion
           changeSetRepository save changeSet
 
-          valueSet.currentVersion = currentVersion
+          valueSet.addVersion(currentVersion)
         }
         valueSetsResult.valueSets += (valueSetName -> valueSet)
       }
