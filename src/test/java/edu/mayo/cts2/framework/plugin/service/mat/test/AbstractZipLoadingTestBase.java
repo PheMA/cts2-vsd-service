@@ -16,12 +16,6 @@ public abstract class AbstractZipLoadingTestBase extends AbstractTestBase {
 	protected String zipFilePath = "src/test/resources/exampleMatZips/test.zip";
 	protected String svsXmlFilePath = "src/test/resources/exampleSVS/1.3.6.1.4.1.33895.1.3.0.31.xml";
 
-	public enum SVS_OR_ZIP {
-		SVS, ZIP
-	}
-
-	public SVS_OR_ZIP svsOrZip = SVS_OR_ZIP.ZIP;
-
 	@Resource
 	public MatZipLoader zipLoader;
 
@@ -30,14 +24,8 @@ public abstract class AbstractZipLoadingTestBase extends AbstractTestBase {
 
 	@Before
 	public void Load() throws Exception {
-		switch (svsOrZip) {
-		case ZIP: {
-			ZipFile zip = new ZipFile(new File(zipFilePath));
+		ZipFile zip = new ZipFile(new File(zipFilePath));
 
-			zipLoader.loadMatZip(zip);
-			break;
-		}
-		}
-
+		zipLoader.loadMatZip(zip);
 	}
 }

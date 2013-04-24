@@ -6,6 +6,7 @@ import java.util.zip.ZipFile;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.osgi.service.http.HttpService;
 import org.springframework.beans.factory.InitializingBean;
@@ -40,7 +41,7 @@ public class ZipUploadController implements ControllerProvider,
 	}
 	
 	@RequestMapping(value = "/mat/zips", method = RequestMethod.POST)
-	public String loadZip(HttpServletRequest request) throws Exception {
+	public void loadZip(HttpServletRequest request, HttpServletResponse response) throws Exception {
 
 		MultipartResolver multipartResolver = new CommonsMultipartResolver(
 				request.getSession().getServletContext());
@@ -62,7 +63,6 @@ public class ZipUploadController implements ControllerProvider,
 		multipartFile.transferTo(zip);
 
 		ZipFile zipFile = new ZipFile(zip);
-
 		try {
 			if (zipType.equals("single")) {
 				matZipLoader.loadMatZip(zipFile);
@@ -72,7 +72,8 @@ public class ZipUploadController implements ControllerProvider,
 				throw new IllegalStateException("Cannot determine Zip type.");
 			}
 
-			return "uploadComplete";
+			response.getWriter().write("<upload><status>success</status></upload>");
+			response.setStatus(200);
 		} finally {
 			if (zipFile != null) {
 				zipFile.close();

@@ -1,10 +1,7 @@
 package edu.mayo.cts2.framework.plugin.service.mat.rest.controller;
 
-import edu.mayo.cts2.framework.plugin.service.mat.loader.Cts2SpreadSheetLoader;
 import edu.mayo.cts2.framework.webapp.rest.extensions.controller.ControllerProvider;
-import org.osgi.service.http.HttpService;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Autowired;
+import edu.mayo.cts2.framework.plugin.service.mat.loader.Nqf2014Loader;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -19,30 +16,19 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.util.UUID;
 
-@Controller("cts2SpreadSheetLoaderController")
-public class Cts2SpreadSheetLoaderController implements ControllerProvider, InitializingBean {
+@Controller("nqf2014LoaderController")
+public class Nqf2014LoaderControlller implements ControllerProvider {
 
 	@Resource
-	private Cts2SpreadSheetLoader loader;
-
-	@Autowired(required = false)
-	private HttpService httpService;
+	private Nqf2014Loader loader;
 
 	@Override
 	public Object getController() {
 		return this;
 	}
 
-	@Override
-	public void afterPropertiesSet() throws Exception {
-		if (this.httpService != null) {
-			httpService.registerResources("/upload", "/WEB-INF", null);
-		}
-	}
-
-	@RequestMapping(value="/upload/cts2spreadsheet", method= RequestMethod.POST)
-	public void loadSpreadSheet(HttpServletRequest request, HttpServletResponse response) throws Exception {
-
+	@RequestMapping(value="/upload/nqf2014", method= RequestMethod.POST)
+	public void loadNqf2014SpreadSheet(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		MultipartResolver multipartResolver = new CommonsMultipartResolver(request.getSession().getServletContext());
 
 		if (!multipartResolver.isMultipart(request))
