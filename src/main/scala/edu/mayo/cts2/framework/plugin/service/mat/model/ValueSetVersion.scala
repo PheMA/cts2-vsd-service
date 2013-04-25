@@ -62,7 +62,9 @@ class ValueSetVersion extends Equals {
   
   def addEntry(entry:ValueSetEntry) = {
     entry.valueSetVersion = this
-    entries.add(entry)
+    if (!entries.contains(entry)) {
+      entries.add(entry)
+    }
   }
   
   def addEntries(entries:Seq[ValueSetEntry]) {
