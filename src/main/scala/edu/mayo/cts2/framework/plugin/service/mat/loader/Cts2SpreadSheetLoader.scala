@@ -229,7 +229,8 @@ class Cts2SpreadSheetLoader extends Loader {
           changeSet.addVersion(currentVersion)
           currentVersion.setChangeType(ChangeType.CREATE)
           currentVersion.setChangeSetUri(changeSet.getChangeSetUri)
-          valueSetVersionRepository save currentVersion
+          if (valueSetVersionRepository.findOne(currentVersion.getDocumentUri) == null)
+            valueSetVersionRepository save currentVersion
           changeSetRepository save changeSet
 
           valueSet.addVersion(currentVersion)
@@ -250,7 +251,8 @@ class Cts2SpreadSheetLoader extends Loader {
     vs.setHref(res href)
     vs.setUri(res uri)
     /* todo: namespace? */
-    valueSetRepository save vs
+    if (valueSetRepository.findOne(vs.name) == null)
+      valueSetRepository save vs
     vs
   }
 
