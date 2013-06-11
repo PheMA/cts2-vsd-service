@@ -28,8 +28,7 @@ trait ValueSetVersionRepository extends CrudRepository[ValueSetVersion, String] 
 //  @Query("select vsv from ValueSetVersion vsv where vsv.valueSet.name = :name and (vsv.id = :id or vsv.version = :id)")
 //  def findVersionByIdOrVersionIdAndValueSetName(@Param("name") name:String, @Param("id") id:String): ValueSetVersion
 
-  @Query("select distinct entries.codeSystem, entries.codeSystemVersion from ValueSetVersion valueSet " +
-  		"inner join valueSet.entries entries where valueSet.version = :version")
+  @Query("select distinct codeSystem, codeSystemVersion from ValueSetEntry where valueSetVersion_documentUri = :version")
   def findCodeSystemVersionsByValueSetVersion(@Param("version") version:String): java.util.Collection[Array[String]]
 
   @Query("select vse from ValueSetEntry vse where vse.valueSetVersion.changeSetUri = :changeSetUri")
