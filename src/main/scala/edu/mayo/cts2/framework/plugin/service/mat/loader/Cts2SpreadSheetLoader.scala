@@ -90,7 +90,7 @@ class Cts2SpreadSheetLoader extends Loader {
   def loadSpreadSheet(file: File) = {
     val wb = WorkbookFactory.create(file)
     val result = loadValueSets(wb, loadResources(wb, loadReferenceTypes(wb)))
-    Loader.getXmlResult(result).toString()
+    "<?xml version=\"1.0\" encoding=\"utf-8\"?>" + Loader.getXmlResult(result).toString()
   }
 
   /*******************************************************/
@@ -229,10 +229,11 @@ class Cts2SpreadSheetLoader extends Loader {
           changeSet.addVersion(currentVersion)
           currentVersion.setChangeType(ChangeType.CREATE)
           currentVersion.setChangeSetUri(changeSet.getChangeSetUri)
-          if (valueSetVersionRepository.findOne(currentVersion.getDocumentUri) == null)
-            valueSetVersionRepository save currentVersion
-          changeSetRepository save changeSet
 
+          if (valueSetVersionRepository.findOne(currentVersion.getDocumentUri) == null) {
+            valueSetVersionRepository save currentVersion
+            changeSetRepository save changeSet
+          }
           valueSet.addVersion(currentVersion)
         }
         valueSetsResult.valueSets += (valueSetName -> valueSet)

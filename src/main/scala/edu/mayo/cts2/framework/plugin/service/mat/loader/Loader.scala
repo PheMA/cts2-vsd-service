@@ -31,17 +31,17 @@ class ValueSetsResult {
 object Loader {
 
   def getXmlResult(result: ValueSetsResult): xml.Elem = {
-    <upload><status>{
+    <ValueSetImportResult><Status>{
       if (result.errors) {
         "error"
       } else {
         "success"
       }
-    }</status><valuesets>{
-      for (vs <- result.valueSets) yield <valueset name={vs._1} version={vs._2.currentVersion.version} entries={vs._2.currentVersion.getEntries.size.toString} />
-    }</valuesets><messages>{
-      for (msg <- result.messages) yield <message>{msg}</message>
-    }</messages></upload>
+    }</Status><ValueSets>{
+      for (vs <- result.valueSets) yield <ValueSet name={vs._1} version={vs._2.currentVersion.version} entries={vs._2.currentVersion.getEntries.size.toString} />
+    }</ValueSets><Messages>m{
+      for (msg <- result.messages) yield <Message>{msg}</Message>
+    }</Messages></ValueSetImportResult>
   }
 
 }
