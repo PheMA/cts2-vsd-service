@@ -11,8 +11,8 @@ import org.springframework.stereotype.Component
 import edu.mayo.cts2.framework.plugin.service.mat.repository.{ValueSetRepository, ValueSetVersionRepository, ChangeSetRepository}
 import javax.annotation.Resource
 import edu.mayo.cts2.framework.plugin.service.mat.model.{ValueSetEntry, ValueSetVersion}
-import edu.mayo.cts2.framework.model.core.types.{FinalizableState, ChangeType}
-import edu.mayo.cts2.framework.model.service.exception.{ResourceIsNotOpen, ChangeSetIsNotOpen, UnknownChangeSet}
+import edu.mayo.cts2.framework.model.core.types.{ChangeCommitted, FinalizableState, ChangeType}
+import edu.mayo.cts2.framework.model.service.exception.{UnknownValueSet, ResourceIsNotOpen, ChangeSetIsNotOpen, UnknownChangeSet}
 import java.util
 import util.{Calendar, UUID}
 import edu.mayo.cts2.framework.model.core.TsAnyType
@@ -91,11 +91,19 @@ class MatValueSetDefinitionMaintenanceService extends AbstractService with Value
     if (changeSet.getState.ne(FinalizableState.OPEN))
       throw new ChangeSetIsNotOpen
 
+    val valueSet = valueSetRepo.findOne(valueSetDefinition.getDefinedValueSet.getContent)
+    if (valueSet.eq(null))
+      throw new UnknownValueSet
+
     val version: ValueSetVersion = toValueSetVersion(valueSetDefinition)
     version.setChangeType(ChangeType.CREATE)
-    versionRepo.save(version)
+    version.setChangeCommitted(ChangeCommitted.COMMITTED)
+    version.setChangeSetUri(changeSet.getChangeSetUri)
+    valueSet.addVersion(version)
     changeSet.addVersion(version)
+    versionRepo.save(version)
     changeSetRepo.save(changeSet)
+    valueSetRepo.save(valueSet)
     new LocalIdValueSetDefinition(version.getVersion, valueSetDefinition)
   }
 

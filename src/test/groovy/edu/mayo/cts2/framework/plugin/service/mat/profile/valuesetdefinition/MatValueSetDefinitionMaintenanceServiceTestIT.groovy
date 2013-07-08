@@ -17,13 +17,17 @@ import edu.mayo.cts2.framework.model.core.types.EntryState
 import edu.mayo.cts2.framework.model.core.types.FinalizableState
 import edu.mayo.cts2.framework.model.core.types.SetOperator
 import edu.mayo.cts2.framework.model.extension.LocalIdValueSetDefinition
+import edu.mayo.cts2.framework.model.service.exception.UnknownChangeSet
+import edu.mayo.cts2.framework.model.service.exception.UnknownValueSet
 import edu.mayo.cts2.framework.model.updates.ChangeSet
 import edu.mayo.cts2.framework.model.util.ModelUtils
+import edu.mayo.cts2.framework.model.valueset.ValueSetCatalogEntry
 import edu.mayo.cts2.framework.model.valuesetdefinition.SpecificEntityList
 import edu.mayo.cts2.framework.model.valuesetdefinition.ValueSetDefinition
 import edu.mayo.cts2.framework.model.valuesetdefinition.ValueSetDefinitionEntry
 import edu.mayo.cts2.framework.plugin.service.mat.model.ValueSet
 import edu.mayo.cts2.framework.plugin.service.mat.profile.update.MatChangeSetService
+import edu.mayo.cts2.framework.plugin.service.mat.profile.valueset.MatValueSetMaintenanceService
 import edu.mayo.cts2.framework.plugin.service.mat.repository.ValueSetRepository
 import edu.mayo.cts2.framework.plugin.service.mat.repository.ValueSetVersionRepository
 import edu.mayo.cts2.framework.plugin.service.mat.test.AbstractTestBase
@@ -43,6 +47,8 @@ import javax.xml.transform.stream.StreamResult
 
 import static org.junit.Assert.assertEquals
 import static org.junit.Assert.assertNotNull
+import static org.junit.Assert.assertNull
+import static org.junit.Assert.assertTrue
 
 class MatValueSetDefinitionMaintenanceServiceTestIT extends AbstractTestBase {
 
@@ -56,6 +62,9 @@ class MatValueSetDefinitionMaintenanceServiceTestIT extends AbstractTestBase {
 	def MatValueSetDefinitionMaintenanceService valueSetDefinitionMaintenanceService
 
 	@Resource
+	def MatValueSetMaintenanceService valueSetMaintenanceService
+
+	@Resource
 	def ValueSetRepository valueSetRepository
 
 	@Resource
@@ -65,6 +74,7 @@ class MatValueSetDefinitionMaintenanceServiceTestIT extends AbstractTestBase {
 	def void setUp() {
 		assertNotNull changeSetService
 		assertNotNull valueSetDefinitionMaintenanceService
+		assertNotNull valueSetMaintenanceService
 		assertNotNull valueSetRepository
 	}
 
@@ -80,11 +90,98 @@ class MatValueSetDefinitionMaintenanceServiceTestIT extends AbstractTestBase {
 				def createdVersion = valueSetVersionRepository.findOne(definition.getDocumentURI())
 				assertNotNull createdVersion
 				assertEquals FinalizableState.OPEN, createdVersion.getState()
-				assertEquals ChangeCommitted.PENDING, createdVersion.getChangeCommitted()
+				assertEquals ChangeCommitted.COMMITTED, createdVersion.getChangeCommitted()
 				assertEquals ChangeType.CREATE, createdVersion.getChangeType()
+
+				def valueSet = valueSetRepository.findOne(createdVersion.valueSet.name)
+				assertNotNull valueSet
+				assertTrue valueSet.versions().contains(createdVersion)
+				assertEquals createdVersion.documentUri, valueSet.currentVersion().documentUri
 			}
 		})
 
+	}
+
+	@Test(expected = UnknownChangeSet.class)
+	void createResourceNoChangeSet() {
+		def txTemplate = new TransactionTemplate(txManager)
+
+		txTemplate.execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus status) {
+				def definition = createNewValueSetDefinition("i.dont.exist")
+				saveAndValidateDefinition(definition)
+			}
+		})
+	}
+
+	@Test(expected = UnknownValueSet.class)
+	void createResourceNoValueSet() {
+		def txTemplate = new TransactionTemplate(txManager)
+
+		txTemplate.execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus status) {
+				def valueSet = new ValueSet(UUID.randomUUID().toString())
+				valueSet.setFormalName("TestValueSet_FORMALNAME")
+//				valueSetRepository.save(valueSet)
+
+				def definition = new ValueSetDefinition()
+
+				definition.setState(FinalizableState.OPEN)
+
+				ChangeableElementGroup group = new ChangeableElementGroup()
+				ChangeDescription changeDescription = new ChangeDescription()
+				changeDescription.setChangeType(ChangeType.CREATE)
+				changeDescription.setCommitted(ChangeCommitted.PENDING)
+				changeDescription.setContainingChangeSet(changeSetService.createChangeSet().changeSetURI)
+				changeDescription.setChangeDate(new Date())
+				group.setChangeDescription(changeDescription)
+				definition.setChangeableElementGroup(group)
+
+				definition.setDocumentURI(UUID.randomUUID().toString())
+				definition.setEntryState(EntryState.ACTIVE)
+				definition.setAbout("This is a test value set description.")
+				definition.setDefinedValueSet(new ValueSetReference(valueSet.name))
+
+				VersionTagReference[] versionRefs = new VersionTagReference[1]
+				versionRefs[0] = new VersionTagReference(UUID.randomUUID().toString().substring(0, 4))
+				definition.setVersionTag(versionRefs)
+
+				SourceAndRoleReference sourceAndRole = new SourceAndRoleReference()
+				sourceAndRole.setSource(new SourceReference("Dale Suesse"))
+				sourceAndRole.setRole(new RoleReference("creator"))
+				definition.setSourceAndRole((SourceAndRoleReference[]) [sourceAndRole])
+
+				definition.setSourceAndNotation(new SourceAndNotation())
+
+				SpecificEntityList entityList = new SpecificEntityList()
+
+				URIAndEntityName entity1 = new URIAndEntityName()
+				entity1.setName("Test Entity 1")
+				entity1.setHref("http://service/testEntity1")
+				entity1.setNamespace("TEST")
+				entity1.setUri(UUID.randomUUID().toString())
+
+				URIAndEntityName entity2 = new URIAndEntityName()
+				entity2.setName("Test Entity 2")
+				entity2.setHref("http://service/testEntity2")
+				entity2.setNamespace("TEST")
+				entity2.setUri(UUID.randomUUID().toString())
+
+				entityList.addReferencedEntity(entity1)
+				entityList.addReferencedEntity(entity2)
+
+				ValueSetDefinitionEntry entry = new ValueSetDefinitionEntry()
+				entry.setOperator(SetOperator.UNION)
+				entry.setEntryOrder(1L)
+				entry.setEntityList(entityList)
+
+				definition.setEntry((ValueSetDefinitionEntry[]) [entry])
+
+				saveAndValidateDefinition(definition)
+			}
+		})
 	}
 
 	private ValueSetDefinition createValueSetDef() {
@@ -237,6 +334,7 @@ class MatValueSetDefinitionMaintenanceServiceTestIT extends AbstractTestBase {
 
 	protected ValueSetDefinition createNewValueSetDefinition(String changeSetUri) {
 		def definition = getValueSetDefinition()
+		definition.setState(FinalizableState.OPEN)
 
 		ChangeableElementGroup group = new ChangeableElementGroup()
 		ChangeDescription changeDescription = new ChangeDescription()
@@ -251,16 +349,19 @@ class MatValueSetDefinitionMaintenanceServiceTestIT extends AbstractTestBase {
 	}
 
 	protected ValueSetDefinition getValueSetDefinition() {
-		def valueSet = new ValueSet(UUID.randomUUID().toString())
-		valueSet.setFormalName("TestValueSet_FORMALNAME")
-		valueSetRepository.save(valueSet)
+		ValueSetCatalogEntry valueSet = createValueSetCatalogEntry()
+		valueSetMaintenanceService.createResource(valueSet)
+
+//		def valueSet = new ValueSet(UUID.randomUUID().toString())
+//		valueSet.setFormalName("TestValueSet_FORMALNAME")
+//		valueSetRepository.save(valueSet)
 
 		def definition = new ValueSetDefinition()
 
 		definition.setDocumentURI(UUID.randomUUID().toString())
 		definition.setEntryState(EntryState.ACTIVE)
 		definition.setAbout("This is a test value set description.")
-		definition.setDefinedValueSet(new ValueSetReference(valueSet.name))
+		definition.setDefinedValueSet(new ValueSetReference(valueSet.valueSetName))
 
 		VersionTagReference[] versionRefs = new VersionTagReference[1]
 		versionRefs[0] = new VersionTagReference(UUID.randomUUID().toString().substring(0, 4))
@@ -298,6 +399,33 @@ class MatValueSetDefinitionMaintenanceServiceTestIT extends AbstractTestBase {
 		definition.setEntry((ValueSetDefinitionEntry[]) [entry])
 
 		definition
+	}
+
+	private ValueSetCatalogEntry createValueSetCatalogEntry() {
+		ValueSetCatalogEntry vs = new ValueSetCatalogEntry()
+		def id = UUID.randomUUID().toString()
+		vs.setValueSetName(id)
+		vs.setFormalName("TestValueSet" + id)
+		vs.setAbout("urn:uuid:" + UUID.randomUUID().toString())
+		SourceAndRoleReference snrr = new SourceAndRoleReference()
+		snrr.setRole(new RoleReference("Author"))
+		snrr.setSource(new SourceReference("jUnitTester"))
+		vs.addSourceAndRole(snrr)
+
+		def cs = changeSetService.createChangeSet()
+
+		def changeDescription = new ChangeDescription()
+		changeDescription.setChangeDate(new Date())
+		changeDescription.setChangeType(ChangeType.CREATE)
+		changeDescription.setContainingChangeSet(cs.getChangeSetURI())
+		changeDescription.setCommitted(ChangeCommitted.PENDING);
+
+		def ceg = new ChangeableElementGroup()
+		ceg.setChangeDescription(changeDescription)
+
+		vs.setChangeableElementGroup(ceg)
+
+		return vs
 	}
 
 	public static void main(String[] args) {

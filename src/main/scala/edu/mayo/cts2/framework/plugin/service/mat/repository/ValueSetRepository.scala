@@ -27,5 +27,8 @@ trait ValueSetRepository extends CrudRepository[ValueSet, String] {
 
   @Query("select vs.currentVersion.id from ValueSet vs where vs.name = :name")
   def findCurrentVersionIdByName(@Param("name") name:String): String
+
+  @Query("select distinct vs from ValueSet vs where vs.uri =:uri")
+  def findOneByUri(@Param("uri") uri: String): ValueSet
   
 }

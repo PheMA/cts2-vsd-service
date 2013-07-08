@@ -57,14 +57,16 @@ class MatValueSetReadService extends AbstractReadService with ValueSetReadServic
     valueSetCatalogEntry.addSourceAndRole(MatValueSetUtils.sourceAndRole)
 
     valueSetCatalogEntry.setDefinitions(urlConstructor.createDefinitionsOfValueSetUrl(valueSet.getName))
-    
-    valueSetCatalogEntry.setCurrentDefinition(
-        MatValueSetUtils.buildValueSetDefinitionReference(
-            valueSetCatalogEntry.getValueSetName, valueSetCatalogEntry.getAbout,
-            valueSet.currentVersion,
-            urlConstructor))
 
-    valueSetCatalogEntry.setChangeableElementGroup(getChangeableElementGroup(valueSet.currentVersion.changeSetUri))
+    if (valueSet.currentVersion != null) {
+      valueSetCatalogEntry.setCurrentDefinition(
+          MatValueSetUtils.buildValueSetDefinitionReference(
+              valueSetCatalogEntry.getValueSetName, valueSetCatalogEntry.getAbout,
+              valueSet.currentVersion,
+              urlConstructor))
+
+      valueSetCatalogEntry.setChangeableElementGroup(getChangeableElementGroup(valueSet.currentVersion.changeSetUri))
+    }
 
     valueSet.properties.foreach( (prop) => valueSetCatalogEntry.addProperty( toProperty(prop) ) )
     

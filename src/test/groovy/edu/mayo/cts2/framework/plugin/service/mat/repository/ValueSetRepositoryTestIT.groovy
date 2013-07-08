@@ -40,7 +40,7 @@ class ValueSetRepositoryTestIT extends AbstractTestBase {
 
 		def vsver = new ValueSetVersion()
 		
-		valueSet.addVersion(vsver,false)
+		valueSet.addVersion(vsver)
 
 		repos.save(valueSet)
 		

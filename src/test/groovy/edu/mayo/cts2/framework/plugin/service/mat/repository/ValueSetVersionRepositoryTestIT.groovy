@@ -37,7 +37,7 @@ class ValueSetVersionRepositoryTestIT extends AbstractTestBase {
 	@Transactional
 	void TestInsertWithValueSetEntry() {
 		def valueSet = new ValueSet(name:"1.23.45")
-		valueSet.addVersion(new ValueSetVersion(),true)
+		valueSet.addVersion(new ValueSetVersion())
 		
 		valueSet.currentVersion.addEntry(new ValueSetEntry(code:"123"))
 		valueSetRepos.save(valueSet)
@@ -48,7 +48,7 @@ class ValueSetVersionRepositoryTestIT extends AbstractTestBase {
 	@Test
 	void TestInsertWithValueSetEntryLarge() {
 		def valueSet = new ValueSet(name:"1.23.45")
-		valueSet.addVersion(new ValueSetVersion(),true)
+		valueSet.addVersion(new ValueSetVersion())
 		
 		for(i in 0..9999){
 			def e = new ValueSetEntry(code:"123")
@@ -79,7 +79,7 @@ class ValueSetVersionRepositoryTestIT extends AbstractTestBase {
 	@Transactional
 	void TestInsertWithTwoValueSetEntry() {
 		def valueSet1 = new ValueSet(name:"1.23.45")
-		valueSet1.addVersion(new ValueSetVersion(),true)
+		valueSet1.addVersion(new ValueSetVersion())
 		valueSet1.currentVersion().changeSetUri = UUID.randomUUID().toString()
 
 		valueSet1.currentVersion().addEntry(new ValueSetEntry(code:"123"))
@@ -102,7 +102,7 @@ class ValueSetVersionRepositoryTestIT extends AbstractTestBase {
 		
 		def version = new ValueSetVersion()
 		version.setVersion(UUID.randomUUID().toString())
-		valueSet.addVersion(version,true)
+		valueSet.addVersion(version)
 		def entry = new ValueSetEntry(code:"123")
 		entry.setCodeSystem("testcs")
 		entry.setCodeSystemVersion("2011")
@@ -124,7 +124,7 @@ class ValueSetVersionRepositoryTestIT extends AbstractTestBase {
 		
 		def version = new ValueSetVersion()
 		version.setVersion(UUID.randomUUID().toString())
-		valueSet.addVersion(version,true)
+		valueSet.addVersion(version)
 		
 		def entry = new ValueSetEntry(code:"123")
 		entry.setCodeSystem("testcs")
@@ -153,11 +153,11 @@ class ValueSetVersionRepositoryTestIT extends AbstractTestBase {
 		def version1 = new ValueSetVersion()
 		version1.version = UUID.randomUUID().toString()
 		version1.creator = creator
-		valueSet.addVersion(version1,true)
+		valueSet.addVersion(version1)
 		def version2 = new ValueSetVersion()
 		version2.version = UUID.randomUUID().toString()
 		version2.creator = creator
-		valueSet.addVersion(version2,true)
+		valueSet.addVersion(version2)
 		valueSetRepos.save(valueSet)
 
 		def oid2 = UUID.randomUUID().toString()
@@ -165,7 +165,7 @@ class ValueSetVersionRepositoryTestIT extends AbstractTestBase {
 		def version3 = new ValueSetVersion()
 		version3.version = UUID.randomUUID().toString()
 		version3.creator = creator
-		valueSet2.addVersion(version3,true)
+		valueSet2.addVersion(version3)
 		valueSetRepos.save(valueSet2)
 
 		def val = repos.findCurrentVersionsByValueSetNameAndCreator(oid, creator, new PageRequest(0, 10))
@@ -183,18 +183,18 @@ class ValueSetVersionRepositoryTestIT extends AbstractTestBase {
 		def version1 = new ValueSetVersion()
 		version1.version = UUID.randomUUID().toString()
 		version1.creator = creator
-		valueSet.addVersion(version1,true)
+		valueSet.addVersion(version1)
 		def version2 = new ValueSetVersion()
 		version2.version = UUID.randomUUID().toString()
 		version2.creator = creator
-		valueSet.addVersion(version2,true)
+		valueSet.addVersion(version2)
 		valueSetRepos.save(valueSet)
 
 		def valueSet2 = new ValueSet(name: oid)
 		def version3 = new ValueSetVersion()
 		version3.version = UUID.randomUUID().toString()
 		version3.creator = creator
-		valueSet2.addVersion(version3,true)
+		valueSet2.addVersion(version3)
 		valueSetRepos.save(valueSet2)
 
 		def val = repos.findCurrentVersionsByCreator(creator, new PageRequest(0, 10))
