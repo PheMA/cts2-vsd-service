@@ -10,6 +10,7 @@ import javax.persistence.CascadeType
 import javax.persistence.ElementCollection
 import java.util.ArrayList
 import javax.persistence.FetchType
+import edu.mayo.cts2.framework.model.core.types.FinalizableState
 
 @Entity
 class ValueSet(valueSetOid: String) extends Equals {
@@ -29,18 +30,20 @@ class ValueSet(valueSetOid: String) extends Equals {
   @BeanProperty
   var href: String = _
 
-  def addVersion(version: ValueSetVersion,current: Boolean = false) {
-    if(currentVersion == null || current){
-      currentVersion = version
+  def addVersion(version: ValueSetVersion) {
+    if (!versions.contains(version)) {
+      if(currentVersion == null || version.getState.eq(FinalizableState.FINAL)){
+        currentVersion = version
+      }
+      versions.add(version)
+      version.valueSet = this
     }
-    versions.add(version)
-    version.valueSet = this
   }
 
-  @OneToOne(cascade=Array{CascadeType.ALL}, fetch = FetchType.LAZY)
+  @OneToOne(cascade=Array{CascadeType.ALL}, fetch = FetchType.EAGER)
   var currentVersion: ValueSetVersion = _
 
-  @OneToMany(cascade=Array{CascadeType.ALL}, fetch = FetchType.LAZY)
+  @OneToMany(cascade=Array{CascadeType.ALL}, fetch = FetchType.EAGER)
   var versions: java.util.List[ValueSetVersion] = new java.util.ArrayList[ValueSetVersion]
 
   @OneToMany(cascade=Array{CascadeType.ALL})
