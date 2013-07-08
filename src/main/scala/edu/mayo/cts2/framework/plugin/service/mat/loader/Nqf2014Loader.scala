@@ -63,7 +63,7 @@ class Nqf2014Loader extends Loader {
   def loadSpreadSheet(file: File) = {
     val wb = WorkbookFactory.create(file)
     val result = loadValueSets(wb)
-    Loader.getXmlResult(result).toString
+    "<?xml version=\"1.0\" encoding=\"utf-8\"?>" + Loader.getXmlResult(result).toString
   }
 
   def loadValueSets(wb: Workbook) = {
