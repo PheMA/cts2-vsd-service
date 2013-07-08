@@ -1,0 +1,68 @@
+CTS2 Exposed Services
+=====================
+
+Change Sets
+-----------
++ Create Change Set
+    + POST
+    + /changeset
++ Delete Change Set
+	+ DELETE
+	+ /changeset/{uri}
++ Get Change Set
+	+ GET
+	+ /changeset/{uri}
++ Update Change Set
+	+ POST
+	+ /changeset/{uri}
++ Get Change Sets
+	+ GET
+	+ /changesets
+	+ filters: creator
+	+ parameters: maxtoreturn _(optional)_
+
+Value Sets
+----------
++ Get Value Sets
+	+ GET 
+	+ /valuesets
+	+ filters: synopsis
+	+ parameters: maxtoreturn _(optional)_
++ Get Value Set
+	+ GET
+	+ /valueset/{oid}
+
+Value Set Definitions
+---------------------
++ Get Value Set Definitions
+	+ GET
+	+ /valueset/{oid}/definitions
+	+ parameters: maxtoreturn _(optional)_
++ Update Value Set Definition
+	+ PUT
+    + /valueset/{oid}/definition/{version}
+	+ parameters: changeseturi (required)
++ Get Value Set Definition
+	+ GET
+    + /valueset/{oid}/definition/{version}
+    + filters: creator
+	+ parameters: changeseturi _(optional)_
++ Create Value Set Definition
+	+ POST 
+	+ /valuesetdefinition
+	+ parameters: valuesetdefinition (required)
++ Delete Value Set Definition
+	+ DELETE
+	+ /valueset/{oid}/definition/{version}
+	+ parameters: changeseturi (required)
+
+Import Value Sets
+-----------------
++ CTS2 Spreadsheet:
+    + POST
+    + /upload/cts2spreadsheet
+    + parameters: file (required)
++ NQF 2013/2014:
+    + POST
+    + /mat/zips
+    + parameters: zipType=[single\combined] (required), file (required)
