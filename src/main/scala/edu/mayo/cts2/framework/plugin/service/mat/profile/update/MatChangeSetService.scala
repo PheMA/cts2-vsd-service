@@ -97,7 +97,7 @@ class MatChangeSetService extends AbstractService with ChangeSetService {
 //    changeSetRepository.save(change)
   }
 
-  def importChangeSet(changeSetURI: URI) = {
+  def importChangeSet(changeSetUri: URI): String = {
     throw new RuntimeException
   }
 

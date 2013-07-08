@@ -19,10 +19,9 @@ import edu.mayo.cts2.framework.model.core.VersionTagReference
 import edu.mayo.cts2.framework.model.directory.DirectoryResult
 import edu.mayo.cts2.framework.model.entity.Designation
 import edu.mayo.cts2.framework.model.entity.EntityDescription
-import edu.mayo.cts2.framework.model.entity.EntityList
+import edu.mayo.cts2.framework.model.service.core.EntityNameOrURI
 import edu.mayo.cts2.framework.model.entity.EntityListEntry
 import edu.mayo.cts2.framework.model.entity.NamedEntityDescription
-import edu.mayo.cts2.framework.model.service.core.EntityNameOrURI
 import edu.mayo.cts2.framework.plugin.service.mat.namespace.NamespaceResolutionService
 import edu.mayo.cts2.framework.plugin.service.mat.profile.AbstractService
 import edu.mayo.cts2.framework.plugin.service.mat.umls.dao.UtsDao
@@ -45,7 +44,7 @@ class UtsEntityReadService extends AbstractService
 
   def availableDescriptions(p1: EntityNameOrURI, p2: ResolvedReadContext): EntityReference = throw new RuntimeException()
 
-  def readEntityDescriptions(p1: EntityNameOrURI, p2: ResolvedReadContext): EntityList = throw new RuntimeException()
+  def readEntityDescriptions(p1: EntityNameOrURI, p2: ResolvedReadContext): java.util.List[EntityListEntry] = throw new RuntimeException()
 
   def getKnownCodeSystems: java.util.List[CodeSystemReference] = throw new RuntimeException()
 
