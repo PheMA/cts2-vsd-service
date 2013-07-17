@@ -23,6 +23,9 @@ Change Sets
 
 Value Sets
 ----------
++ Create Value Set
+	+ POST
+	+ /valueset
 + Get Value Sets
 	+ GET 
 	+ /valuesets
