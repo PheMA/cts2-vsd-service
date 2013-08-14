@@ -1,13 +1,11 @@
 package edu.mayo.cts2.framework.plugin.service.mat.model
 
 import scala.reflect.BeanProperty
-import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.Id
 import javax.persistence.OneToMany
 import javax.persistence.OneToOne
 import javax.persistence.CascadeType
-import javax.persistence.ElementCollection
 import java.util.ArrayList
 import javax.persistence.FetchType
 import edu.mayo.cts2.framework.model.core.types.FinalizableState
@@ -43,7 +41,7 @@ class ValueSet(valueSetOid: String) extends Equals {
   @OneToOne(cascade=Array{CascadeType.ALL}, fetch = FetchType.EAGER)
   var currentVersion: ValueSetVersion = _
 
-  @OneToMany(cascade=Array{CascadeType.ALL}, fetch = FetchType.EAGER)
+  @OneToMany(fetch = FetchType.EAGER, orphanRemoval = true)
   var versions: java.util.List[ValueSetVersion] = new java.util.ArrayList[ValueSetVersion]
 
   @OneToMany(cascade=Array{CascadeType.ALL})
