@@ -12,20 +12,6 @@ import edu.mayo.cts2.framework.model.core.types.{ChangeCommitted, FinalizableSta
 @Component
 class Nqf2014Loader extends Loader {
 
-//  def MEASURE_ID_COL = "Measure Identifier"
-//  def MEASURE_ID_CELL = "0"
-//  def MEASURE_TITLE_COL = "Measure Title"
-//  def MEASURE_TITLE_CELL = "1"
-//  def NQF_ID_COL = "NQF ID"
-//  def NQF_ID_CELL = "2"
-//  def VERSION_COL = "Version"
-//  def VERSION_CELL = "3"
-//  def ELIGIBILITY_COL = "Eligibility"
-//  def ELIGIBILITY_CELL = "4"
-//  def CATEGORY_COL = "Category"
-//  def CATEGORY_CELL = "5"
-//  def QUALITY_DATE_ELEMENT_COL = "Quality Data Element"
-//  def QUALITY_DATE_ELEMENT_CELL = "6"
   val VALUESET_OID_COL = "Value Set OID"
   val VALUESET_OID_CELL = 7
   val VALUESET_NAME_COL = "Value Set Name"
@@ -60,6 +46,10 @@ class Nqf2014Loader extends Loader {
     var codeDesc: String = _
   }
 
+  class ResourcesResult {
+    var valueSets = Map[String, ValueSet]()
+  }
+
   def loadSpreadSheet(file: File) = {
     val wb = WorkbookFactory.create(file)
     val result = loadValueSets(wb)
@@ -67,36 +57,41 @@ class Nqf2014Loader extends Loader {
   }
 
   def loadValueSets(wb: Workbook) = {
+    val resourcesResult = new ResourcesResult
     val valueSetsResult = new ValueSetsResult
-//    wb.getSheetAt(0).rowIterator().foreach(row => {
-//      if (row.getRowNum > 0) {
-//        val vsRow = rowToValueSetRow(row)
-//        val valueSet = valueSetsResult.valueSets.get(vsRow.oid) match {
-//          case Some(vs) => vs
-//          case None => createValueSet(vsRow)
-//        }
-//        var currentVersion = valueSet.currentVersion
-//        if (currentVersion != null && currentVersion.version.equalsIgnoreCase(vsRow.version)) {
-//          currentVersion.addEntry(createValueSetEntry(vsRow))
-//        } else {
-//          /* create new version */
-//          currentVersion = createValueSetVersion(vsRow, valueSet)
-//          currentVersion.addEntry(createValueSetEntry(vsRow))
-//
-//          val changeSet = new ValueSetChange
-//          changeSet.setCreator("NQF 2014 Loader")
-//          changeSet.addVersion(currentVersion)
-//          currentVersion.setChangeType(ChangeType.CREATE)
-//          currentVersion.setChangeSetUri(changeSet.getChangeSetUri)
-//          valueSetVersionRepository save currentVersion
-//          changeSetRepository save changeSet
-//
-//          valueSet.addVersion(currentVersion)
-//        }
-//        valueSetsResult.valueSets += (vsRow.oid -> valueSet)
-//      }
-//    })
-//    valueSetsResult.valueSets.foreach(vs => valueSetRepository.save(vs._2))
+    wb.getSheetAt(0).rowIterator().foreach(row => {
+      if (row.getRowNum > 0) {
+        val vsRow = rowToValueSetRow(row)
+        val valueSet = resourcesResult.valueSets.get(vsRow.oid) match {
+          case Some(vs) => vs
+          case None => createValueSet(vsRow)
+        }
+        var currentVersion = valueSet.currentVersion
+        if (currentVersion != null && currentVersion.version.equalsIgnoreCase(vsRow.version)) {
+          currentVersion.addEntry(createValueSetEntry(vsRow))
+        } else {
+          /* create new version */
+          currentVersion = createValueSetVersion(vsRow, valueSet)
+          currentVersion.addEntry(createValueSetEntry(vsRow))
+
+          val changeSet = new ValueSetChange
+          changeSet.setCreator("NQF 2014 Loader")
+          changeSet.addVersion(currentVersion)
+          currentVersion.setChangeType(ChangeType.CREATE)
+          currentVersion.setChangeSetUri(changeSet.getChangeSetUri)
+          valueSetVersionRepository save currentVersion
+          changeSetRepository save changeSet
+
+          valueSet.addVersion(currentVersion)
+        }
+        resourcesResult.valueSets += (vsRow.oid -> valueSet)
+        val resultTuple = (vsRow.oid, currentVersion.version, currentVersion.entries.size)
+        valueSetsResult.valueSets += resultTuple
+      }
+    })
+    resourcesResult.valueSets.foreach(vs => {
+      valueSetRepository.save(vs._2)
+    })
 
     valueSetsResult
   }: ValueSetsResult
