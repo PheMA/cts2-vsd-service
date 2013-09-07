@@ -68,35 +68,35 @@ class Nqf2014Loader extends Loader {
 
   def loadValueSets(wb: Workbook) = {
     val valueSetsResult = new ValueSetsResult
-    wb.getSheetAt(0).rowIterator().foreach(row => {
-      if (row.getRowNum > 0) {
-        val vsRow = rowToValueSetRow(row)
-        val valueSet = valueSetsResult.valueSets.get(vsRow.oid) match {
-          case Some(vs) => vs
-          case None => createValueSet(vsRow)
-        }
-        var currentVersion = valueSet.currentVersion
-        if (currentVersion != null && currentVersion.version.equalsIgnoreCase(vsRow.version)) {
-          currentVersion.addEntry(createValueSetEntry(vsRow))
-        } else {
-          /* create new version */
-          currentVersion = createValueSetVersion(vsRow, valueSet)
-          currentVersion.addEntry(createValueSetEntry(vsRow))
-
-          val changeSet = new ValueSetChange
-          changeSet.setCreator("NQF 2014 Loader")
-          changeSet.addVersion(currentVersion)
-          currentVersion.setChangeType(ChangeType.CREATE)
-          currentVersion.setChangeSetUri(changeSet.getChangeSetUri)
-          valueSetVersionRepository save currentVersion
-          changeSetRepository save changeSet
-
-          valueSet.addVersion(currentVersion)
-        }
-        valueSetsResult.valueSets += (vsRow.oid -> valueSet)
-      }
-    })
-    valueSetsResult.valueSets.foreach(vs => valueSetRepository.save(vs._2))
+//    wb.getSheetAt(0).rowIterator().foreach(row => {
+//      if (row.getRowNum > 0) {
+//        val vsRow = rowToValueSetRow(row)
+//        val valueSet = valueSetsResult.valueSets.get(vsRow.oid) match {
+//          case Some(vs) => vs
+//          case None => createValueSet(vsRow)
+//        }
+//        var currentVersion = valueSet.currentVersion
+//        if (currentVersion != null && currentVersion.version.equalsIgnoreCase(vsRow.version)) {
+//          currentVersion.addEntry(createValueSetEntry(vsRow))
+//        } else {
+//          /* create new version */
+//          currentVersion = createValueSetVersion(vsRow, valueSet)
+//          currentVersion.addEntry(createValueSetEntry(vsRow))
+//
+//          val changeSet = new ValueSetChange
+//          changeSet.setCreator("NQF 2014 Loader")
+//          changeSet.addVersion(currentVersion)
+//          currentVersion.setChangeType(ChangeType.CREATE)
+//          currentVersion.setChangeSetUri(changeSet.getChangeSetUri)
+//          valueSetVersionRepository save currentVersion
+//          changeSetRepository save changeSet
+//
+//          valueSet.addVersion(currentVersion)
+//        }
+//        valueSetsResult.valueSets += (vsRow.oid -> valueSet)
+//      }
+//    })
+//    valueSetsResult.valueSets.foreach(vs => valueSetRepository.save(vs._2))
 
     valueSetsResult
   }: ValueSetsResult

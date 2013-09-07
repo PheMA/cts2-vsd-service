@@ -2,8 +2,8 @@ package edu.mayo.cts2.framework.plugin.service.mat.loader
 
 import org.apache.poi.ss.usermodel.Cell
 import scala.xml
-import edu.mayo.cts2.framework.plugin.service.mat.model.ValueSet
-import scala.collection.Seq
+//import scala.collection.Seq
+import scala.collection._
 
 trait Loader {
   def getCellValue(cell:Cell) = {
@@ -23,9 +23,9 @@ trait Loader {
 }
 
 class ValueSetsResult {
-  var valueSets = Map[String, ValueSet]()
+  var valueSets = mutable.ArrayBuffer.empty[(String, String, Int)]
   var errors = false
-  var messages: Seq[String] = IndexedSeq[String]()
+  var messages = mutable.ArrayBuffer.empty[String]
 }
 
 object Loader {
@@ -38,8 +38,8 @@ object Loader {
         "success"
       }
     }</Status><ValueSets>{
-      for (vs <- result.valueSets) yield <ValueSet name={vs._1} version={vs._2.currentVersion.version} entries={vs._2.currentVersion.getEntries.size.toString} />
-    }</ValueSets><Messages>m{
+      for (vs <- result.valueSets) yield <ValueSet name={vs._1} version={vs._2} entries={vs._3.toString} />
+    }</ValueSets><Messages>{
       for (msg <- result.messages) yield <Message>{msg}</Message>
     }</Messages></ValueSetImportResult>
   }

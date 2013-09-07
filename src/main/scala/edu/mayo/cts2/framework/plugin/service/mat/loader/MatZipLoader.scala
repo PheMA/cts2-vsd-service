@@ -134,7 +134,7 @@ class MatZipLoader extends Loader {
               result.valueSetEntries = result.valueSetEntries updated (name, (result.valueSetEntries.get(name).get ++ Seq(valueSetEntry)))
             }
           } else {
-            result.valueSets.get(name).get.currentVersion.includesValueSets += valueSetEntry.code
+            result.valueSets.get(name).get.currentVersion.includesValueSets :+ valueSetEntry.code
           }
 
         }

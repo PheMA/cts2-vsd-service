@@ -77,7 +77,7 @@ class MatValueSetReadService extends AbstractReadService with ValueSetReadServic
      val prop = createProperty(valueSetProp.getName, valueSetProp.getValue)
      
      valueSetProp.qualifiers.foreach( (qual) => {
-       prop.addPropertyQualifier( createProperty(qual.getName, qual.getValue) )
+       prop.addPropertyQualifier( createProperty(qual.qualName, qual.qualValue) )
      })  
      
      prop

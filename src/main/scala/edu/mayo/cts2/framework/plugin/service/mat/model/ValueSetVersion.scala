@@ -1,10 +1,11 @@
 package edu.mayo.cts2.framework.plugin.service.mat.model
 
-import scala.collection.JavaConversions._
 import scala.reflect.BeanProperty
 import javax.persistence._
 import edu.mayo.cts2.framework.model.core.types.{ChangeCommitted, ChangeType, FinalizableState}
 import java.util
+import org.apache.commons.lang.builder.{EqualsBuilder, HashCodeBuilder}
+import scala.collection.JavaConversions._
 
 @Entity
 class ValueSetVersion extends Equals {
@@ -60,14 +61,14 @@ class ValueSetVersion extends Equals {
   @OneToMany(mappedBy="valueSetVersion", fetch = FetchType.LAZY, cascade = Array{CascadeType.ALL})
   val entries: util.List[ValueSetEntry] = new util.ArrayList[ValueSetEntry]()
   
-  def addEntry(entry:ValueSetEntry) = {
+  def addEntry(entry:ValueSetEntry) {
     entry.valueSetVersion = this
     if (!entries.contains(entry)) {
       entries.add(entry)
     }
   }
   
-  def addEntries(entries:Seq[ValueSetEntry]) {
+  def addEntries(entries: Seq[ValueSetEntry]) {
     entries.foreach(addEntry(_))
   }
 
@@ -94,15 +95,17 @@ class ValueSetVersion extends Equals {
   @BeanProperty
   var revisionDate = util.Calendar.getInstance
 
-  override def hashCode() = this.documentUri.hashCode
+  override def hashCode() = new HashCodeBuilder()
+    .append(documentUri)
+    .toHashCode
       
   override def equals(other: Any) = other match {
-    case that: ValueSetVersion => this.documentUri == that.documentUri
+    case that: ValueSetVersion => new EqualsBuilder()
+      .append(documentUri, that.documentUri)
+      .isEquals
     case _ => false
   }
   
-  def canEqual(other: Any) = {
-    other.isInstanceOf[edu.mayo.cts2.framework.plugin.service.mat.model.ValueSetVersion]
-  }
+  def canEqual(other: Any) = classOf[ValueSetVersion].eq(other.getClass)
 
 }

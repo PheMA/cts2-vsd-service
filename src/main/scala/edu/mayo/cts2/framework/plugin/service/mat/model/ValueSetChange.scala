@@ -5,14 +5,13 @@ import javax.persistence._
 import edu.mayo.cts2.framework.model.core.{SourceReference, ChangeSetElementGroup}
 import edu.mayo.cts2.framework.model.updates.{ChangeableResource, ChangeSet}
 import java.util
+import edu.mayo.cts2.framework.model.core.types.FinalizableState
 import scala.collection.JavaConversions._
-import util.{UUID, Calendar}
-import edu.mayo.cts2.framework.model.core.types.{ChangeCommitted, FinalizableState}
 
 @Entity
 class ValueSetChange(uuid: String) {
 
-  def this() = this(UUID.randomUUID().toString)
+  def this() = this(util.UUID.randomUUID().toString)
 
   @Id
   @BeanProperty
@@ -22,10 +21,10 @@ class ValueSetChange(uuid: String) {
   var creator: String = _
 
   @BeanProperty
-  var date = Calendar.getInstance
+  var date = util.Calendar.getInstance
 
   @BeanProperty
-  var closeDate: Calendar = _
+  var closeDate: util.Calendar = _
 
   @BeanProperty
   var state: FinalizableState = FinalizableState.OPEN

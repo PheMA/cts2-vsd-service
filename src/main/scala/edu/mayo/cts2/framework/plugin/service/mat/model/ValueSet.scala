@@ -1,14 +1,11 @@
 package edu.mayo.cts2.framework.plugin.service.mat.model
 
 import scala.reflect.BeanProperty
-import javax.persistence.Entity
-import javax.persistence.Id
-import javax.persistence.OneToMany
-import javax.persistence.OneToOne
-import javax.persistence.CascadeType
-import java.util.ArrayList
-import javax.persistence.FetchType
+import javax.persistence._
 import edu.mayo.cts2.framework.model.core.types.FinalizableState
+import org.apache.commons.lang.builder.{EqualsBuilder, HashCodeBuilder}
+import scala.collection.JavaConversions._
+import java.util
 
 @Entity
 class ValueSet(valueSetOid: String) extends Equals {
@@ -33,7 +30,7 @@ class ValueSet(valueSetOid: String) extends Equals {
       if(currentVersion == null || version.getState.eq(FinalizableState.FINAL)){
         currentVersion = version
       }
-      versions.add(version)
+      versions :+ version
       version.valueSet = this
     }
   }
@@ -45,16 +42,19 @@ class ValueSet(valueSetOid: String) extends Equals {
   var versions: java.util.List[ValueSetVersion] = new java.util.ArrayList[ValueSetVersion]
 
   @OneToMany(cascade=Array{CascadeType.ALL})
-  var properties: java.util.List[ValueSetProperty] = new ArrayList[ValueSetProperty]()
+  var properties: java.util.List[ValueSetProperty] = new util.ArrayList[ValueSetProperty]()
 
-  override def hashCode() = this.name.hashCode
+  override def hashCode() = new HashCodeBuilder()
+    .append(name)
+    .toHashCode
 
   override def equals(other: Any) = other match {
-    case that: ValueSet => this.name == that.name
+    case that: ValueSet => new EqualsBuilder()
+      .append(name, that.name)
+      .isEquals
     case _ => false
   }
 
-  def canEqual(other: Any) = {
-    other.isInstanceOf[edu.mayo.cts2.framework.plugin.service.mat.model.ValueSet]
-  }
+  def canEqual(that: Any) = classOf[ValueSet].eq(that.getClass)
+
 }

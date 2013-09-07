@@ -12,6 +12,7 @@ import edu.mayo.cts2.framework.plugin.service.mat.repository.{ValueSetVersionRep
 import javax.annotation
 import collection.mutable.ArrayBuffer
 import edu.mayo.cts2.framework.model.core.types.{ChangeType, ChangeCommitted, FinalizableState}
+import org.hibernate.Hibernate
 
 @Component
 class Cts2SpreadSheetLoader extends Loader {
@@ -72,8 +73,9 @@ class Cts2SpreadSheetLoader extends Loader {
     var description: String = _
   }
 
-  class ResourcesResult {
+  case class ResourcesResult(workbook: Workbook) {
     var resourceTypes: mutable.Map[String, mutable.Buffer[Resource]] = mutable.HashMap[String, mutable.Buffer[Resource]]()
+    val status = new ValueSetsResult
 
     def addResourceType(resource: Resource) {
       resourceTypes.get(resource.domain) match {
@@ -89,28 +91,39 @@ class Cts2SpreadSheetLoader extends Loader {
 
   def loadSpreadSheet(file: File) = {
     val wb = WorkbookFactory.create(file)
-    val result = loadValueSets(wb, loadResources(wb, loadReferenceTypes(wb)))
+
+    val result = loadValueSets(
+      loadResources(
+        loadReferenceTypes(wb)))
+
     "<?xml version=\"1.0\" encoding=\"utf-8\"?>" + Loader.getXmlResult(result).toString()
   }
 
   /*******************************************************/
   /*              Load ReferenceTypes Sheet              */
   /*******************************************************/
-  private def loadReferenceTypes(wb: Workbook) = {
-    val iter = wb.getSheet(REFERENCE_TYPE_SHEET).rowIterator()
-    var domain = ""
-    val resources = iter.foldLeft(new ResourcesResult)(
-    (result, row) => {
-      if (row.getRowNum > 0) {
-        val resource = refTypeRowToReferenceType(row, domain)
-        domain = resource.domain
-        result.addResourceType(resource)
-      }
-      result
-    })
-
-    resources
-  }: ResourcesResult
+  private def loadReferenceTypes(wb: Workbook): ResourcesResult = {
+    val resourcesResult = new ResourcesResult(wb)
+    val refTypeSheet = wb.getSheet(REFERENCE_TYPE_SHEET)
+    if (refTypeSheet != null) {
+      val iter = wb.getSheet(REFERENCE_TYPE_SHEET).rowIterator()
+      var domain = ""
+      iter.foldLeft(resourcesResult)(
+      (result, row) => {
+        if (row.getRowNum > 0) {
+          val resource = refTypeRowToReferenceType(row, domain)
+          domain = resource.domain
+          result.addResourceType(resource)
+        }
+        result
+      })
+      resourcesResult
+    } else {
+      resourcesResult.status.errors = true
+      resourcesResult.status.messages += "Error: %s sheet was not found, canceled load.".format(REFERENCE_TYPE_SHEET)
+      resourcesResult
+    }
+  }
 
   def refTypeRowToReferenceType(row: Row, domain: String): Resource = {
     val resource = new Resource
@@ -128,21 +141,31 @@ class Cts2SpreadSheetLoader extends Loader {
   /*******************************************************/
   /*                Load Resources Sheet                 */
   /*******************************************************/
-  private def loadResources(wb: Workbook, resourcesResults: ResourcesResult) = {
-    val iter = wb.getSheet(RESOURCES_SHEET).rowIterator()
-    var domain: String = ""
-    val resources = iter.foldLeft(resourcesResults)(
-      (result, row) => {
-        if (row.getRowNum() > 0) {
-          val resource = resourceRowToReferenceType(row, domain)
-          domain = resource.domain
-          result.addResourceType(resource)
-        }
-        result
-      })
-
-    resources
-  }: ResourcesResult
+  private def loadResources(resourceResults: ResourcesResult): ResourcesResult = {
+    if (!resourceResults.status.errors) {
+      val resSheet = resourceResults.workbook.getSheet(RESOURCES_SHEET)
+      if (resSheet != null) {
+        val iter = resSheet.rowIterator()
+        var domain: String = ""
+        iter.foldLeft(resourceResults)(
+          (result, row) => {
+            if (row.getRowNum > 0) {
+              val resource = resourceRowToReferenceType(row, domain)
+              domain = resource.domain
+              result.addResourceType(resource)
+            }
+            result
+          })
+      } else {
+        resourceResults.status.errors = true
+        resourceResults.status.messages += "Error: %s sheet was not found, canceled load.".format(RESOURCES_SHEET)
+        resourceResults
+      }
+    } else {
+      resourceResults.status.messages += "Error: Could not load the resources because of previous errors."
+      resourceResults
+    }
+  }
 
   def resourceRowToReferenceType(row: Row, domain: String): Resource = {
     val resource = new Resource
@@ -165,18 +188,19 @@ class Cts2SpreadSheetLoader extends Loader {
   class EntryContext {
     var codeSystem: String = null
     var codeSystemVersion: String = null
-    var valueSet: String = null
+    var valueSetName: String = null
     var valueSetDefinition: String = null
+    var valueSet: Option[ValueSet] = None
   }
 
-  class ValueSetRow {
-    var valueSet: String = null
-    var valueSetDefinition: String = null
-    var codeSystem: String = null
-    var codeSystemVersion: String = null
-    var concept: String = null
-    var description: String = null
-  }
+  case class ValueSetRow(
+    valueSet: String,
+    valueSetDefinition: String,
+    codeSystem: String,
+    codeSystemVersion: String,
+    concept: String,
+    description: String
+  )
 
   private def createValueSetEntry(vsr: ValueSetRow) = {
     val vse = new ValueSetEntry
@@ -198,74 +222,116 @@ class Cts2SpreadSheetLoader extends Loader {
     vsv
   }
 
-  private def loadValueSets(wb: Workbook, resourcesResults: ResourcesResult) = {
-    val valueSetSheet = wb.getSheet(VALUE_SET_SHEET)
+  private def loadValueSets(resourcesResult: ResourcesResult): ValueSetsResult = {
+    if (resourcesResult.status.errors) {
+      resourcesResult.status.messages+= "Error: Could not load the value sets because of previous errors."
+      resourcesResult.status
+    } else {
+      val defMap = buildValueSetMap(resourcesResult)
 
+      if (!resourcesResult.status.errors) {
+        defMap.entrySet().foldLeft(resourcesResult.status)((valueSetsResult, entry) => {
+          // check if valueset exisits in service
+          var valueSet = valueSetRepository.findOne(entry.getValue.valueSet.name)
+          val version = entry.getValue.definition
+
+          if (valueSet == null) {
+            try {
+              valueSetRepository.save(entry.getValue.valueSet)
+              valueSet = valueSetRepository.findOne(entry.getValue.valueSet.name)
+            } catch {
+              case e: Exception => {
+                valueSetsResult.errors = true
+                valueSetsResult.messages += "An error occurred while saving the value set. Error: %s".format(e.getMessage)
+              }
+            }
+          }
+
+          // check if value set def exists in service
+          val definition = valueSetVersionRepository.findByValueSetNameAndValueSetVersion(valueSet.name, version.version)
+          if (definition == null) {
+            val changeSet = new ValueSetChange
+            changeSet.setCreator("CTS2 Spreadsheet Loader")
+            changeSet.addVersion(version)
+            version.setChangeType(ChangeType.CREATE)
+            version.setChangeSetUri(changeSet.getChangeSetUri)
+            valueSet.addVersion(version)
+
+            try {
+              valueSetVersionRepository.save(entry.getValue.definition)
+              changeSetRepository.save(changeSet)
+              valueSetRepository.save(valueSet)
+            } catch {
+              case e: Exception => {
+                valueSetsResult.errors = true
+                valueSetsResult.messages += "An error occurred while saving the value set definition. Error: %s".format(e.getMessage)
+              }
+            }
+          } else {
+            valueSetsResult.messages += "Duplicate definition %s/%s already exists in the service and was not uploaded.".format(valueSet.name, version.version)
+          }
+          val vs = (valueSet.name, version.version, version.entries.size)
+          valueSetsResult.valueSets += vs
+          valueSetsResult
+        })
+      } else {
+        resourcesResult.status.messages += "Error: Could not load the value sets because of previous errors."
+        resourcesResult.status
+      }
+    }
+  }
+
+  private def buildValueSetMap(resourcesResults: ResourcesResult):
+  Map[String, DefinitionResult] = {
     var context = new EntryContext
 
-    val valueSetsResult = new ValueSetsResult
-    valueSetSheet.rowIterator().foreach(row => {
-      if (row.getRowNum > 0) {
-        val valueSetRowResult = rowToValueSetRow(row, context)
-        val valueSetRow = valueSetRowResult._1
-        val valueSetName = valueSetRow.valueSet
-        context = valueSetRowResult._2
-        val valueSet = valueSetsResult.valueSets.get(valueSetName) match {
-          case Some(vs) => vs
-          case None => createValueSet(valueSetName, resourcesResults)
-        }
+    val valueSetSheet = resourcesResults.workbook.getSheet(VALUE_SET_SHEET)
+    if (valueSetSheet != null) {
+      valueSetSheet.rowIterator().foldLeft(mutable.Map.empty[String, DefinitionResult])((definitionResultMap, row) => {
+        if (row.getRowNum > 0) {
+          val valueSetRowTuple = rowToValueSetRow(row, context)
+          context = valueSetRowTuple._2
 
-        /* if valueset has definition add to it, else create then add to it */
-        var currentVersion = valueSet.currentVersion
-        if (currentVersion != null && currentVersion.version.equalsIgnoreCase(valueSetRow.valueSetDefinition)) {
-          currentVersion.addEntry(createValueSetEntry(valueSetRow))
-        } else {
-          /* create new version */
-          currentVersion = createValueSetVersion(valueSetRow, valueSet, resourcesResults)
-          currentVersion.addEntry(createValueSetEntry(valueSetRow))
+          val valueSet = context.valueSet
+            .getOrElse(createValueSet(valueSetRowTuple._1.valueSet, resourcesResults, context))
 
-          val changeSet = new ValueSetChange
-          changeSet.setCreator("CTS2 Spreadsheet Loader")
-          changeSet.addVersion(currentVersion)
-          currentVersion.setChangeType(ChangeType.CREATE)
-          currentVersion.setChangeSetUri(changeSet.getChangeSetUri)
-
-          if (valueSetVersionRepository.findOne(currentVersion.getDocumentUri) == null) {
-            valueSetVersionRepository save currentVersion
-            changeSetRepository save changeSet
+          val version = definitionResultMap.get(valueSet.name) match {
+            case Some(v) => v.definition
+            case _ => createValueSetVersion(valueSetRowTuple._1, valueSet, resourcesResults)
           }
-          valueSet.addVersion(currentVersion)
+          val entry = createValueSetEntry(valueSetRowTuple._1)
+          version.addEntry(entry)
+          definitionResultMap += (valueSet.name -> new DefinitionResult(valueSet, version))
+
         }
-        valueSetsResult.valueSets += (valueSetName -> valueSet)
-      }
-    })
-    valueSetsResult.valueSets.foreach(vs => valueSetRepository.save(vs._2))
+        definitionResultMap
+      }).toMap
+    } else {
+      resourcesResults.status.errors = true
+      resourcesResults.status.messages += "Error: %s sheet was not found, canceled load.".format(VALUE_SET_SHEET)
+      Map.empty
+    }
+  }
 
-    valueSetsResult
-  }: ValueSetsResult
-
-  def createValueSet(name: String, resources: ResourcesResult) = {
+  def createValueSet(name: String, resources: ResourcesResult, context: EntryContext) = {
     val res = resources.resourceTypes.get("VALUE_SET").get.find(_.name.equalsIgnoreCase(name)).get
     val vs = new ValueSet
     vs.setName(name)
     vs.setFormalName(name)
     vs.setHref(res href)
     vs.setUri(res uri)
-    /* todo: namespace? */
-    if (valueSetRepository.findOne(vs.name) == null)
-      valueSetRepository save vs
+    context.valueSet = Option(vs)
     vs
   }
 
   def rowToValueSetRow(row: Row, context: EntryContext): (ValueSetRow, EntryContext) = {
     val newContext = context
-    val valueSetRow = new ValueSetRow
 
     var valueSetName = getCellValue(row.getCell(VALUE_SET_VALUE_SET_CELL))
     if (valueSetName == null) {
-      valueSetName = newContext.valueSet
+      valueSetName = newContext.valueSetName
     } else {
-      newContext.valueSet = valueSetName
+      newContext.valueSetName = valueSetName
     }
 
     var valueSetDef = getCellValue(row.getCell(VALUE_SET_VALUE_SET_DEFINITION_CELL))
@@ -289,14 +355,28 @@ class Cts2SpreadSheetLoader extends Loader {
       newContext.codeSystemVersion = codeSystemVersion
     }
 
-    valueSetRow.valueSet = valueSetName
-    valueSetRow.valueSetDefinition = valueSetDef
-    valueSetRow.codeSystem = codeSystem
-    valueSetRow.codeSystemVersion = codeSystemVersion
-    valueSetRow.concept = getCellValue(row.getCell(VALUE_SET_CONCEPT_CELL))
-    valueSetRow.description = getCellValue(row.getCell(VALUE_SET_DESCRIPTION_CELL))
+    if (context!=newContext) {
+      val vsExisting = valueSetRepository.findOneByUri(newContext.valueSetName)
+      if (vsExisting != null)
+        newContext.valueSet = Option(vsExisting)
+    }
 
-    (valueSetRow, newContext)
+    (new ValueSetRow(
+      valueSetName,
+      valueSetDef,
+      codeSystem,
+      codeSystemVersion,
+      getCellValue(row.getCell(VALUE_SET_CONCEPT_CELL)),
+      getCellValue(row.getCell(VALUE_SET_DESCRIPTION_CELL))),
+      newContext)
   }
 
 }
+
+class DefinitionResultMap(var definitions: Map[String, Option[DefinitionResult]]) {
+  def addDefinition(id: String, definition: Option[DefinitionResult]) {
+    definitions += (id -> definition)
+  }
+}
+
+case class DefinitionResult(valueSet: ValueSet, definition: ValueSetVersion)
