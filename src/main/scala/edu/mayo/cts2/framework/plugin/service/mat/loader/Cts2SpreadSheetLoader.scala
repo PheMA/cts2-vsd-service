@@ -2,7 +2,7 @@ package edu.mayo.cts2.framework.plugin.service.mat.loader
 
 import java.io.File
 import scala.collection.JavaConversions._
-import collection.{mutable, Seq}
+import collection.mutable
 import org.apache.poi.ss.usermodel.Workbook
 import org.apache.poi.ss.usermodel.WorkbookFactory
 import org.apache.poi.ss.usermodel.Row
@@ -12,7 +12,7 @@ import edu.mayo.cts2.framework.plugin.service.mat.repository.{ValueSetVersionRep
 import javax.annotation
 import collection.mutable.ArrayBuffer
 import edu.mayo.cts2.framework.model.core.types.{ChangeType, ChangeCommitted, FinalizableState}
-import org.hibernate.Hibernate
+import edu.mayo.cts2.framework.plugin.service.mat.uri.{IdType, UriResolver}
 
 @Component
 class Cts2SpreadSheetLoader extends Loader {
@@ -63,6 +63,9 @@ class Cts2SpreadSheetLoader extends Loader {
 
   @annotation.Resource
   var changeSetRepository: ChangeSetRepository = _
+
+  @annotation.Resource
+  var uriResolver: UriResolver = _
 
   class Resource {
     var domain: String = _
@@ -137,6 +140,8 @@ class Cts2SpreadSheetLoader extends Loader {
 
     resource
   }
+
+  private def getCodeSystem(codeSystem: String): String = uriResolver.idToName(codeSystem, IdType.CODE_SYSTEM)
 
   /*******************************************************/
   /*                Load Resources Sheet                 */
@@ -268,7 +273,7 @@ class Cts2SpreadSheetLoader extends Loader {
               }
             }
           } else {
-            valueSetsResult.messages += "Duplicate definition %s/%s already exists in the service and was not uploaded.".format(valueSet.name, version.version)
+            valueSetsResult.messages += "Duplicate definition, %s/%s already exists in the service and was not recreated.".format(valueSet.name, version.version)
           }
           val vs = (valueSet.name, version.version, version.entries.size)
           valueSetsResult.valueSets += vs
@@ -345,7 +350,7 @@ class Cts2SpreadSheetLoader extends Loader {
     if (codeSystem == null) {
       codeSystem = newContext.codeSystem
     } else {
-      newContext.codeSystem = codeSystem
+      newContext.codeSystem = getCodeSystem(codeSystem)
     }
 
     var codeSystemVersion = getCellValue(row.getCell(VALUE_SET_CODE_SYSTEM_VERSION_CELL))
