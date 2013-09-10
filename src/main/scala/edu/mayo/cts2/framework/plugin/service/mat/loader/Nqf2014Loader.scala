@@ -2,12 +2,14 @@ package edu.mayo.cts2.framework.plugin.service.mat.loader
 
 import scala.collection.JavaConversions._
 import org.springframework.stereotype.Component
-import javax.annotation
 import edu.mayo.cts2.framework.plugin.service.mat.repository.{ChangeSetRepository, ValueSetVersionRepository, ValueSetRepository}
 import java.io.File
 import org.apache.poi.ss.usermodel.{Row, Workbook, WorkbookFactory}
 import edu.mayo.cts2.framework.plugin.service.mat.model.{ValueSetVersion, ValueSetChange, ValueSetEntry, ValueSet}
 import edu.mayo.cts2.framework.model.core.types.{ChangeCommitted, FinalizableState, ChangeType}
+import edu.mayo.cts2.framework.plugin.service.mat.uri.{UriResolver, IdType}
+import javax.annotation.Resource
+import scala.collection._
 
 @Component
 class Nqf2014Loader extends Loader {
@@ -27,27 +29,30 @@ class Nqf2014Loader extends Loader {
   val CONCEPT_DESC_COL = "Concept Description"
   val CONCEPT_DESC_CELL = 13
 
-  @annotation.Resource
+  @Resource
   var valueSetRepository: ValueSetRepository = _
 
-  @annotation.Resource
+  @Resource
   var valueSetVersionRepository: ValueSetVersionRepository = _
 
-  @annotation.Resource
+  @Resource
   var changeSetRepository: ChangeSetRepository = _
 
-  class ValueSetRow {
-    var oid: String = _
-    var name : String = _
-    var version: String = _
-    var codeSystem: String = _
-    var codeSystemVersion: String = _
-    var code: String = _
-    var codeDesc: String = _
-  }
+  @Resource
+  var uriResolver: UriResolver = _
+
+  case class ValueSetRow(
+    oid: String,
+    name: String,
+    version: String,
+    codeSystem: String,
+    codeSystemVersion: String,
+    code: String,
+    codeDesc: String)
 
   class ResourcesResult {
     var valueSets = Map[String, ValueSet]()
+    var valueSetVersions = Map[(String, String), ValueSetVersion]()
   }
 
   def loadSpreadSheet(file: File) = {
@@ -61,36 +66,55 @@ class Nqf2014Loader extends Loader {
     val valueSetsResult = new ValueSetsResult
     wb.getSheetAt(0).rowIterator().foreach(row => {
       if (row.getRowNum > 0) {
+        // create value set add to collection
         val vsRow = rowToValueSetRow(row)
-        val valueSet = resourcesResult.valueSets.get(vsRow.oid) match {
-          case Some(vs) => vs
-          case None => createValueSet(vsRow)
-        }
-        var currentVersion = valueSet.currentVersion
-        if (currentVersion != null && currentVersion.version.equalsIgnoreCase(vsRow.version)) {
-          currentVersion.addEntry(createValueSetEntry(vsRow))
-        } else {
-          /* create new version */
-          currentVersion = createValueSetVersion(vsRow, valueSet)
-          currentVersion.addEntry(createValueSetEntry(vsRow))
 
-          val changeSet = new ValueSetChange
-          changeSet.setCreator("NQF 2014 Loader")
-          changeSet.addVersion(currentVersion)
-          currentVersion.setChangeType(ChangeType.CREATE)
-          currentVersion.setChangeSetUri(changeSet.getChangeSetUri)
-          valueSetVersionRepository save currentVersion
-          changeSetRepository save changeSet
+        val valueSet = resourcesResult.valueSets.get(vsRow.oid).getOrElse({
+          val vs = createValueSet(vsRow)
+          resourcesResult.valueSets += (vsRow.oid -> vs)
+          vs
+        })
 
-          valueSet.addVersion(currentVersion)
-        }
-        resourcesResult.valueSets += (vsRow.oid -> valueSet)
-        val resultTuple = (vsRow.oid, currentVersion.version, currentVersion.entries.size)
-        valueSetsResult.valueSets += resultTuple
+        // create entry add to collection
+        resourcesResult.valueSetVersions.get((vsRow.oid, vsRow.version)).getOrElse({
+          val version = createValueSetVersion(vsRow, valueSet)
+          resourcesResult.valueSetVersions += ((vsRow.oid, vsRow.version) -> version)
+          version
+        }).addEntry(createValueSetEntry(vsRow))
+
       }
     })
+
+    // 1. save all valuesets
     resourcesResult.valueSets.foreach(vs => {
-      valueSetRepository.save(vs._2)
+      if (valueSetRepository.findOne(vs._1) != null) {
+        valueSetsResult.messages += "Duplicate value set, %s already exists in the service and was not recreated.".format(vs._1)
+      } else {
+        valueSetRepository.save(vs._2)
+      }
+    })
+
+    // 2. save all definitions
+    resourcesResult.valueSetVersions.entrySet.foreach(definition => {
+      val version = definition.getValue
+      val valueSet = resourcesResult.valueSets.get(definition.getKey._1).get
+
+      val vs = (valueSet.name, version.version, version.entries.size)
+      valueSetsResult.valueSets += vs
+
+      if (valueSetVersionRepository.findByValueSetNameAndValueSetVersion(valueSet.name, version.version) != null) {
+        valueSetsResult.messages += "Duplicate definition, %s/%s already exists in the service and was not recreated.".format(valueSet.name, version.version)
+      } else {
+        valueSet.addVersion(version)
+        val changeSet = new ValueSetChange
+        changeSet.setCreator("NQF 2014 Loader")
+        changeSet.addVersion(version)
+        version.setChangeType(ChangeType.CREATE)
+        version.setChangeSetUri(changeSet.getChangeSetUri)
+        valueSetVersionRepository.save(version)
+        changeSetRepository.save(changeSet)
+        valueSetRepository.save(valueSet)
+      }
     })
 
     valueSetsResult
@@ -98,15 +122,13 @@ class Nqf2014Loader extends Loader {
 
 
   def rowToValueSetRow(row: Row): ValueSetRow = {
-    val vs = new ValueSetRow
-    vs.oid = getCellValue(row.getCell(VALUESET_OID_CELL))
-    vs.name = getCellValue(row.getCell(VALUESET_NAME_CELL))
-    vs.version = getCellValue(row.getCell(VALUESET_VERSION_CELL))
-    vs.codeSystem = getCellValue(row.getCell(CODE_SYSTEM_CELL))
-    vs.codeSystemVersion = getCellValue(row.getCell(CODE_SYSTEM_VERSION_CELL))
-    vs.code = getCellValue(row.getCell(CONCEPT_CELL))
-    vs.codeDesc = getCellValue(row.getCell(CONCEPT_DESC_CELL))
-    vs
+    new ValueSetRow(getCellValue(row.getCell(VALUESET_OID_CELL)),
+      getCellValue(row.getCell(VALUESET_NAME_CELL)),
+      getCellValue(row.getCell(VALUESET_VERSION_CELL)),
+      getCodeSystem(getCellValue(row.getCell(CODE_SYSTEM_CELL))),
+      getCellValue(row.getCell(CODE_SYSTEM_VERSION_CELL)),
+      getCellValue(row.getCell(CONCEPT_CELL)),
+      getCellValue(row.getCell(CONCEPT_DESC_CELL)))
   }
 
   def createValueSet(vsRow: ValueSetRow): ValueSet = {
@@ -114,7 +136,6 @@ class Nqf2014Loader extends Loader {
     valueSet.setName(vsRow.oid)
     valueSet.setFormalName(vsRow.name)
     valueSet.setUri("urn:oid:" + vsRow.oid)
-    valueSetRepository.save(valueSet)
     valueSet
   }
 
@@ -134,6 +155,10 @@ class Nqf2014Loader extends Loader {
     vsv.setState(FinalizableState.FINAL)
     vsv.setChangeCommitted(ChangeCommitted.COMMITTED)
     vsv
+  }
+
+  private def getCodeSystem(codeSystem: String): String = {
+   uriResolver.idToName(codeSystem, IdType.CODE_SYSTEM)
   }
 
 }
