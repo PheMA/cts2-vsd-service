@@ -74,14 +74,14 @@ class MatValueSetDefinitionResolutionService extends AbstractService with ValueS
     var valueSetVersion: ValueSetVersion = null
 
     if (changeSetUri == null || changeSetUri.equals(""))
-      valueSetVersion = valueSetVersionRepository.findCurrentVersionByValueSetName(valueSetName)
+      valueSetVersion = valueSetVersionRepository.findByValueSetNameAndValueSetVersion(valueSetName, id.getName)
     else
       valueSetVersion = valueSetVersionRepository.findByChangeSetUri(changeSetUri)
 
     if (valueSetVersion == null) {
       return null
     }
-    
+
     val pageable = this.toPageable(Option(page))
     val ids = MatValueSetUtils.getIncludedVersionIds(valueSetVersion, valueSetRepository)
     val entryPage = valueSetVersionRepository.findValueSetEntriesByValueSetVersionIds(ids, pageable)
