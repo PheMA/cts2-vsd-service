@@ -19,25 +19,25 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
 	<security:http pattern="/mat/utslogin.html" security="none"/>
 	<security:http pattern="\A.*\?.*bypass=1.*\Z" path-type="regex" security="none"/>
 
-	<security:http>
-		<security:intercept-url pattern="/**" access="ROLE_USER" />
+	<!--<security:http>-->
+		<!--<security:intercept-url pattern="/**" access="ROLE_USER" />-->
 <!-- 		<security:form-login  -->
 <!-- 			login-processing-url="${securityCheckUrl}" -->
 <!-- 			authentication-success-handler-ref="originalUrlSuccessHandler"  -->
 <!-- 			login-page="/mat/utslogin.html"/> -->
-		<security:http-basic/>
-	</security:http>
+		<!--<security:http-basic/>-->
+	<!--</security:http>-->
 
-	<beans:bean id="originalUrlSuccessHandler" class="org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler">
-	    <beans:property name="useReferer" value="true"/>
-	    <beans:property name="defaultTargetUrl" value="/"/>
-	    <beans:property name="targetUrlParameter" value="spring-security-redirect"/>
-	</beans:bean>
+	<!--<beans:bean id="originalUrlSuccessHandler" class="org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler">-->
+	    <!--<beans:property name="useReferer" value="true"/>-->
+	    <!--<beans:property name="defaultTargetUrl" value="/"/>-->
+	    <!--<beans:property name="targetUrlParameter" value="spring-security-redirect"/>-->
+	<!--</beans:bean>-->
 
-	<security:authentication-manager alias="authenticationManager">
-		<security:authentication-provider ref="utsSecurityProvider"/>	
-	</security:authentication-manager>
+	<!--<security:authentication-manager alias="authenticationManager">-->
+		<!--<security:authentication-provider ref="utsSecurityProvider"/>	-->
+	<!--</security:authentication-manager>-->
 
-	<beans:bean id="utsSecurityProvider" 
-		class="edu.mayo.cts2.framework.plugin.service.mat.security.UtsSecurityProvider"/>
+	<!--<beans:bean id="utsSecurityProvider" -->
+		<!--class="edu.mayo.cts2.framework.plugin.service.mat.security.UtsSecurityProvider"/>-->
 </beans:beans>
