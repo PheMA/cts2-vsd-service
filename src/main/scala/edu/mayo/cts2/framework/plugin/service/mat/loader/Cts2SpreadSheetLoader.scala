@@ -297,17 +297,18 @@ class Cts2SpreadSheetLoader extends Loader {
           val valueSetRowTuple = rowToValueSetRow(row, context)
           context = valueSetRowTuple._2
 
-          val valueSet = context.valueSet
-            .getOrElse(createValueSet(valueSetRowTuple._1.valueSet, resourcesResults, context))
+          if (valueSetRowTuple._1.concept != null) {
+            val valueSet = context.valueSet
+              .getOrElse(createValueSet(valueSetRowTuple._1.valueSet, resourcesResults, context))
 
-          val version = definitionResultMap.get(valueSet.name) match {
-            case Some(v) => v.definition
-            case _ => createValueSetVersion(valueSetRowTuple._1, valueSet, resourcesResults)
+            val version = definitionResultMap.get(valueSet.name) match {
+              case Some(v) => v.definition
+              case _ => createValueSetVersion(valueSetRowTuple._1, valueSet, resourcesResults)
+            }
+            val entry = createValueSetEntry(valueSetRowTuple._1)
+            version.addEntry(entry)
+            definitionResultMap += (valueSet.name -> new DefinitionResult(valueSet, version))
           }
-          val entry = createValueSetEntry(valueSetRowTuple._1)
-          version.addEntry(entry)
-          definitionResultMap += (valueSet.name -> new DefinitionResult(valueSet, version))
-
         }
         definitionResultMap
       }).toMap
