@@ -12,7 +12,7 @@ trait Loader {
 
       cellType match {
         case Cell.CELL_TYPE_STRING => cell.getStringCellValue
-        case Cell.CELL_TYPE_NUMERIC => cell.getNumericCellValue.asInstanceOf[Int].toString
+        case Cell.CELL_TYPE_NUMERIC => cell.toString
         case Cell.CELL_TYPE_BLANK => null
         case _ => throw new IllegalStateException("Found a Cell of type: " + cellType)
       }
