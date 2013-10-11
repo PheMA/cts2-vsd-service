@@ -100,8 +100,7 @@ class MatValueSetReadService extends AbstractReadService with ValueSetReadServic
   }
 
   @Override
-  def exists(identifier: NameOrURI, readContext: ResolvedReadContext): Boolean = {
-    throw new UnsupportedOperationException()
-  }
+  def exists(identifier: NameOrURI, readContext: ResolvedReadContext): Boolean =
+    valueSetRepository.findOne(identifier.getName) != null
 
 }
