@@ -188,7 +188,13 @@ class MatValueSetDefinitionReadService extends AbstractReadService with ValueSet
 
   @Override
   def exists(identifier: ValueSetDefinitionReadId, readContext: ResolvedReadContext): Boolean = {
-    throw new UnsupportedOperationException()
+    val valueSetName = identifier.getValueSet.getName
+    val changeSetUri = Option(readContext).map(_.getChangeSetContextUri).getOrElse("")
+
+    if (changeSetUri == null || changeSetUri.equals(""))
+      valueSetVersionRepository.findByValueSetNameAndValueSetVersion(valueSetName, identifier.getName) != null
+    else
+      valueSetVersionRepository.findByChangeSetUri(changeSetUri) != null
   }
 
   def getSupportedTags: java.util.List[VersionTagReference] =
