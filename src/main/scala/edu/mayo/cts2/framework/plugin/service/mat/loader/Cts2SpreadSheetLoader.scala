@@ -155,9 +155,11 @@ class Cts2SpreadSheetLoader extends Loader {
         iter.foldLeft(resourceResults)(
           (result, row) => {
             if (row.getRowNum > 0) {
-              val resource = resourceRowToReferenceType(row, domain)
-              domain = resource.domain
-              result.addResourceType(resource)
+              resourceRowToReferenceType(row, domain).foreach(resource => {
+                domain = resource.domain
+                if (resource.name != null && !resource.name.isEmpty)
+                  result.addResourceType(resource)
+              })
             }
             result
           })
@@ -172,7 +174,7 @@ class Cts2SpreadSheetLoader extends Loader {
     }
   }
 
-  def resourceRowToReferenceType(row: Row, domain: String): Resource = {
+  def resourceRowToReferenceType(row: Row, domain: String): Option[Resource] = {
     val resource = new Resource
     resource.domain = getCellValue(row.getCell(RESOURCES_DOMAIN_CELL))
     resource.name = getCellValue(row.getCell(RESOURCES_NAME_CELL))
@@ -181,10 +183,12 @@ class Cts2SpreadSheetLoader extends Loader {
     resource.href = getCellValue(row.getCell(RESOURCES_HREF_CELL))
     resource.uriPrefix = getCellValue(row.getCell(RESOURCES_URI_PREFIX_CELL))
 
-    if (resource.domain == null || resource.domain.isEmpty)
-      resource.domain = domain
-
-    resource
+    if (resource.name != null && !resource.name.isEmpty) {
+      if (resource.domain == null || resource.domain.isEmpty)
+        resource.domain = domain
+      Option(resource)
+    } else
+      None
   }
 
   /*******************************************************/
@@ -208,12 +212,15 @@ class Cts2SpreadSheetLoader extends Loader {
   )
 
   private def createValueSetEntry(vsr: ValueSetRow) = {
-    val vse = new ValueSetEntry
-    vse.setCode(vsr.concept)
-    vse.setDescription(vsr.description)
-    vse.setCodeSystem(vsr.codeSystem)
-    vse.setCodeSystemVersion(vsr.codeSystemVersion)
-    vse
+    if (vsr.concept != null && !vsr.concept.isEmpty) {
+      val vse = new ValueSetEntry
+      vse.setCode(vsr.concept)
+      vse.setDescription(vsr.description)
+      vse.setCodeSystem(vsr.codeSystem)
+      vse.setCodeSystemVersion(vsr.codeSystemVersion)
+      Option(vse)
+    }
+    else None
   }
 
   private def createValueSetVersion(vsr: ValueSetRow, vs: ValueSet, resources: ResourcesResult) = {
@@ -293,6 +300,8 @@ class Cts2SpreadSheetLoader extends Loader {
     val valueSetSheet = resourcesResults.workbook.getSheet(VALUE_SET_SHEET)
     if (valueSetSheet != null) {
       valueSetSheet.rowIterator().foldLeft(mutable.Map.empty[String, DefinitionResult])((definitionResultMap, row) => {
+        val rowNum = row.getRowNum
+        println("row: " + rowNum)
         if (row.getRowNum > 0) {
           val valueSetRowTuple = rowToValueSetRow(row, context)
           context = valueSetRowTuple._2
@@ -305,9 +314,13 @@ class Cts2SpreadSheetLoader extends Loader {
               case Some(v) => v.definition
               case _ => createValueSetVersion(valueSetRowTuple._1, valueSet, resourcesResults)
             }
-            val entry = createValueSetEntry(valueSetRowTuple._1)
-            version.addEntry(entry)
-            definitionResultMap += (valueSet.name -> new DefinitionResult(valueSet, version))
+            createValueSetEntry(valueSetRowTuple._1).foreach(entry => {
+              version.addEntry(entry)
+              if (!definitionResultMap.contains(valueSet.name)) {
+                definitionResultMap += (valueSet.name -> new DefinitionResult(valueSet, version))
+              }
+            })
+
           }
         }
         definitionResultMap
@@ -331,6 +344,8 @@ class Cts2SpreadSheetLoader extends Loader {
   }
 
   def rowToValueSetRow(row: Row, context: EntryContext): (ValueSetRow, EntryContext) = {
+    val rowNum = row.getRowNum
+    println("rowToVsr row:" + rowNum)
     val newContext = context
 
     var valueSetName = getCellValue(row.getCell(VALUE_SET_VALUE_SET_CELL))
