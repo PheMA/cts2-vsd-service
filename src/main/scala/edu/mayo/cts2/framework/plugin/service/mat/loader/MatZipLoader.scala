@@ -150,32 +150,32 @@ class MatZipLoader extends Loader {
     if (!validateCell(row,OID_CELL) || !validateCell(row,NAME_CELL)) {
       return null
     }
-    valueSet.name = getCellValue(row.getCell(OID_CELL))
-    valueSet.formalName = getCellValue(row.getCell(NAME_CELL))
+    valueSet.name = getCellValue(row.getCell(OID_CELL)).getOrElse("")
+    valueSet.formalName = getCellValue(row.getCell(NAME_CELL)).getOrElse("")
     valueSet.uri = "urn:oid:" + valueSet.name
     valueSet.addVersion(new ValueSetVersion())
     valueSet.currentVersion.setVersion("1")
     valueSet.currentVersion.setState(FinalizableState.FINAL)
     valueSet.currentVersion.setChangeCommitted(ChangeCommitted.COMMITTED)
-    valueSet.currentVersion.creator = getCellValue(row.getCell(DEVELOPER_CELL))
-    valueSet.currentVersion.qdmCategory = getCellValue(row.getCell(QDM_CATEGORY_CELL))
+    valueSet.currentVersion.creator = getCellValue(row.getCell(DEVELOPER_CELL)).getOrElse("")
+    valueSet.currentVersion.qdmCategory = getCellValue(row.getCell(QDM_CATEGORY_CELL)).getOrElse("")
 
     valueSet
   }
   
   private def validateCell(row:Row, cell:Int) = {
-    row.getCell(OID_CELL) != null && StringUtils.isNotBlank(getCellValue(row.getCell(OID_CELL)))
+    row.getCell(OID_CELL) != null && StringUtils.isNotBlank(getCellValue(row.getCell(OID_CELL)).getOrElse(""))
   } :Boolean
 
   def rowToValueSetEntry(row: Row): ValueSetEntry = {
     val valueSetEntry = new ValueSetEntry()
 
-    valueSetEntry.code = getCellValue(row.getCell(CODE_CELL))
+    valueSetEntry.code = getCellValue(row.getCell(CODE_CELL)).getOrElse("")
 
-    valueSetEntry.codeSystem = getCellValue(row.getCell(CODE_SYSTEM_CELL))
-    valueSetEntry.codeSystemVersion = getCellValue(row.getCell(CODE_SYSTEM_VERSION_CELL))
+    valueSetEntry.codeSystem = getCellValue(row.getCell(CODE_SYSTEM_CELL)).getOrElse("")
+    valueSetEntry.codeSystemVersion = getCellValue(row.getCell(CODE_SYSTEM_VERSION_CELL)).getOrElse("")
     
-    val description = getCellValue(row.getCell(DESCRIPTOR_CELL))
+    val description = getCellValue(row.getCell(DESCRIPTOR_CELL)).getOrElse("")
     if(StringUtils.isBlank(description) &&
         fetchCptDescriptions && 
         valueSetEntry.codeSystem.equals("CPT")){

@@ -122,13 +122,13 @@ class Nqf2014Loader extends Loader {
 
 
   def rowToValueSetRow(row: Row): ValueSetRow = {
-    new ValueSetRow(getCellValue(row.getCell(VALUESET_OID_CELL)),
-      getCellValue(row.getCell(VALUESET_NAME_CELL)),
-      getCellValue(row.getCell(VALUESET_VERSION_CELL)),
-      getCodeSystem(getCellValue(row.getCell(CODE_SYSTEM_CELL))),
-      getCellValue(row.getCell(CODE_SYSTEM_VERSION_CELL)),
-      getCellValue(row.getCell(CONCEPT_CELL)),
-      getCellValue(row.getCell(CONCEPT_DESC_CELL)))
+    new ValueSetRow(getCellValue(row.getCell(VALUESET_OID_CELL)).getOrElse(""),
+      getCellValue(row.getCell(VALUESET_NAME_CELL)).getOrElse(""),
+      getCellValue(row.getCell(VALUESET_VERSION_CELL)).getOrElse(""),
+      getCodeSystem(getCellValue(row.getCell(CODE_SYSTEM_CELL)).getOrElse("")),
+      getCellValue(row.getCell(CODE_SYSTEM_VERSION_CELL)).getOrElse(""),
+      getCellValue(row.getCell(CONCEPT_CELL)).getOrElse(""),
+      getCellValue(row.getCell(CONCEPT_DESC_CELL)).getOrElse(""))
   }
 
   def createValueSet(vsRow: ValueSetRow): ValueSet = {

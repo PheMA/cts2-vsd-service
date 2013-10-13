@@ -6,18 +6,16 @@ import scala.xml
 import scala.collection._
 
 trait Loader {
-  def getCellValue(cell:Cell) = {
-    if (cell != null) {
-      val cellType = cell.getCellType
-
-      cellType match {
-        case Cell.CELL_TYPE_STRING => cell.getStringCellValue
-        case Cell.CELL_TYPE_NUMERIC => cell.toString
-        case Cell.CELL_TYPE_BLANK => null
-        case _ => throw new IllegalStateException("Found a Cell of type: " + cellType)
+  def getCellValue(cell:Cell): Option[String] = {
+    Option(cell) match {
+      case Some(c) => {
+        cell.getCellType match {
+          case Cell.CELL_TYPE_STRING => Option(cell.getStringCellValue)
+          case Cell.CELL_TYPE_NUMERIC => Option(cell.toString)
+          case _ => None
+        }
       }
-    } else {
-      null
+      case _ => None
     }
   }
 }

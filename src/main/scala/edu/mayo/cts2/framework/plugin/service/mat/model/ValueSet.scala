@@ -30,7 +30,7 @@ class ValueSet(valueSetOid: String) extends Equals {
       if(currentVersion == null || version.getState.eq(FinalizableState.FINAL)){
         currentVersion = version
       }
-      versions :+ version
+      versions.add(version)
       version.valueSet = this
     }
   }
