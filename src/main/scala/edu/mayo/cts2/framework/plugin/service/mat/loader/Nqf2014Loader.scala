@@ -14,6 +14,8 @@ import scala.collection._
 @Component
 class Nqf2014Loader extends Loader {
 
+  // 2013.11.27 Updated for the new EP & EH combined xlsx (April_2013_EH_June_2013_EP_export_xlsx_2013-09-30-1826.xlsx)
+  // http://ushik.ahrq.gov/files/meaningfulUse/Stage2/ValueSets/compiled_exports/April_2013_EH_June_2013_EP/April_2013_EH_June_2013_EP_export_xlsx_2013-09-30-1826.zip?enableAsynchronousLoading=true
   val VALUESET_OID_COL = "Value Set OID"
   val VALUESET_OID_CELL = 7
   val VALUESET_NAME_COL = "Value Set Name"
@@ -22,12 +24,14 @@ class Nqf2014Loader extends Loader {
   val VALUESET_VERSION_CELL = 9
   val CODE_SYSTEM_COL = "Code System"
   val CODE_SYSTEM_CELL = 10
+  val CODE_SYSTEM_OID_COL = "Code System OID"
+  val CODE_SYSTEM_OID_CELL = 11
   val CODE_SYSTEM_VERSION_COL = "Code System Version"
-  val CODE_SYSTEM_VERSION_CELL = 11
+  val CODE_SYSTEM_VERSION_CELL = 12
   val CONCEPT_COL = "Concept"
-  val CONCEPT_CELL = 12
+  val CONCEPT_CELL = 13
   val CONCEPT_DESC_COL = "Concept Description"
-  val CONCEPT_DESC_CELL = 13
+  val CONCEPT_DESC_CELL = 14
 
   @Resource
   var valueSetRepository: ValueSetRepository = _
