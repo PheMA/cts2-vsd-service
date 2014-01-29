@@ -2,18 +2,17 @@ package edu.mayo.cts2.framework.plugin.service.mat.profile.update
 
 import javax.annotation.Resource
 
-import java.net.URI
-import java.util.{Calendar, UUID, Date}
+import java.util.{Calendar, Date}
 
 import edu.mayo.cts2.framework.model.core.{OpaqueData, SourceReference}
-import edu.mayo.cts2.framework.plugin.service.mat.model.{ValueSetChange}
+import edu.mayo.cts2.framework.plugin.service.mat.model.ValueSetChange
 import edu.mayo.cts2.framework.plugin.service.mat.repository.{ValueSetVersionRepository, ChangeSetRepository}
 import edu.mayo.cts2.framework.service.profile.update.ChangeSetService
 import edu.mayo.cts2.framework.plugin.service.mat.profile.AbstractService
 import org.springframework.stereotype.Component
-import edu.mayo.cts2.framework.model.core.types.{ChangeCommitted, ChangeType, FinalizableState}
+import edu.mayo.cts2.framework.model.core.types.FinalizableState
 import edu.mayo.cts2.framework.model.updates.ChangeSet
-import edu.mayo.cts2.framework.model.service.exception.{UnknownValueSetDefinition, ChangeSetIsNotOpen, UnknownChangeSet}
+import edu.mayo.cts2.framework.model.service.exception.{ChangeSetIsNotOpen, UnknownChangeSet}
 
 @Component
 class MatChangeSetService extends AbstractService with ChangeSetService {
@@ -97,8 +96,5 @@ class MatChangeSetService extends AbstractService with ChangeSetService {
 //    changeSetRepository.save(change)
   }
 
-  def importChangeSet(changeSetUri: URI): String = {
-    throw new RuntimeException
-  }
-
+  def importChangeSet(changeSet: ChangeSet) = throw new RuntimeException
 }

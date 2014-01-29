@@ -8,8 +8,7 @@ import edu.mayo.cts2.framework.service.profile.UpdateChangeableMetadataRequest
 import javax.annotation.Resource
 import edu.mayo.cts2.framework.plugin.service.mat.repository.{ChangeSetRepository, ValueSetRepository}
 import org.springframework.stereotype.Component
-import edu.mayo.cts2.framework.model.util.ModelUtils
-import edu.mayo.cts2.framework.plugin.service.mat.model.{ValueSetVersion, ValueSetChange, ValueSet}
+import edu.mayo.cts2.framework.plugin.service.mat.model.{ValueSetChange, ValueSet}
 import edu.mayo.cts2.framework.model.service.exception.{ChangeSetIsNotOpen, UnknownChangeSet, DuplicateValueSetURI, DuplicateValueSetName}
 import edu.mayo.cts2.framework.model.core.types.FinalizableState
 

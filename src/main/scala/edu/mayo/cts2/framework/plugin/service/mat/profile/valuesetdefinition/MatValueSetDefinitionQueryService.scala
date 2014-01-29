@@ -7,20 +7,19 @@ import org.springframework.transaction.annotation.Transactional
 import edu.mayo.cts2.framework.model.command.Page
 import edu.mayo.cts2.framework.model.core._
 import edu.mayo.cts2.framework.model.directory.DirectoryResult
-import edu.mayo.cts2.framework.model.valuesetdefinition.ValueSetDefinitionDirectoryEntry
+import edu.mayo.cts2.framework.model.valuesetdefinition.{ValueSetDefinitionListEntry, ValueSetDefinitionDirectoryEntry}
 import edu.mayo.cts2.framework.plugin.service.mat.profile.AbstractQueryService
 import edu.mayo.cts2.framework.service.meta.StandardMatchAlgorithmReference
 import edu.mayo.cts2.framework.service.meta.StandardModelAttributeReference
 import edu.mayo.cts2.framework.service.profile.valuesetdefinition.ValueSetDefinitionQuery
 import edu.mayo.cts2.framework.service.profile.valuesetdefinition.ValueSetDefinitionQueryService
 import javax.annotation.Resource
-import edu.mayo.cts2.framework.model.valuesetdefinition.ValueSetDefinition
-import edu.mayo.cts2.framework.plugin.service.mat.uri.UriUtils
 import edu.mayo.cts2.framework.plugin.service.mat.repository.ValueSetVersionRepository
 import edu.mayo.cts2.framework.plugin.service.mat.model.ValueSetVersion
 import edu.mayo.cts2.framework.plugin.service.mat.profile.valueset.MatValueSetUtils
 import java.util.Collections
 import edu.mayo.cts2.framework.model.util.ModelUtils
+import edu.mayo.cts2.framework.model.valueset.ValueSetCatalogEntryListEntry
 
 @Component
 class MatValueSetDefinitionQueryService
@@ -37,11 +36,10 @@ class MatValueSetDefinitionQueryService
     set
   }
 
-  def getSupportedSearchReferences: java.util.Set[_ <: PropertyReference] = {
-    val set = new java.util.HashSet[PropertyReference]()
-    set.add(StandardModelAttributeReference.RESOURCE_NAME.getPropertyReference)
-    set.add(StandardModelAttributeReference.RESOURCE_SYNOPSIS.getPropertyReference)
-    set.add(createAttributeReference("creator", "http://purl.org/dc/elements/1.1/creator", "valueSetDeveloper"))
+  def getSupportedSearchReferences: java.util.Set[_ <: ComponentReference] = {
+    val set = new java.util.HashSet[ComponentReference]()
+    set.add(StandardModelAttributeReference.RESOURCE_NAME.getComponentReference)
+    set.add(StandardModelAttributeReference.RESOURCE_SYNOPSIS.getComponentReference)
     set
   }
 
@@ -52,18 +50,7 @@ class MatValueSetDefinitionQueryService
       valueSetVersionRepository.findAll(_:Pageable)
     } else {
       val name = query.getRestrictions.getValueSet.getName
-      var creator: String = null
-      query.getFilterComponent.foreach(filter => {
-        if (filter.getPropertyReference.getReferenceTarget.getName.equals("creator")) {
-          creator = filter.getMatchValue
-        }
-      })
-      if (name != null && creator != null)
-        valueSetVersionRepository.findCurrentVersionsByValueSetNameAndCreator(name, creator, _:Pageable)
-      else if (name == null && creator != null)
-        valueSetVersionRepository.findCurrentVersionsByCreator(creator, _:Pageable)
-      else
-        valueSetVersionRepository.findByValueSetName(name, _:Pageable)
+      valueSetVersionRepository.findByValueSetName(name, _:Pageable)
     }
 
     val valueSets = fn(toPageable(Option(page)))
@@ -99,7 +86,8 @@ class MatValueSetDefinitionQueryService
     seq ++ Seq(summary)
   }:Seq[ValueSetDefinitionDirectoryEntry]
 
-  def getResourceList(p1: ValueSetDefinitionQuery, p2: SortCriteria, p3: Page): DirectoryResult[ValueSetDefinition] = null
+  def getResourceList(query: ValueSetDefinitionQuery, sortCriteria: SortCriteria, page: Page): DirectoryResult[ValueSetDefinitionListEntry] =
+    new DirectoryResult[ValueSetDefinitionListEntry](List.empty[ValueSetDefinitionListEntry], true)
 
   def count(p1: ValueSetDefinitionQuery): Int = 0
 

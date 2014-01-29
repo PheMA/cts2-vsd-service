@@ -12,16 +12,7 @@ import org.springframework.transaction.annotation.Transactional
 
 import edu.mayo.cts2.framework.model.command.Page
 import edu.mayo.cts2.framework.model.command.ResolvedReadContext
-import edu.mayo.cts2.framework.model.core.CodeSystemReference
-import edu.mayo.cts2.framework.model.core.CodeSystemVersionReference
-import edu.mayo.cts2.framework.model.core.EntitySynopsis
-import edu.mayo.cts2.framework.model.core.MatchAlgorithmReference
-import edu.mayo.cts2.framework.model.core.NameAndMeaningReference
-import edu.mayo.cts2.framework.model.core.PredicateReference
-import edu.mayo.cts2.framework.model.core.PropertyReference
-import edu.mayo.cts2.framework.model.core.SortCriteria
-import edu.mayo.cts2.framework.model.core.ValueSetDefinitionReference
-import edu.mayo.cts2.framework.model.entity.EntityDirectoryEntry
+import edu.mayo.cts2.framework.model.core._
 import edu.mayo.cts2.framework.model.service.core.NameOrURI
 import edu.mayo.cts2.framework.model.valuesetdefinition.ResolvedValueSet
 import edu.mayo.cts2.framework.model.valuesetdefinition.ResolvedValueSetHeader
@@ -32,7 +23,6 @@ import edu.mayo.cts2.framework.plugin.service.mat.profile.valueset.MatValueSetUt
 import edu.mayo.cts2.framework.plugin.service.mat.repository.ValueSetRepository
 import edu.mayo.cts2.framework.plugin.service.mat.repository.ValueSetVersionRepository
 import edu.mayo.cts2.framework.plugin.service.mat.uri.IdType
-import edu.mayo.cts2.framework.plugin.service.mat.uri.UriResolver
 import edu.mayo.cts2.framework.service.profile.valuesetdefinition.ResolvedValueSetResolutionEntityQuery
 import edu.mayo.cts2.framework.service.profile.valuesetdefinition.ResolvedValueSetResult
 import edu.mayo.cts2.framework.service.profile.valuesetdefinition.ValueSetDefinitionResolutionService
@@ -53,9 +43,9 @@ class MatValueSetDefinitionResolutionService extends AbstractService with ValueS
 
   def getSupportedMatchAlgorithms: Set[_ <: MatchAlgorithmReference] = null
 
-  def getSupportedSearchReferences: Set[_ <: PropertyReference] = null
+  def getSupportedSearchReferences: Set[_ <: ComponentReference] = null
 
-  def getSupportedSortReferences: Set[_ <: PropertyReference] = null
+  def getSupportedSortReferences: Set[_ <: ComponentReference] = null
 
   def getKnownProperties: Set[PredicateReference] = null
 
@@ -64,10 +54,9 @@ class MatValueSetDefinitionResolutionService extends AbstractService with ValueS
     id: ValueSetDefinitionReadId,
     codeSystemVersions: Set[NameOrURI],
     codeSystemVersionTag: NameOrURI,
-    query: ResolvedValueSetResolutionEntityQuery,
     sort: SortCriteria,
     readContext: ResolvedReadContext,
-    page: Page): ResolvedValueSetResult[EntitySynopsis] = {
+    page: Page): ResolvedValueSetResult[URIAndEntityName] = {
 
     val valueSetName = id.getValueSet.getName
     val changeSetUri = Option(readContext).map(_.getChangeSetContextUri).getOrElse("")
@@ -86,15 +75,15 @@ class MatValueSetDefinitionResolutionService extends AbstractService with ValueS
     val ids = MatValueSetUtils.getIncludedVersionIds(valueSetVersion, valueSetRepository)
     val entryPage = valueSetVersionRepository.findValueSetEntriesByValueSetVersionIds(ids, pageable)
     val entries = entryPage.getContent
-    val directoryEntries = entries.foldLeft(Seq[EntitySynopsis]())(valueSetToEntitySynopsis)
+    val directoryEntries = entries.foldLeft(Seq[URIAndEntityName]())(valueSetToEntitySynopsis)
 
     new ResolvedValueSetResult(
         buildHeader(valueSetVersion), 
-        directoryEntries, entries.size == entryPage.getTotalElements);
+        directoryEntries, entries.size == entryPage.getTotalElements)
   }
 
-  private def valueSetToEntitySynopsis = (seq: Seq[EntitySynopsis], entry: ValueSetEntry) => {
-    val synopsis = new EntitySynopsis()
+  private def valueSetToEntitySynopsis = (seq: Seq[URIAndEntityName], entry: ValueSetEntry) => {
+    val synopsis = new URIAndEntityName()
     synopsis.setName(entry.code)
 
     val csName = uriResolver.idToName(entry.codeSystem, IdType.CODE_SYSTEM)
@@ -108,7 +97,7 @@ class MatValueSetDefinitionResolutionService extends AbstractService with ValueS
     synopsis.setHref(hrefBuilder.createEntityHref(entry))
 
     seq ++ Seq(synopsis)
-  }: Seq[EntitySynopsis]
+  }: Seq[URIAndEntityName]
 
   private def buildHeader(valueSetVersion: ValueSetVersion): ResolvedValueSetHeader = {
     val header = new ResolvedValueSetHeader()
@@ -164,7 +153,7 @@ class MatValueSetDefinitionResolutionService extends AbstractService with ValueS
     header
   }
 
-  def resolveDefinitionAsEntityDirectory(p1: ValueSetDefinitionReadId, p2: Set[NameOrURI], p3: NameOrURI, p4: ResolvedValueSetResolutionEntityQuery, p5: SortCriteria, p6: ResolvedReadContext, p7: Page): ResolvedValueSetResult[EntityDirectoryEntry] = null
+  def resolveDefinitionAsCompleteSet(p1: ValueSetDefinitionReadId, p2: Set[NameOrURI], p3: NameOrURI, p4: SortCriteria, p5: ResolvedReadContext): ResolvedValueSet = null
 
-  def resolveDefinitionAsCompleteSet(p1: ValueSetDefinitionReadId, p2: Set[NameOrURI], p3: NameOrURI, p4: ResolvedReadContext): ResolvedValueSet = null
+  def resolveDefinitionAsEntityDirectory(definitionId: ValueSetDefinitionReadId, codeSystemVersions: Set[NameOrURI], tag: NameOrURI, query: ResolvedValueSetResolutionEntityQuery, sortCriteria: SortCriteria, readContext: ResolvedReadContext, page: Page) = null
 }

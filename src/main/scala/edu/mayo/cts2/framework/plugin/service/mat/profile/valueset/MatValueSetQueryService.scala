@@ -1,21 +1,15 @@
 package edu.mayo.cts2.framework.plugin.service.mat.profile.valueset
 
 import scala.collection.JavaConversions._
-import org.springframework.data.jpa.domain.Specification
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
-import edu.mayo.cts2.framework.filter.`match`.StateAdjustingPropertyReference
-import edu.mayo.cts2.framework.filter.directory.DirectoryBuilder
 import edu.mayo.cts2.framework.model.command.Page
-import edu.mayo.cts2.framework.model.core.MatchAlgorithmReference
-import edu.mayo.cts2.framework.model.core.SortCriteria
+import edu.mayo.cts2.framework.model.core.{ComponentReference, MatchAlgorithmReference, SortCriteria}
 import edu.mayo.cts2.framework.model.directory.DirectoryResult
-import edu.mayo.cts2.framework.model.valueset.ValueSetCatalogEntry
-import edu.mayo.cts2.framework.model.valueset.ValueSetCatalogEntrySummary
+import edu.mayo.cts2.framework.model.valueset.{ValueSetCatalogEntryListEntry, ValueSetCatalogEntrySummary}
 import edu.mayo.cts2.framework.plugin.service.mat.model.ValueSet
 import edu.mayo.cts2.framework.plugin.service.mat.profile.AbstractQueryService
 import edu.mayo.cts2.framework.plugin.service.mat.repository.ValueSetRepository
-import edu.mayo.cts2.framework.plugin.service.mat.uri.UriUtils
 import edu.mayo.cts2.framework.service.meta.StandardMatchAlgorithmReference
 import edu.mayo.cts2.framework.service.meta.StandardModelAttributeReference
 import edu.mayo.cts2.framework.service.profile.valueset.ValueSetQuery
@@ -41,44 +35,33 @@ class MatValueSetQueryService
     set
   }
 
-  def getSupportedSearchReferences: java.util.Set[StateAdjustingPropertyReference[Seq[Specification[ValueSet]]]] = {
-    val set = new java.util.HashSet[StateAdjustingPropertyReference[Seq[Specification[ValueSet]]]]()
-
-    val nameRef = StandardModelAttributeReference.RESOURCE_NAME.getPropertyReference
-    val synopsisRef = StandardModelAttributeReference.RESOURCE_SYNOPSIS.getPropertyReference
-
-    set.add(
-      createAttributeReference(
-        nameRef.getReferenceTarget.getName, nameRef.getReferenceTarget.getUri, "name"))
-    set.add(
-      createAttributeReference(
-        synopsisRef.getReferenceTarget.getName, synopsisRef.getReferenceTarget.getUri, "formalName"))
-
-    set.add(createPropertyReference(NQF_NUMBER_PROP, UriUtils.toSvsUri("NQF Number"), "NQF Number"))
-    set.add(createPropertyReference(EMEASURE_ID_PROP, UriUtils.toSvsUri("eMeasure Identifier"), "eMeasure Identifier"))
-
-    set
+  def getSupportedSearchReferences: java.util.Set[ComponentReference] = {
+    Set[ComponentReference](StandardModelAttributeReference.RESOURCE_NAME.getComponentReference,
+      StandardModelAttributeReference.RESOURCE_SYNOPSIS.getComponentReference)
   }
 
   @Transactional
   def getResourceSummaries(query: ValueSetQuery, sort: SortCriteria, requestedPage: Page = new Page()): DirectoryResult[ValueSetCatalogEntrySummary] = {
     val page = if (requestedPage == null) new Page() else requestedPage
 
-    var directoryBuilder: DirectoryBuilder[ValueSetCatalogEntrySummary] = new HibernateCriteriaDirectoryBuilder[ValueSetCatalogEntrySummary, ValueSet](
-      classOf[ValueSet],
-      entityManager,
-      transformSingleValueSet,
-      getSupportedMatchAlgorithms,
-      getSupportedSearchReferences)
+    // TODO Implement
+//    var directoryBuilder: DirectoryBuilder[ValueSetCatalogEntrySummary] = new HibernateCriteriaDirectoryBuilder[ValueSetCatalogEntrySummary, ValueSet](
+//      classOf[ValueSet],
+//      entityManager,
+//      transformSingleValueSet,
+//      getSupportedMatchAlgorithms,
+//      getSupportedSearchReferences)
+//
+//    if (query != null) {
+//      directoryBuilder = directoryBuilder.restrict(query.getFilterComponent)
+//    }
+//
+//    directoryBuilder.
+//      addStart(page.getStart).
+//      addMaxToReturn(page.getMaxToReturn).
+//      resolve
 
-    if (query != null) {
-      directoryBuilder = directoryBuilder.restrict(query.getFilterComponent)
-    }
-
-    directoryBuilder.
-      addStart(page.getStart).
-      addMaxToReturn(page.getMaxToReturn).
-      resolve
+    new DirectoryResult[ValueSetCatalogEntrySummary](List.empty[ValueSetCatalogEntrySummary], true)
   }
 
   def transformSingleValueSet = (valueSet: ValueSet) => {
@@ -101,7 +84,8 @@ class MatValueSetQueryService
     seq :+ transformSingleValueSet(valueSet)
   }: Seq[ValueSetCatalogEntrySummary]
 
-  def getResourceList(p1: ValueSetQuery, p2: SortCriteria, p3: Page): DirectoryResult[ValueSetCatalogEntry] = null
+  def getResourceList(p1: ValueSetQuery, p2: SortCriteria, p3: Page): DirectoryResult[ValueSetCatalogEntryListEntry] =
+    new DirectoryResult[ValueSetCatalogEntryListEntry](List.empty[ValueSetCatalogEntryListEntry], true)
 
   def count(p1: ValueSetQuery): Int = 0
 

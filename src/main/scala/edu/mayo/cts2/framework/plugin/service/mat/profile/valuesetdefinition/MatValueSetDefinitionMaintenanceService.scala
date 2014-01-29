@@ -15,7 +15,6 @@ import edu.mayo.cts2.framework.model.core.types.{ChangeCommitted, FinalizableSta
 import edu.mayo.cts2.framework.model.service.exception.{UnknownValueSet, ResourceIsNotOpen, ChangeSetIsNotOpen, UnknownChangeSet}
 import java.util
 import util.{Calendar, UUID}
-import edu.mayo.cts2.framework.model.core.TsAnyType
 
 @Component
 class MatValueSetDefinitionMaintenanceService extends AbstractService with ValueSetDefinitionMaintenanceService {

@@ -47,9 +47,9 @@ class MatChangeSetQueryService extends AbstractQueryService with ChangeSetQuery 
     filters.foreach((filter: ResolvedFilter) =>
       Option(filter) match {
         case Some(aFilter) => {
-          if (aFilter.getPropertyReference.getReferenceTarget.getName.equalsIgnoreCase(CREATOR_PROP))
+          if (aFilter.getComponentReference.getAttributeReference.equalsIgnoreCase(CREATOR_PROP))
             creator = aFilter.getMatchValue
-          else if (aFilter.getPropertyReference.getReferenceTarget.getName.equalsIgnoreCase(VALUESET_PROP))
+          else if (aFilter.getComponentReference.getAttributeReference.equalsIgnoreCase(VALUESET_PROP))
             valuesetoid = aFilter.getMatchValue
         }
 
@@ -103,12 +103,10 @@ class MatChangeSetQueryService extends AbstractQueryService with ChangeSetQuery 
     set
   }
 
-  def getSupportedSearchReferences: java.util.Set[_ <: PropertyReference] = {
-    val set = new java.util.HashSet[PropertyReference]()
-    set.add(StandardModelAttributeReference.RESOURCE_NAME.getPropertyReference)
-    set.add(StandardModelAttributeReference.RESOURCE_SYNOPSIS.getPropertyReference)
-    set.add(createAttributeReference(CREATOR_PROP, "http://purl.org/dc/elements/1.1/creator", "valueSetDeveloper"))
-    set.add(createAttributeReference(VALUESET_PROP, "", "valueSetName"))
+  def getSupportedSearchReferences: java.util.Set[_ <: ComponentReference] = {
+    val set = new java.util.HashSet[ComponentReference]()
+    set.add(StandardModelAttributeReference.RESOURCE_NAME.getComponentReference)
+    set.add(StandardModelAttributeReference.RESOURCE_SYNOPSIS.getComponentReference)
     set
   }
 

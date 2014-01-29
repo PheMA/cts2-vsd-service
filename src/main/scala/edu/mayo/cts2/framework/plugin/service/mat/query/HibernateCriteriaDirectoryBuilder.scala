@@ -1,25 +1,13 @@
 package edu.mayo.cts2.framework.plugin.service.mat.profile.valueset
 
 import scala.collection.JavaConversions._
-import scala.collection.JavaConversions.iterableAsScalaIterable
 import org.springframework.data.jpa.domain.Specifications
-import edu.mayo.cts2.framework.filter.`match`.StateAdjustingPropertyReference
-import edu.mayo.cts2.framework.filter.directory.AbstractStateBuildingDirectoryBuilder
 import edu.mayo.cts2.framework.filter.directory.AbstractStateBuildingDirectoryBuilder.Callback
-import edu.mayo.cts2.framework.model.core.MatchAlgorithmReference
 import edu.mayo.cts2.framework.model.directory.DirectoryResult
-import edu.mayo.cts2.framework.plugin.service.mat.model.ValueSet
-import edu.mayo.cts2.framework.plugin.service.mat.model.ValueSetVersion
-import edu.mayo.cts2.framework.plugin.service.mat.profile.AbstractService
 import edu.mayo.cts2.framework.plugin.service.mat.profile.ProfileUtils
 import javax.persistence.EntityManager
-import javax.persistence.TypedQuery
-import javax.persistence.criteria.CriteriaBuilder
-import javax.persistence.criteria.CriteriaQuery
 import org.springframework.data.jpa.domain.Specification
 import org.apache.commons.collections.CollectionUtils
-import javax.persistence.criteria.Join
-import javax.persistence.criteria.JoinType
 
 class CriteriaCallback[T, X](
   entityManager: EntityManager,
@@ -77,17 +65,17 @@ class CriteriaCallback[T, X](
   }
 }
 
-class HibernateCriteriaDirectoryBuilder[T, X](
-  resultClass: Class[X],
-  entityManager: EntityManager,
-  transform: (X) => T,
-  matchAlgorithmReferences: java.util.Set[MatchAlgorithmReference],
-  stateAdjustingPropertyReferences: java.util.Set[StateAdjustingPropertyReference[Seq[Specification[X]]]])
-
-  extends AbstractStateBuildingDirectoryBuilder[Seq[Specification[X]], T](
-    new java.util.ArrayList[Specification[X]](),
-    new CriteriaCallback[T, X](entityManager, resultClass, transform),
-    matchAlgorithmReferences,
-    stateAdjustingPropertyReferences) {
-
-}
+//class HibernateCriteriaDirectoryBuilder[T, X](
+//  resultClass: Class[X],
+//  entityManager: EntityManager,
+//  transform: (X) => T,
+//  matchAlgorithmReferences: java.util.Set[MatchAlgorithmReference],
+//  stateAdjustingPropertyReferences: java.util.Set[StateAdjustingPropertyReference[Seq[Specification[X]]]])
+//
+//  extends AbstractStateBuildingDirectoryBuilder[Seq[Specification[X]], T](
+//    new java.util.ArrayList[Specification[X]](),
+//    new CriteriaCallback[T, X](entityManager, resultClass, transform),
+//    matchAlgorithmReferences,
+//    stateAdjustingPropertyReferences) {
+//
+//}
