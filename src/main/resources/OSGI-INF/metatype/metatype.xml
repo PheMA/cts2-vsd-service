@@ -1,19 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <metatype:MetaData xmlns:metatype="http://www.osgi.org/xmlns/metatype/v1.0.0">
 	<OCD description="MAT Zip Output Plugin" name="MAT Zip Output Plugin" id="edu.mayo.cts2.framework.plugin.service.mat">
-		<AD name="UTS Service Name" id="utsServiceName" required="true" type="String" default="http://umlsks.nlm.nih.gov"/>
-		<AD name="UTS Username" id="utsUsername" required="true" type="String" />
-		<AD name="UTS Password" id="utsPassword" required="true" type="String" />
-		<AD name="UTS Auth Service Url" id="utsAuthServiceUrl" required="true" type="String" default="https://uts-ws.nlm.nih.gov/restful/IsValidUMLSUser"/>
-		<AD name="UTS License Code" id="utsLicenseCode" required="true" type="String" />
-		<AD name="UTS UMLS Release" id="utsUmlsRelease" required="true" type="String" default="2012AA"/>
 		<AD name="JDBC URL" id="jdbcUrl" required="true" type="String" default="jdbc:hsqldb:file:${user.home}/.cts2/mat-load-database"/>
 		<AD name="JDBC Driver Class" id="jdbcDriverClass" required="true" type="String" default="org.hsqldb.jdbcDriver"/>
 		<AD name="JDBC Username" id="jdbcUsername" required="true" type="String" default="sa" />
 		<AD name="JDBC Password" id="jdbcPassword" required="true" type="String" default="" />
 		<AD name="NamespaceService URL" id="namespaceServiceUrl" required="true" type="String" default="http://informatics.mayo.edu/cts2/services/bioportal-rdf/"  />
 		<AD name="UriResolutionService URL" id="uriResolutionServiceUrl" required="true" type="String" default="http://bmidev4:8000/"  />
-		<AD name="Security Check URL" id="securityCheckUrl" required="true" type="String" default="/j_spring_security_check"  />
 		<AD name="Hibernate SQL Dialect" id="hibernateDialect" required="true" type="String" default="org.hibernate.dialect.MySQLDialect"  />
 		<AD name="Fetch Missing CPT Descriptions" id="fetchCptDescriptions" required="true" type="Boolean" default="false"  />
 		<AD name="SNOMEDCT Entity URL Base" id="snomedCtUrlBase" required="false" type="String" default=""  />

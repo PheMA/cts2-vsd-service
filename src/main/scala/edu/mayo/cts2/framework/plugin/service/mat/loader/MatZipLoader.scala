@@ -22,21 +22,6 @@ class MatZipLoader extends Loader {
   @scala.reflect.BeanProperty
   var fetchCptDescriptions: java.lang.Boolean = false
     
-  @Resource  
-  var loaderUts: MatZipLoaderUTS = _  
-
-  /* This seems to be the new version of the excel
-  def DEVELOPER_CELL = 0
-  def OID_CELL = 1
-  def LAST_MODIFIED = 2
-  def NAME_CELL = 3
-  def QDM_CATEGORY_CELL = 4
-  def CODE_SYSTEM_CELL = 5
-  def CODE_SYSTEM_VERSION_CELL = 6
-  def CODE_CELL = 7
-  def DESCRIPTOR_CELL = 8
-  */
-
   def DEVELOPER_CELL = 0
   def OID_CELL = 1
   def NAME_CELL = 2
@@ -179,7 +164,8 @@ class MatZipLoader extends Loader {
     if(StringUtils.isBlank(description) &&
         fetchCptDescriptions && 
         valueSetEntry.codeSystem.equals("CPT")){
-    	valueSetEntry.description = loaderUts.getDescriptionFromUTS(valueSetEntry.codeSystem, valueSetEntry.code)
+//    	valueSetEntry.description = loaderUts.getDescriptionFromUTS(valueSetEntry.codeSystem, valueSetEntry.code)
+    	valueSetEntry.description = ""
     }
     else{
           valueSetEntry.description = description
