@@ -8,54 +8,12 @@
 		<version>1.1.0-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>mat-service</artifactId>
+	<artifactId>lcdvsd-service</artifactId>
 	<version>1.1.0-SNAPSHOT</version>
 	<packaging>bundle</packaging>
 
-	<description>A CTS2 Framework Service Plugin based on the MAT Zip output.</description>
-	<name>MAT Zip Output Service Plugin</name>
-
-	<inceptionYear>2012</inceptionYear>
-	<licenses>
-		<license>
-			<name>Apache 2</name>
-			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-			<distribution>repo</distribution>
-			<comments>A business-friendly OSS license</comments>
-		</license>
-	</licenses>
-	<organization>
-		<name>Mayo Clinic</name>
-		<url>http://mayo.edu</url>
-	</organization>
-	<issueManagement>
-		<system>GitHub</system>
-		<url>https://github.com/cts2/mat-service/issues</url>
-	</issueManagement>
-
-	<developers>
-		<developer>
-			<id>kevin</id>
-			<name>Kevin Peterson</name>
-			<email>kevin.peterson@mayo.edu</email>
-			<roles>
-				<role>Developer</role>
-			</roles>
-			<organization>Mayo Clinic</organization>
-			<timezone>-5</timezone>
-		</developer>
-	</developers>
-
-	<scm>
-		<developerConnection>scm:git:git@github.com:cts2/ecis-cts2-service.git</developerConnection>
-	</scm>
-
-	<distributionManagement>
-		<site>
-			<id>site-upload-server</id>
-			<url>scp://informatics.mayo.edu:/home/informatics/homes/cts2framework/public_html/sites/${project.artifactId}</url>
-		</site>
-	</distributionManagement>
+	<description>A Value Set Definitoin CTS2 implementation as a CTS2 Framework Service Plugin.</description>
+	<name>LCD Value Set Service Plugin</name>
 
 	<properties>
 		<forkMode>never</forkMode>

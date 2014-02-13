@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <metatype:MetaData xmlns:metatype="http://www.osgi.org/xmlns/metatype/v1.0.0">
-	<OCD description="MAT Zip Output Plugin" name="MAT Zip Output Plugin" id="edu.mayo.cts2.framework.plugin.service.mat">
+	<OCD description="LCD Value Set Plugin" name="LCD Value Set Plugin" id="edu.mayo.cts2.framework.plugin.service.mat">
 		<AD name="JDBC URL" id="jdbcUrl" required="true" type="String" default="jdbc:hsqldb:file:${user.home}/.cts2/mat-load-database"/>
 		<AD name="JDBC Driver Class" id="jdbcDriverClass" required="true" type="String" default="org.hsqldb.jdbcDriver"/>
 		<AD name="JDBC Username" id="jdbcUsername" required="true" type="String" default="sa" />
