@@ -15,6 +15,7 @@ import edu.mayo.cts2.framework.model.core.types.{ChangeCommitted, FinalizableSta
 import edu.mayo.cts2.framework.model.service.exception.{UnknownValueSet, ResourceIsNotOpen, ChangeSetIsNotOpen, UnknownChangeSet}
 import java.util
 import util.{Calendar, UUID}
+import edu.mayo.cts2.framework.model.core.URIAndEntityName
 
 @Component
 class MatValueSetDefinitionMaintenanceService extends AbstractService with ValueSetDefinitionMaintenanceService {
@@ -157,7 +158,7 @@ class MatValueSetDefinitionMaintenanceService extends AbstractService with Value
         val vsEntry = new ValueSetEntry
         vsEntry.setId(UUID.randomUUID.toString)
         vsEntry.setCodeSystem(entity.getNamespace)
-        vsEntry.setCodeSystemVersion(Option(entry.getCompleteCodeSystem).map(_.getCodeSystemVersion.getVersion.getContent).getOrElse(""))
+        vsEntry.setCodeSystemVersion(getCodeSystemVersion(vsd, entity))
         vsEntry.setValueSetVersion(version)
         vsEntry.setCode(entity.getName)
         vsEntry.setDescription(entity.getDesignation)
@@ -166,6 +167,23 @@ class MatValueSetDefinitionMaintenanceService extends AbstractService with Value
     })
 
     version
+  }
+
+  private def getCodeSystemVersion(vsd: ValueSetDefinition, entry: URIAndEntityName) = {
+    vsd.getProperty.find(p =>
+      p.getPredicate.getName.equals("usesCodeSystem") &&
+        p.getValue.exists(v => v.getLiteral.getSchema.equals("codeSystem") &&
+          v.getLiteral.getValue.getContent.equals(entry.getNamespace))) match {
+      case Some(p) =>
+        p.getPropertyQualifier.find(_.getPredicate.getName.equals("usesCodeSystemVersion")) match {
+          case Some(pq) => pq.getValue.find(_.getLiteral.getSchema.equals("codeSystemVersion")) match {
+            case Some(v) => v.getLiteral.getValue.getContent
+            case None => ""
+          }
+          case None => ""
+        }
+      case None => ""
+    }
   }
 
 }
