@@ -140,7 +140,7 @@ class MatValueSetDefinitionResolutionService extends AbstractService with ValueS
         cs.setUri(codeSystemUri)
 
         val csv = new NameAndMeaningReference()
-        csv.setContent(csName + "-" + versionId)
+        csv.setContent(versionId)
         //csv.setUri(codeSystemUri)
 
         ref.setCodeSystem(cs)
