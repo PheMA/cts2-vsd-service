@@ -8,7 +8,7 @@
 		<version>1.1.0-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>lcdvsd-service</artifactId>
+	<artifactId>vsd-service</artifactId>
 	<version>1.1.0-SNAPSHOT</version>
 	<packaging>bundle</packaging>
 
