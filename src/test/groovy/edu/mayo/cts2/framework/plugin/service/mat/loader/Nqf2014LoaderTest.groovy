@@ -3,6 +3,7 @@ package edu.mayo.cts2.framework.plugin.service.mat.loader
 import edu.mayo.cts2.framework.plugin.service.mat.repository.ValueSetRepository
 import edu.mayo.cts2.framework.plugin.service.mat.repository.ValueSetVersionRepository
 import edu.mayo.cts2.framework.plugin.service.mat.test.AbstractTestBase
+import org.junit.Ignore
 import org.junit.Test
 import org.springframework.transaction.annotation.Transactional
 
@@ -25,12 +26,14 @@ class Nqf2014LoaderTest extends AbstractTestBase {
 	def ssPath = "src/test/resources/exampleNqf2014/valuesets.xlsx"
 
 	@Test
+    @Ignore
 	void TestSetUp() {
 		assertNotNull loader
 	}
 
 	@Test
 	@Transactional
+    @Ignore
 	void TestLoadValueSets() {
 		def ss = new File(ssPath)
 		def result = loader.loadSpreadSheet(ss)
