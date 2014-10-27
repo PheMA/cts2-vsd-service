@@ -9,10 +9,10 @@
 	</parent>
 
 	<artifactId>vsd-service</artifactId>
-	<version>1.1.0-SNAPSHOT</version>
+	<version>1.4.4-SNAPSHOT</version>
 	<packaging>bundle</packaging>
 
-	<description>A Value Set Definitoin CTS2 implementation as a CTS2 Framework Service Plugin.</description>
+	<description>A Value Set Definition CTS2 implementation as a CTS2 Framework Service Plugin.</description>
 	<name>LCD Value Set Service Plugin</name>
 
 	<properties>
