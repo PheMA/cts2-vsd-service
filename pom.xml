@@ -489,6 +489,11 @@
 			<id>repo.codahale.com</id>
 			<url>http://repo.codahale.com</url>
 		</repository>
+
+        <repository>
+            <id>Mayo Nexus</id>
+            <url>http://nexus.mayo.edu/content/repositories/nlp/</url>
+        </repository>
 	</repositories>
 
 </project>
