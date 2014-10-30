@@ -47,10 +47,9 @@ import javax.xml.transform.stream.StreamResult
 
 import static org.junit.Assert.assertEquals
 import static org.junit.Assert.assertNotNull
-import static org.junit.Assert.assertNull
 import static org.junit.Assert.assertTrue
 
-class MatValueSetDefinitionMaintenanceServiceTestIT extends AbstractTestBase {
+class MatValueSetDefinitionMaintenanceServiceTest extends AbstractTestBase {
 
 	@Resource
 	def PlatformTransactionManager txManager
@@ -254,6 +253,7 @@ class MatValueSetDefinitionMaintenanceServiceTestIT extends AbstractTestBase {
 	}
 
 	@Test
+    @Ignore
 	void updateResourceTest() {
 		def definition = createValueSetDef()
 		def page = new Page()
@@ -429,7 +429,7 @@ class MatValueSetDefinitionMaintenanceServiceTestIT extends AbstractTestBase {
 	}
 
 	public static void main(String[] args) {
-		MatValueSetDefinitionMaintenanceServiceTestIT test = new MatValueSetDefinitionMaintenanceServiceTestIT()
+		MatValueSetDefinitionMaintenanceServiceTest test = new MatValueSetDefinitionMaintenanceServiceTest()
 		ValueSetDefinition definition = test.createNewValueSetDefinition(UUID.randomUUID().toString())
 		StringWriter sw = new StringWriter()
 		DelegatingMarshaller marshaller = new DelegatingMarshaller()

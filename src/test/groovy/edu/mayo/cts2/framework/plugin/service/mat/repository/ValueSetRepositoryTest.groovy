@@ -13,7 +13,7 @@ import edu.mayo.cts2.framework.plugin.service.mat.model.ValueSetVersion
 import edu.mayo.cts2.framework.plugin.service.mat.model.ValueSetEntry
 import edu.mayo.cts2.framework.plugin.service.mat.test.AbstractTestBase
 
-class ValueSetRepositoryTestIT extends AbstractTestBase {
+class ValueSetRepositoryTest extends AbstractTestBase {
 
 	@Resource
 	def ValueSetRepository repos

@@ -18,7 +18,7 @@ import edu.mayo.cts2.framework.service.command.restriction.ValueSetDefinitionQue
 import edu.mayo.cts2.framework.service.profile.valuesetdefinition.ValueSetDefinitionQuery
 import edu.mayo.cts2.framework.service.profile.valuesetdefinition.ValueSetDefinitionQueryService
 
-class MatValueSetDefinitionQueryServiceTestIT extends AbstractZipLoadingTestBase {
+class MatValueSetDefinitionQueryServiceTest extends AbstractZipLoadingTestBase {
 
 	@Resource
 	def ValueSetDefinitionQueryService service

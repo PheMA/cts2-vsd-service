@@ -12,7 +12,7 @@ import edu.mayo.cts2.framework.model.valueset.ValueSetCatalogEntry
 import edu.mayo.cts2.framework.plugin.service.mat.test.AbstractZipLoadingTestBase
 import edu.mayo.cts2.framework.service.profile.valueset.ValueSetReadService
 
-class MatValueSetReadServiceTestIT extends AbstractZipLoadingTestBase {
+class MatValueSetReadServiceTest extends AbstractZipLoadingTestBase {
 
 	@Resource
 	def ValueSetReadService service
