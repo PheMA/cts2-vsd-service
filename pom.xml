@@ -429,7 +429,7 @@
 		<dependency>
 			<groupId>org.hsqldb</groupId>
 			<artifactId>hsqldb</artifactId>
-			<version>2.2.8</version>
+			<version>2.3.2</version>
 			<scope>test</scope>
 		</dependency>
 
@@ -477,6 +477,11 @@
 			<id>repo.codahale.com</id>
 			<url>http://repo.codahale.com</url>
 		</repository>
+
+        <repository>
+            <id>Mayo Nexus</id>
+            <url>http://nexus.mayo.edu/content/repositories/nlp/</url>
+        </repository>
 	</repositories>
 
 </project>

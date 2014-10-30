@@ -8,7 +8,7 @@ import edu.mayo.cts2.framework.plugin.service.mat.test.AbstractTestBase
 import org.junit.Test
 import javax.annotation.Resource
 
-class ChangeSetRepositoryTestIT extends AbstractTestBase {
+class ChangeSetRepositoryTest extends AbstractTestBase {
 
 	@Resource
 	def ChangeSetRepository changeSetRepository

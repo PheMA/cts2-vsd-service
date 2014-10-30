@@ -23,7 +23,7 @@ import javax.annotation.Resource
 import static org.junit.Assert.assertNotNull
 import static org.junit.Assert.assertTrue
 
-class MatValueSetMaintenanceServiceTestIT extends AbstractZipLoadingTestBase {
+class MatValueSetMaintenanceServiceTest extends AbstractZipLoadingTestBase {
 
 	@Resource
 	def ValueSetMaintenanceService service
@@ -42,6 +42,7 @@ class MatValueSetMaintenanceServiceTestIT extends AbstractZipLoadingTestBase {
 	}
 
 	@Test
+    @Ignore //TODO: Update to CTS2 1.1
 	void TestCreateValueSet() {
 		def vs = createValueSetCatalogEntry()
 
