@@ -1,10 +1,14 @@
 package edu.mayo.cts2.framework.plugin.service.mat.profile.valueset
 
+import edu.mayo.cts2.framework.filter.directory.AbstractStateBuildingDirectoryBuilder
+import edu.mayo.cts2.framework.model.core.MatchAlgorithmReference
+
 import scala.collection.JavaConversions._
 import org.springframework.data.jpa.domain.Specifications
 import edu.mayo.cts2.framework.filter.directory.AbstractStateBuildingDirectoryBuilder.Callback
 import edu.mayo.cts2.framework.model.directory.DirectoryResult
 import edu.mayo.cts2.framework.plugin.service.mat.profile.ProfileUtils
+import edu.mayo.cts2.framework.filter.`match`.StateAdjustingComponentReference
 import javax.persistence.EntityManager
 import org.springframework.data.jpa.domain.Specification
 import org.apache.commons.collections.CollectionUtils
@@ -65,17 +69,17 @@ class CriteriaCallback[T, X](
   }
 }
 
-//class HibernateCriteriaDirectoryBuilder[T, X](
-//  resultClass: Class[X],
-//  entityManager: EntityManager,
-//  transform: (X) => T,
-//  matchAlgorithmReferences: java.util.Set[MatchAlgorithmReference],
-//  stateAdjustingPropertyReferences: java.util.Set[StateAdjustingPropertyReference[Seq[Specification[X]]]])
-//
-//  extends AbstractStateBuildingDirectoryBuilder[Seq[Specification[X]], T](
-//    new java.util.ArrayList[Specification[X]](),
-//    new CriteriaCallback[T, X](entityManager, resultClass, transform),
-//    matchAlgorithmReferences,
-//    stateAdjustingPropertyReferences) {
-//
-//}
+class HibernateCriteriaDirectoryBuilder[T, X](
+  resultClass: Class[X],
+  entityManager: EntityManager,
+  transform: (X) => T,
+  matchAlgorithmReferences: java.util.Set[MatchAlgorithmReference],
+  stateAdjustingPropertyReferences: java.util.Set[StateAdjustingComponentReference[Seq[Specification[X]]]])
+
+  extends AbstractStateBuildingDirectoryBuilder[Seq[Specification[X]], T](
+    new java.util.ArrayList[Specification[X]](),
+    new CriteriaCallback[T, X](entityManager, resultClass, transform),
+    matchAlgorithmReferences,
+    stateAdjustingPropertyReferences) {
+
+}
