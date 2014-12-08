@@ -29,7 +29,7 @@ Value Sets
 + Get Value Sets
 	+ GET 
 	+ /valuesets
-	+ filters: synopsis
+	+ filters: resourceSynopsis, resourceName
 	+ parameters: maxtoreturn _(optional)_
 + Get Value Set
 	+ GET
