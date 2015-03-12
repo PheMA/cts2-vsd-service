@@ -120,7 +120,8 @@ class MatValueSetDefinitionReadService extends AbstractReadService with ValueSet
       entity.setNamespace(prefix)
       entity.setName(entry.code)
 
-      val baseUri = uriResolver.idToBaseUri(entry.codeSystem)
+      var baseUri = uriResolver.idToBaseUri(entry.codeSystem)
+      if (baseUri.isEmpty) baseUri = valueSetVersion.valueSet.uri + "/concepts/" + entry.code
 
       entity.setUri(baseUri + entry.code)
 

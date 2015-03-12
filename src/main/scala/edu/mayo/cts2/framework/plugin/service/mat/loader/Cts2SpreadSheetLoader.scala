@@ -1,18 +1,20 @@
+// Copyright (c) 2014. Mayo Foundation for Medical Education and Research. All rights reserved.
+
 package edu.mayo.cts2.framework.plugin.service.mat.loader
 
 import java.io.File
-import scala.collection.JavaConversions._
-import collection.mutable
-import org.apache.poi.ss.usermodel.Workbook
-import org.apache.poi.ss.usermodel.WorkbookFactory
-import org.apache.poi.ss.usermodel.Row
-import org.springframework.stereotype.Component
-import edu.mayo.cts2.framework.plugin.service.mat.model._
-import edu.mayo.cts2.framework.plugin.service.mat.repository.{ValueSetVersionRepository, ChangeSetRepository, ValueSetRepository}
 import javax.annotation
-import collection.mutable.ArrayBuffer
-import edu.mayo.cts2.framework.model.core.types.{ChangeType, ChangeCommitted, FinalizableState}
-import edu.mayo.cts2.framework.plugin.service.mat.uri.{IdType, UriResolver}
+
+import edu.mayo.cts2.framework.model.core.types.{ChangeCommitted, ChangeType, FinalizableState}
+import edu.mayo.cts2.framework.plugin.service.mat.model._
+import edu.mayo.cts2.framework.plugin.service.mat.repository.{ChangeSetRepository, ResourceRepository, ValueSetRepository, ValueSetVersionRepository}
+import edu.mayo.cts2.framework.plugin.service.mat.uri.UriResolver
+import org.apache.poi.ss.usermodel.{Row, Workbook, WorkbookFactory}
+import org.springframework.stereotype.Component
+
+import scala.collection.JavaConversions._
+import scala.collection.mutable
+import scala.collection.mutable.ArrayBuffer
 
 @Component
 class Cts2SpreadSheetLoader extends Loader {
@@ -65,16 +67,10 @@ class Cts2SpreadSheetLoader extends Loader {
   var changeSetRepository: ChangeSetRepository = _
 
   @annotation.Resource
-  var uriResolver: UriResolver = _
+  var resourceRepository: ResourceRepository = _
 
-  class Resource {
-    var domain: String = _
-    var name: String = _
-    var uri: String = _
-    var uriPrefix: String = _
-    var href: String = _
-    var description: String = _
-  }
+  @annotation.Resource
+  var uriResolver: UriResolver = _
 
   case class ResourcesResult(workbook: Workbook) {
     var resourceTypes: mutable.Map[String, mutable.Buffer[Resource]] = mutable.HashMap[String, mutable.Buffer[Resource]]()
@@ -129,10 +125,10 @@ class Cts2SpreadSheetLoader extends Loader {
   }
 
   def refTypeRowToReferenceType(row: Row, domain: String): Resource = {
-    val resource = new Resource
-    resource.domain = getCellValue(row.getCell(REFERENCE_TYPE_DOMAIN_CELL)).getOrElse("")
-    resource.name = getCellValue(row.getCell(REFERENCE_TYPE_NAME_CELL)).getOrElse("")
-    resource.uri = getCellValue(row.getCell(REFERENCE_TYPE_URI_CELL)).getOrElse("")
+    val domain = getCellValue(row.getCell(REFERENCE_TYPE_DOMAIN_CELL)).getOrElse("")
+    val name = getCellValue(row.getCell(REFERENCE_TYPE_NAME_CELL)).getOrElse("")
+    val uri = getCellValue(row.getCell(REFERENCE_TYPE_URI_CELL)).getOrElse("")
+    val resource = new Resource(name, uri, domain)
     resource.description = getCellValue(row.getCell(REFERENCE_TYPE_DESCRIPTION_CELL)).getOrElse("")
 
     if (resource.domain == null || resource.domain.isEmpty)
@@ -154,9 +150,13 @@ class Cts2SpreadSheetLoader extends Loader {
           (result, row) => {
             if (row.getRowNum > 0) {
               resourceRowToReferenceType(row, domain).foreach(resource => {
-                domain = resource.domain
-                if (resource.name != null && !resource.name.isEmpty)
-                  result.addResourceType(resource)
+                if (resource != null) {
+                  domain = resource.domain
+                  if (resource.name != null && !resource.name.isEmpty) {
+                    resourceRepository.save(resource)
+                    result.addResourceType(resource)
+                  }
+                }
               })
             }
             result
@@ -173,13 +173,13 @@ class Cts2SpreadSheetLoader extends Loader {
   }
 
   def resourceRowToReferenceType(row: Row, domain: String): Option[Resource] = {
-    val resource = new Resource
-    resource.domain = getCellValue(row.getCell(RESOURCES_DOMAIN_CELL)).getOrElse("")
-    resource.name = getCellValue(row.getCell(RESOURCES_NAME_CELL)).getOrElse("")
-    resource.uri = getCellValue(row.getCell(RESOURCES_URI_CELL)).getOrElse("")
+    val name = getCellValue(row.getCell(RESOURCES_NAME_CELL)).getOrElse("")
+    val uri = getCellValue(row.getCell(RESOURCES_URI_CELL)).getOrElse("")
+    val domain = getCellValue(row.getCell(RESOURCES_DOMAIN_CELL)).getOrElse("")
+    val resource = new Resource(name, uri, domain)
     resource.description = getCellValue(row.getCell(RESOURCES_DESCRIPTION_CELL)).getOrElse("")
     resource.href = getCellValue(row.getCell(RESOURCES_HREF_CELL)).getOrElse("")
-    resource.uriPrefix = getCellValue(row.getCell(RESOURCES_URI_PREFIX_CELL)).getOrElse("")
+    resource.baseUri = getCellValue(row.getCell(RESOURCES_URI_PREFIX_CELL)).getOrElse(uri)
 
     if (resource.name != null && !resource.name.isEmpty) {
       if (resource.domain == null || resource.domain.isEmpty)
@@ -338,7 +338,7 @@ class Cts2SpreadSheetLoader extends Loader {
       val newContext = new EntryContext(context.codeSystem, context.codeSystemVersion, context.valueSetName, context.valueSetDefinition)
       getCellValue(row.getCell(VALUE_SET_VALUE_SET_CELL)).foreach(newContext.valueSetName = _)
       getCellValue(row.getCell(VALUE_SET_VALUE_SET_DEFINITION_CELL)).foreach(newContext.valueSetDefinition = _)
-      getCellValue(row.getCell(VALUE_SET_CODE_SYSTEM_CELL)).foreach(cs => newContext.codeSystem = getCodeSystem(cs))
+      getCellValue(row.getCell(VALUE_SET_CODE_SYSTEM_CELL)).foreach(newContext.codeSystem = _)
       getCellValue(row.getCell(VALUE_SET_CODE_SYSTEM_VERSION_CELL)).foreach(newContext.codeSystemVersion = _)
 
       Option(new ValueSetRow(newContext,
@@ -346,7 +346,7 @@ class Cts2SpreadSheetLoader extends Loader {
     })
   }
 
-  private def getCodeSystem(codeSystem: String): String = uriResolver.idToName(codeSystem, IdType.CODE_SYSTEM)
+//  private def getCodeSystem(codeSystem: String): String = uriResolver.idToName(codeSystem, IdType.CODE_SYSTEM)
 
 }
 

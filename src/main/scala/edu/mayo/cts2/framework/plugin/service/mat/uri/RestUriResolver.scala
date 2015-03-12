@@ -1,10 +1,10 @@
+// Copyright (c) 2014. Mayo Foundation for Medical Education and Research. All rights reserved.
+
 package edu.mayo.cts2.framework.plugin.service.mat.uri
 
+import clojure.lang.RT
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
-
-import clojure.lang.RT
-import edu.mayo.cts2.framework.plugin.service.mat.namespace.NamespaceResolutionService
 
 @Component
 class RestUriResolver extends UriResolver {
