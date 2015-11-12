@@ -1,6 +1,6 @@
 package edu.mayo.cts2.framework.plugin.service.mat.rest.controller;
 
-import edu.mayo.cts2.framework.plugin.service.mat.loader.Cts2SpreadSheetLoader;
+import edu.mayo.cts2.framework.plugin.service.mat.loader.PhemaSpreadSheetLoader;
 import edu.mayo.cts2.framework.webapp.rest.extensions.controller.ControllerProvider;
 import org.osgi.service.http.HttpService;
 import org.springframework.beans.factory.InitializingBean;
@@ -20,7 +20,7 @@ import java.io.File;
 import java.util.UUID;
 
 @Controller("phemaSpreadSheetLoaderController")
-public class PhemaSpreadSheetLoaderController implements ControllerProvider, InitializingBean {
+public class PhemaSpreadSheetLoaderController implements ControllerProvider {
 
 	@Resource
 	private PhemaSpreadSheetLoader loader;
@@ -31,13 +31,6 @@ public class PhemaSpreadSheetLoaderController implements ControllerProvider, Ini
 	@Override
 	public Object getController() {
 		return this;
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception {
-		if (this.httpService != null) {
-			httpService.registerResources("/upload", "/WEB-INF", null);
-		}
 	}
 
 	@RequestMapping(value="/upload/phema", method= RequestMethod.POST)
