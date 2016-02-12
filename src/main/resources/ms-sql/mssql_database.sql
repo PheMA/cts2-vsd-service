@@ -1,26 +1,25 @@
-USE [lcd_valuesets_dev]
+DROP DATABASE IF EXISTS valuesets;
+GO
+
+CREATE DATABASE valuesets;
+GO
+
+GRANT ALL ON valuesets.* to 'cts2'@'127.0.0.1' WITH GRANT OPTION;
+GO
+
+
+
+
+
+USE valuesets
 GO
 /****** Object:  Table [dbo].[ValueSetVersion_includesValueSets]    Script Date: 02/19/2014 14:47:50 ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
 CREATE TABLE [dbo].[ValueSetVersion_includesValueSets](
 	[ValueSetVersion_documentUri] [varchar](255) NOT NULL,
 	[includesValueSets] [varchar](255) NULL
 ) ON [PRIMARY]
 GO
-SET ANSI_PADDING OFF
-GO
 /****** Object:  Table [dbo].[ValueSetEntry]    Script Date: 02/19/2014 14:47:50 ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
 CREATE TABLE [dbo].[ValueSetEntry](
 	[id] [varchar](255) NOT NULL,
 	[code] [varchar](255) NULL,
@@ -34,15 +33,7 @@ PRIMARY KEY CLUSTERED
 )WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-SET ANSI_PADDING OFF
-GO
 /****** Object:  Table [dbo].[ValueSetChange_ValueSetVersion]    Script Date: 02/19/2014 14:47:50 ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
 CREATE TABLE [dbo].[ValueSetChange_ValueSetVersion](
 	[ValueSetChange_changeSetUri] [varchar](255) NOT NULL,
 	[versions_documentUri] [varchar](255) NOT NULL,
@@ -52,15 +43,7 @@ UNIQUE NONCLUSTERED
 )WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-SET ANSI_PADDING OFF
-GO
 /****** Object:  Table [dbo].[ValueSetChange]    Script Date: 02/19/2014 14:47:50 ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_PADDING ON
-GO
 CREATE TABLE [dbo].[ValueSetChange](
 	[changeSetUri] [varchar](255) NOT NULL,
 	[closeDate] [datetime2](7) NULL,

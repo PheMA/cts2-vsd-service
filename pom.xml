@@ -9,7 +9,7 @@
 	</parent>
 
 	<artifactId>vsd-service</artifactId>
-	<version>1.4.4-SNAPSHOT</version>
+	<version>1.4.5</version>
 	<packaging>bundle</packaging>
 
 	<description>A Value Set Definition CTS2 implementation as a CTS2 Framework Service Plugin.</description>

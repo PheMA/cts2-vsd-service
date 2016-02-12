@@ -23,6 +23,8 @@
 
 	<osgi:service ref="nqf2014LoaderController" interface="edu.mayo.cts2.framework.webapp.rest.extensions.controller.ControllerProvider"/>
 
+        <osgi:service ref="phemaSpreadSheetLoaderController" interface="edu.mayo.cts2.framework.webapp.rest.extensions.controller.ControllerProvider"/>
+
 	<!--<osgi:service ref="springSecurityFilterChain" interface="javax.servlet.Filter">-->
 		<!--<osgi:service-properties>-->
 			 <!--<entry key="ORDER" value="FIRST"/>-->
