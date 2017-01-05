@@ -124,7 +124,6 @@
 							!org.springframework.batch.*,
 							edu.mayo.cts2.*,
 							edu.mayo.cts2.framework.core.xml,
-							edu.mayo.cts2.framework.core.plugin,
 							org.springframework.context.config,
 							org.springframework.security.web.authentication,
 							edu.mayo.cts2.framework.model,
@@ -408,7 +407,6 @@
 			<groupId>edu.mayo.cts2.framework</groupId>
 			<artifactId>cts2-plugin-util</artifactId>
 			<version>${develpment.framework.version}</version>
-			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
@@ -443,10 +441,86 @@
 	</dependencies>
 
 	<repositories>
+		<!-- disable -->
+		<repository>
+			<id>scala-tools.org</id>
+			<name>Scala-Tools Maven2 Repository</name>
+			<url>http://scala-tools.org/repo-releases</url>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+
+		<!-- disable -->
+		<repository>
+			<id>clojure-releases</id>
+			<url>http://build.clojure.org/releases</url>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+
+		<!-- disable -->
+		<repository>
+			<id>clojars</id>
+			<url>http://clojars.org/repo/</url>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+
+		<!-- disable -->
+		<repository>
+			<id>edu.informatics.maven.snapshot</id>
+			<name>Informatics Maven Snapshot Repository</name>
+			<url>http://informatics.mayo.edu/maven/content/repositories/snapshots</url>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+
+		<!-- disable -->
 		<repository>
 			<id>edu.informatics.maven.releases</id>
 			<name>Informatics Maven Release Repository</name>
-			<url>http://informatics.mayo.edu/maven/content/repositories/releases/</url>
+			<url>http://informatics.mayo.edu/maven/content/repositories/releases</url>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+
+		<!-- disable -->
+		<repository>
+			<id>edu.informatics.maven.thirdparty</id>
+			<name>Informatics Maven ThirdParty Repository</name>
+			<url>http://informatics.mayo.edu/maven/content/repositories/thirdparty</url>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+
+		<repository>
+			<id>nci.maven.releases</id>
+			<name>NCI Maven Release Repository</name>
+			<url>https://ncimvn.nci.nih.gov/nexus/content/repositories/LexEVSRelease</url>
 			<releases>
 				<enabled>true</enabled>
 			</releases>
@@ -456,9 +530,9 @@
 		</repository>
 
 		<repository>
-			<id>edu.informatics.maven.thirdparty</id>
-			<name>Informatics Maven ThirdParty Repository</name>
-			<url>http://informatics.mayo.edu/maven/content/repositories/thirdparty/</url>
+			<id>nci.maven.thirdparty</id>
+			<name>NCI Maven 3rd Party Repository</name>
+			<url>https://ncimvn.nci.nih.gov/nexus/content/repositories/LexEVS3rdParty</url>
 			<releases>
 				<enabled>true</enabled>
 			</releases>
@@ -471,11 +545,6 @@
 			<id>sonatype</id>
 			<url>http://oss.sonatype.org/content/repositories/releases/</url>
 			<name>Sonatype Releases</name>
-		</repository>
-
-		<repository>
-			<id>repo.codahale.com</id>
-			<url>http://repo.codahale.com</url>
 		</repository>
 
 	</repositories>

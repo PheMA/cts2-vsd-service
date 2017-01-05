@@ -1,5 +1,7 @@
 package edu.mayo.cts2.framework.plugin.service.mat.profile.valuesetdefinition
 
+import org.springframework.transaction.annotation.Transactional
+
 import scala.collection.JavaConversions._
 import edu.mayo.cts2.framework.plugin.service.mat.profile.AbstractService
 import edu.mayo.cts2.framework.service.profile.valuesetdefinition.ValueSetDefinitionMaintenanceService
@@ -54,6 +56,7 @@ class MatValueSetDefinitionMaintenanceService extends AbstractService with Value
 //    }
   }
 
+  @Transactional
   override def updateResource(resource: LocalIdValueSetDefinition) {
     val changeSet = changeSetRepo.findOne(resource.getChangeableElementGroup.getChangeDescription.getContainingChangeSet)
     if (changeSet.eq(null))
@@ -62,14 +65,18 @@ class MatValueSetDefinitionMaintenanceService extends AbstractService with Value
     if (changeSet.getState.ne(FinalizableState.OPEN))
       throw new ChangeSetIsNotOpen
 
-    Option(versionRepo.findOne(resource.getResource.getDocumentURI)) match {
+    val valueSetName = resource.getResource.getDefinedValueSet.getContent
+
+    Option(versionRepo.findByValueSetNameAndValueSetVersion(valueSetName, resource.getLocalID)) match {
       case Some(origVersion) => {
         val updatedVersion: ValueSetVersion = toValueSetVersion(resource.getResource)
         updatedVersion.setDocumentUri(UUID.randomUUID.toString)
+        updatedVersion.setVersion(origVersion.getVersion)
         updatedVersion.setChangeType(ChangeType.UPDATE)
         updatedVersion.setChangeSetUri(changeSet.getChangeSetUri)
         updatedVersion.setPrevChangeSetUri(origVersion.getChangeSetUri)
         updatedVersion.setRevisionDate(Calendar.getInstance)
+        updatedVersion.setChangeCommitted(ChangeCommitted.COMMITTED)
 
         origVersion.setSuccessor(updatedVersion.getDocumentUri)
 
