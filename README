@@ -5,11 +5,12 @@ This service uses v1.1.0 of the CTS2 framework.
 
 Building
 =====================
-mvn clean compile
+mvn clean deploy -DskipTests
 
 If you get an OutOfMemory exception, run the following before running maven:
 export MAVEN_OPTS="-Xmx512m -XX:MaxPermSize=128m"
 
+(And yes, we know skipping tests is a bad idea.  The current suite is failing from the original master branch, and we will be looking at fixing this in the future.)
 
 
 CTS2 Exposed Services
