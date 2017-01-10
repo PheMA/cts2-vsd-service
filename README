@@ -1,3 +1,17 @@
+Dependencies
+=====================
+This service uses v1.1.0 of the CTS2 framework.
+
+
+Building
+=====================
+mvn clean compile
+
+If you get an OutOfMemory exception, run the following before running maven:
+export MAVEN_OPTS="-Xmx512m -XX:MaxPermSize=128m"
+
+
+
 CTS2 Exposed Services
 =====================
 
