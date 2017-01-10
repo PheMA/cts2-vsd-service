@@ -14,15 +14,16 @@ import edu.mayo.cts2.framework.plugin.service.mat.model.ValueSetVersion
 @Transactional
 trait ValueSetVersionRepository extends CrudRepository[ValueSetVersion, String] {
 
-  def findAll(pageable: Pageable): Page[ValueSetVersion]
+  @Query("select vsv from ValueSetVersion vsv where vsv.successor is null")
+  def findAllLatest(pageable: Pageable): Page[ValueSetVersion]
 
-  @Query("select vsv from ValueSetVersion vsv where vsv.valueSet.name = :name and vsv.changeCommitted = edu.mayo.cts2.framework.model.core.types.ChangeCommitted.COMMITTED")
+  @Query("select vsv from ValueSetVersion vsv where vsv.successor is null and vsv.valueSet.name = :name and vsv.changeCommitted = edu.mayo.cts2.framework.model.core.types.ChangeCommitted.COMMITTED")
   def findByValueSetName(@Param("name") name: String, pageable: Pageable): Page[ValueSetVersion]
 
   @Query("select vs.currentVersion from ValueSet vs where vs.name = :name")
   def findCurrentVersionByValueSetName(@Param("name") name: String): ValueSetVersion
 
-  @Query("select vsv from ValueSetVersion vsv where vsv.valueSet.name=:name and vsv.version=:version and vsv.changeCommitted = edu.mayo.cts2.framework.model.core.types.ChangeCommitted.COMMITTED")
+  @Query("select vsv from ValueSetVersion vsv where vsv.valueSet.name=:name and vsv.version=:version and vsv.successor is null and vsv.changeCommitted = edu.mayo.cts2.framework.model.core.types.ChangeCommitted.COMMITTED")
   def findByValueSetNameAndValueSetVersion(@Param("name") name: String, @Param("version") version: String): ValueSetVersion
 
 //  @Query("select vsv from ValueSetVersion vsv where vsv.valueSet.name = :name and (vsv.id = :id or vsv.version = :id)")

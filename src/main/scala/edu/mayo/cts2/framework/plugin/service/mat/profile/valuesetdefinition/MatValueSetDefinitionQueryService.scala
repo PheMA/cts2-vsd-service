@@ -19,7 +19,6 @@ import edu.mayo.cts2.framework.plugin.service.mat.model.ValueSetVersion
 import edu.mayo.cts2.framework.plugin.service.mat.profile.valueset.MatValueSetUtils
 import java.util.Collections
 import edu.mayo.cts2.framework.model.util.ModelUtils
-import edu.mayo.cts2.framework.model.valueset.ValueSetCatalogEntryListEntry
 
 @Component
 class MatValueSetDefinitionQueryService
@@ -47,9 +46,16 @@ class MatValueSetDefinitionQueryService
   def getResourceSummaries(query: ValueSetDefinitionQuery, sort: SortCriteria, page: Page = new Page()): DirectoryResult[ValueSetDefinitionDirectoryEntry] = {
     val fn =
     if(query == null || query.getRestrictions == null || query.getRestrictions.getValueSet == null){
-      valueSetVersionRepository.findAll(_:Pageable)
+      valueSetVersionRepository.findAllLatest(_:Pageable)
     } else {
-      val name = query.getRestrictions.getValueSet.getName
+      def vs = query.getRestrictions.getValueSet
+
+      def name = if(vs.getName != null) {
+        vs.getName
+      } else {
+        vs.getUri
+      }
+
       valueSetVersionRepository.findByValueSetName(name, _:Pageable)
     }
 
