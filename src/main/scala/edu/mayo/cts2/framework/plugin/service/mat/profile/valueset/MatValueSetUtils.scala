@@ -85,7 +85,7 @@ object MatValueSetUtils {
     val sourceAndRoleRef = new SourceAndRoleReference()
     sourceAndRoleRef.setRole(creatorRole)
 
-    val sourceRef = new SourceReference("National Committee for Quality Assurance")
+    val sourceRef = new SourceReference("PhEMA Authoring Tool")
     sourceAndRoleRef.setSource(sourceRef)
 
     sourceAndRoleRef
