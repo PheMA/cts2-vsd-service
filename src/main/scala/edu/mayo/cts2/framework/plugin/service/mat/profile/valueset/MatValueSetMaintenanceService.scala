@@ -27,23 +27,39 @@ class MatValueSetMaintenanceService extends AbstractService with ValueSetMainten
 
   override def updateResource(valueSetCatalogEntry: ValueSetCatalogEntry) {
     getChangeSet(valueSetCatalogEntry)
+    val vs = valueSetRepository.findOneByUri(valueSetCatalogEntry.getAbout);
+    if (vs.eq(null))
+      throw new DuplicateValueSetURI
+
+    vs.setName(valueSetCatalogEntry.getValueSetName)
+    vs.setFormalName(valueSetCatalogEntry.getFormalName)
+    valueSetRepository save vs
+    valueSetCatalogEntry
   }
 
   override def createResource(valueSetCatalogEntry: ValueSetCatalogEntry): ValueSetCatalogEntry = {
     /* TODO: update change set */
     getChangeSet(valueSetCatalogEntry)
 
-    if (valueSetRepository.findOne(valueSetCatalogEntry.getValueSetName).ne(null))
-      throw new DuplicateValueSetName
-    if (valueSetRepository.findOneByUri(valueSetCatalogEntry.getAbout).ne(null))
-      throw new DuplicateValueSetURI
+    // if (valueSetRepository.findOne(valueSetCatalogEntry.getValueSetName).ne(null))
+    //   throw new DuplicateValueSetName
+    // if (valueSetRepository.findOneByUri(valueSetCatalogEntry.getAbout).ne(null))
+    //   throw new DuplicateValueSetURI
+    val existingValueSet = valueSetRepository.findOneByUri(valueSetCatalogEntry.getAbout)
+    if (existingValueSet.ne(null)) {
+      existingValueSet.setName(valueSetCatalogEntry.getValueSetName)
+      existingValueSet.setFormalName(valueSetCatalogEntry.getFormalName)
+      valueSetRepository save existingValueSet
+    }
+    else {
+      val vs = new ValueSet
+      vs.setName(valueSetCatalogEntry.getValueSetName)
+      vs.setFormalName(valueSetCatalogEntry.getFormalName)
+      vs.setHref(null)
+      vs.setUri(valueSetCatalogEntry.getAbout)
+        valueSetRepository save vs
+    }
 
-    val vs = new ValueSet
-    vs.setName(valueSetCatalogEntry.getValueSetName)
-    vs.setFormalName(valueSetCatalogEntry.getFormalName)
-    vs.setHref(null)
-    vs.setUri(valueSetCatalogEntry.getAbout)
-      valueSetRepository save vs
     valueSetCatalogEntry
   }
 
